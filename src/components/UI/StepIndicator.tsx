@@ -38,7 +38,7 @@ export default function StepIndicator() {
           <div key={step.number} className="flex items-center">
             {/* Step Circle */}
             <div
-              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 font-semibold text-sm ${
+              className={`flex items-center justify-center w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 font-semibold text-xs lg:text-sm ${
                 step.number <= currentStep
                   ? 'bg-primary-600 border-primary-600 text-white'
                   : 'bg-white border-gray-300 text-gray-500'
@@ -48,8 +48,8 @@ export default function StepIndicator() {
             </div>
             
             {/* Step Info */}
-            <div className="ml-3 hidden sm:block">
-              <div className="text-sm font-medium text-gray-900">
+            <div className="ml-2 lg:ml-3 hidden sm:block">
+              <div className="text-xs lg:text-sm font-medium text-gray-900">
                 {step.title}
               </div>
               <div className="text-xs text-gray-500">
@@ -60,7 +60,7 @@ export default function StepIndicator() {
             {/* Connector Line */}
             {index < steps.length - 1 && (
               <div
-                className={`flex-1 h-0.5 mx-4 ${
+                className={`flex-1 h-0.5 mx-2 lg:mx-4 ${
                   step.number < currentStep ? 'bg-primary-600' : 'bg-gray-300'
                 }`}
               />
@@ -70,11 +70,11 @@ export default function StepIndicator() {
       </div>
       
       {/* Mobile Step Title */}
-      <div className="sm:hidden mt-4 text-center">
-        <div className="text-lg font-semibold text-gray-900">
+      <div className="sm:hidden mt-3 lg:mt-4 text-center">
+        <div className="text-base lg:text-lg font-semibold text-gray-900">
           {steps[currentStep - 1]?.title}
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-xs lg:text-sm text-gray-500">
           {steps[currentStep - 1]?.description}
         </div>
       </div>
