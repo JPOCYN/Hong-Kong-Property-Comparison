@@ -128,6 +128,18 @@ export default function ComparisonResultsStep() {
           <h2 className="text-xl font-semibold">{t('results.detailedComparison')}</h2>
           <div className="flex space-x-2">
             <button
+              onClick={() => setCurrentStep(2)}
+              className="btn-secondary text-sm"
+            >
+              ✏️ {t('actions.editProperties')}
+            </button>
+            <button
+              onClick={() => setCurrentStep(1)}
+              className="btn-secondary text-sm"
+            >
+              🏠 {t('actions.goHome')}
+            </button>
+            <button
               onClick={() => exportToPDF(calculations, language)}
               className="btn-primary text-sm"
             >

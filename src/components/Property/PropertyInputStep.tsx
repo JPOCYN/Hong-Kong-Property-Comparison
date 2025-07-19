@@ -144,12 +144,15 @@ export default function PropertyInputStep() {
                   </span>
                   <input
                     type="number"
-                    value={currentProperty.price || ''}
-                    onChange={(e) => handleInputChange('price', Number(e.target.value))}
+                    value={currentProperty.price ? currentProperty.price / 10000 : ''}
+                    onChange={(e) => handleInputChange('price', Number(e.target.value) * 10000)}
                     className="input-field pl-8"
-                    placeholder="8000000"
+                    placeholder="800"
                     required
                   />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                    萬
+                  </span>
                 </div>
               </div>
             </div>
@@ -412,7 +415,7 @@ export default function PropertyInputStep() {
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">{property.name}</h4>
                   <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                    <span>${property.price.toLocaleString()}</span>
+                    <span>${(property.price / 10000).toFixed(0)}萬</span>
                     <span>{property.size} ft²</span>
                     <span>{property.rooms}R {property.toilets}T</span>
                     {property.district && <span>{property.district}</span>}
