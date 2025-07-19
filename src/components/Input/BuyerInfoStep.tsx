@@ -43,26 +43,26 @@ export default function BuyerInfoStep() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="text-center mb-4 lg:mb-6">
+        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
           {t('buyerInfo.stepTitle')}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm lg:text-base">
           {t('buyerInfo.stepDescription')}
         </p>
       </div>
 
       {/* Banner Tip */}
-      <div className="card bg-blue-50 border-blue-200">
-        <div className="flex items-start space-x-3">
-          <span className="text-xl">💡</span>
+      <div className="card bg-blue-50 border-blue-200 p-3 lg:p-4">
+        <div className="flex items-start space-x-2 lg:space-x-3">
+          <span className="text-lg lg:text-xl">💡</span>
           <div>
-            <h3 className="font-medium text-blue-900 mb-1">
+            <h3 className="font-medium text-blue-900 mb-1 text-sm lg:text-base">
               {t('buyerInfo.tipTitle')}
             </h3>
-            <p className="text-sm text-blue-700">
+            <p className="text-xs lg:text-sm text-blue-700">
               {t('buyerInfo.tipDescription')}
             </p>
           </div>
@@ -70,13 +70,13 @@ export default function BuyerInfoStep() {
       </div>
 
       {/* Income Section */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <span className="text-xl mr-2">💰</span>
+      <div className="card p-4 lg:p-6">
+        <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
+          <span className="text-lg lg:text-xl mr-2">💰</span>
           {t('buyerInfo.incomeSection')}
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {/* Monthly Income */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -129,13 +129,13 @@ export default function BuyerInfoStep() {
       </div>
 
       {/* Buyer Type Section */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <span className="text-xl mr-2">👤</span>
+      <div className="card p-4 lg:p-6">
+        <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
+          <span className="text-lg lg:text-xl mr-2">👤</span>
           {t('buyerInfo.buyerTypeSection')}
         </h3>
         
-        <div className="space-y-4">
+        <div className="space-y-3 lg:space-y-4">
           {/* First-time Buyer Toggle */}
           <label className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
             <input
@@ -162,15 +162,15 @@ export default function BuyerInfoStep() {
       </div>
 
       {/* Mortgage Options Section */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          <span className="text-xl mr-2">🏦</span>
+      <div className="card p-4 lg:p-6">
+        <h3 className="text-base lg:text-lg font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
+          <span className="text-lg lg:text-xl mr-2">🏦</span>
           {t('buyerInfo.mortgageSection')}
         </h3>
         
-        <div className="space-y-6">
-          {/* Mortgage Type and Years */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4 lg:space-y-6">
+                      {/* Mortgage Type and Years */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
             {/* Mortgage Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -206,7 +206,7 @@ export default function BuyerInfoStep() {
           </div>
 
           {/* Current Rate Display Card */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm font-medium text-blue-800">
@@ -216,15 +216,15 @@ export default function BuyerInfoStep() {
                   {getRateFormula()}
                 </p>
               </div>
-              <span className="text-2xl font-bold text-blue-600">
+              <span className="text-xl lg:text-2xl font-bold text-blue-600">
                 {getMortgageRate().toFixed(2)}%
               </span>
             </div>
           </div>
 
-          {/* Mortgage Rate Configuration */}
-          {buyerInfo.mortgageType === 'H-mortgage' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Mortgage Rate Configuration */}
+            {buyerInfo.mortgageType === 'H-mortgage' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   HIBOR Rate (%)
@@ -260,8 +260,8 @@ export default function BuyerInfoStep() {
             </div>
           )}
 
-          {buyerInfo.mortgageType === 'P-mortgage' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {buyerInfo.mortgageType === 'P-mortgage' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
                   Prime Rate (%)
@@ -317,12 +317,12 @@ export default function BuyerInfoStep() {
 
       {/* Form Validation Status */}
       {!isFormValid() && (
-        <div className="card bg-yellow-50 border-yellow-200">
-          <div className="flex items-center space-x-3">
-            <span className="text-xl">⚠️</span>
+        <div className="card bg-yellow-50 border-yellow-200 p-3 lg:p-4">
+          <div className="flex items-center space-x-2 lg:space-x-3">
+            <span className="text-lg lg:text-xl">⚠️</span>
             <div>
-              <h3 className="font-medium text-yellow-800">{t('buyerInfo.validationTitle')}</h3>
-              <p className="text-sm text-yellow-700">{t('buyerInfo.validationMessage')}</p>
+              <h3 className="font-medium text-yellow-800 text-sm lg:text-base">{t('buyerInfo.validationTitle')}</h3>
+              <p className="text-xs lg:text-sm text-yellow-700">{t('buyerInfo.validationMessage')}</p>
             </div>
           </div>
         </div>

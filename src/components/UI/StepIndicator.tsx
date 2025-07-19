@@ -32,7 +32,7 @@ export default function StepIndicator() {
   ];
 
   return (
-    <div className="mb-8">
+    <div className="mb-4 lg:mb-6">
       <div className="flex items-center justify-between">
         {steps.map((step, index) => (
           <div key={step.number} className="flex items-center">

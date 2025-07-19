@@ -82,27 +82,27 @@ export default function PropertyInputStep() {
   const isExpensive = costPerSqFt > 25000;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="text-center mb-4 lg:mb-6">
+        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
           {t('propertyInput.stepTitle')}
         </h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-sm lg:text-base">
           {t('propertyInput.stepDescription')}
         </p>
       </div>
 
       {/* Property Form Card */}
-      <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+      <div className="bg-white shadow-lg rounded-xl p-4 lg:p-6 border border-gray-200">
         {/* Basic Info Section */}
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
-            <span className="text-lg mr-2">🏠</span>
+        <div className="mb-4 lg:mb-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
+            <span className="text-lg lg:text-xl mr-2">🏠</span>
             {t('propertyInput.basicInfoSection')}
           </h3>
           
-          <div className="space-y-4">
+          <div className="space-y-3 lg:space-y-4">
             {/* Property Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -181,13 +181,13 @@ export default function PropertyInputStep() {
         </div>
 
         {/* Layout & Location Section */}
-        <div className="mb-6 border-t border-gray-200 pt-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
-            <span className="text-lg mr-2">📍</span>
+        <div className="mb-4 lg:mb-6 border-t border-gray-200 pt-4 lg:pt-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
+            <span className="text-lg lg:text-xl mr-2">📍</span>
             {t('propertyInput.layoutLocationSection')}
           </h3>
           
-          <div className="space-y-4">
+          <div className="space-y-3 lg:space-y-4">
             {/* Rooms and Toilets - Paired Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -287,13 +287,13 @@ export default function PropertyInputStep() {
         </div>
 
         {/* Extras & Fees Section */}
-        <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
-            <span className="text-lg mr-2">💰</span>
+        <div className="border-t border-gray-200 pt-4 lg:pt-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
+            <span className="text-lg lg:text-xl mr-2">💰</span>
             {t('propertyInput.extrasFeesSection')}
           </h3>
           
-          <div className="space-y-4">
+          <div className="space-y-3 lg:space-y-4">
             {/* Car Park Toggle */}
             <label className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
               <input
@@ -391,7 +391,7 @@ export default function PropertyInputStep() {
         </div>
 
         {/* Add Property Button */}
-        <div className="mt-8 flex justify-end">
+        <div className="mt-6 lg:mt-8 flex justify-end">
           <button
             onClick={handleAddProperty}
             disabled={!isPropertyValid()}

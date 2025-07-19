@@ -56,14 +56,14 @@ export default function ComparisonResultsStep() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 lg:space-y-6">
       {/* Enhanced Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card bg-success-50 border-success-200">
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">💰</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 lg:gap-4">
+        <div className="card bg-success-50 border-success-200 p-3 lg:p-4">
+          <div className="flex items-center mb-2 lg:mb-3">
+            <span className="text-xl lg:text-2xl mr-2 lg:mr-3">💰</span>
             <div>
-              <h3 className="text-sm font-medium text-success-800">
+              <h3 className="text-xs lg:text-sm font-medium text-success-800">
                 {mostAffordable.affordabilityPercentage > 60 ? t('results.bestFitBasedOnIncome') : t('results.mostAffordable')}
               </h3>
               <div className="flex items-center">
@@ -72,59 +72,59 @@ export default function ComparisonResultsStep() {
               </div>
             </div>
           </div>
-          <p className="text-lg font-semibold text-success-900">
+          <p className="text-base lg:text-lg font-semibold text-success-900">
             {mostAffordable.property.name}
           </p>
-          <p className="text-sm text-success-700">
+          <p className="text-xs lg:text-sm text-success-700">
             {formatNumber(mostAffordable.affordabilityPercentage)}% of income
           </p>
         </div>
 
-        <div className="card bg-blue-50 border-blue-200">
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">🏆</span>
-            <h3 className="text-sm font-medium text-blue-800">
+        <div className="card bg-blue-50 border-blue-200 p-3 lg:p-4">
+          <div className="flex items-center mb-2 lg:mb-3">
+            <span className="text-xl lg:text-2xl mr-2 lg:mr-3">🏆</span>
+            <h3 className="text-xs lg:text-sm font-medium text-blue-800">
               {t('results.bestValue')}
             </h3>
           </div>
-          <p className="text-lg font-semibold text-blue-900">
+          <p className="text-base lg:text-lg font-semibold text-blue-900">
             {bestValue.property.name}
           </p>
-          <p className="text-sm text-blue-700">
+          <p className="text-xs lg:text-sm text-blue-700">
             {formatCurrency(bestValue.costPerSqFt)}/ft²
           </p>
         </div>
 
-        <div className="card bg-gray-50 border-gray-200">
-          <div className="flex items-center mb-3">
-            <span className="text-2xl mr-3">📊</span>
-            <h3 className="text-sm font-medium text-gray-800">
+        <div className="card bg-gray-50 border-gray-200 p-3 lg:p-4">
+          <div className="flex items-center mb-2 lg:mb-3">
+            <span className="text-xl lg:text-2xl mr-2 lg:mr-3">📊</span>
+            <h3 className="text-xs lg:text-sm font-medium text-gray-800">
               {t('results.averageMonthly')}
             </h3>
           </div>
-          <p className="text-lg font-semibold text-gray-900">
+          <p className="text-base lg:text-lg font-semibold text-gray-900">
             {formatCurrency(averageMonthly)}
           </p>
-          <p className="text-sm text-gray-700">per month</p>
+          <p className="text-xs lg:text-sm text-gray-700">per month</p>
         </div>
       </div>
 
       {/* Affordability Alert */}
       {!hasSafeOptions && (
-        <div className="card bg-warning-50 border-warning-200">
+        <div className="card bg-warning-50 border-warning-200 p-3 lg:p-4">
           <div className="flex items-center">
-            <span className="text-xl mr-3">⚠️</span>
+            <span className="text-lg lg:text-xl mr-2 lg:mr-3">⚠️</span>
             <div>
-              <h3 className="font-medium text-warning-800">{t('results.affordabilityAlert')}</h3>
-              <p className="text-sm text-warning-700">{t('results.affordabilityAlertDesc')}</p>
+              <h3 className="font-medium text-warning-800 text-sm lg:text-base">{t('results.affordabilityAlert')}</h3>
+              <p className="text-xs lg:text-sm text-warning-700">{t('results.affordabilityAlertDesc')}</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Enhanced Comparison Table */}
-      <div className="card">
-        <div className="flex justify-between items-center mb-6">
+      <div className="card p-4 lg:p-6">
+        <div className="flex justify-between items-center mb-4 lg:mb-6">
           <h2 className="text-xl font-semibold">{t('results.detailedComparison')}</h2>
           <div className="flex space-x-2">
             <button
@@ -292,9 +292,9 @@ export default function ComparisonResultsStep() {
       </div>
 
       {/* Enhanced Monthly Burden Breakdown */}
-      <div className="card">
-        <h3 className="text-lg font-semibold mb-4">{t('results.monthlyBurdenBreakdown')}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="card p-4 lg:p-6">
+        <h3 className="text-base lg:text-lg font-semibold mb-3 lg:mb-4">{t('results.monthlyBurdenBreakdown')}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {calculations.map((calc) => (
             <div 
               key={calc.property.id}
