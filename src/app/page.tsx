@@ -75,10 +75,13 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-8 lg:mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
           <div className="text-center text-gray-500 text-xs lg:text-sm">
             <p>Hong Kong Property Comparison Tool for Self-Use Buyers</p>
-            <p className="mt-1 lg:mt-2">© 2024 - Helping you make informed property decisions</p>
+            <div className="mt-1 lg:mt-2 space-y-0.5">
+              <p>© 2025 - Helping you make informed property decisions</p>
+              <p>Created by OC</p>
+            </div>
           </div>
         </div>
       </footer>
