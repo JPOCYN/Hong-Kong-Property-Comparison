@@ -1,15 +1,29 @@
 'use client';
 
-import FinancialInput from '@/components/FinancialInput';
-import PropertyInput from '@/components/PropertyInput';
-import ComparisonResults from '@/components/ComparisonResults';
-import LanguageToggle from '@/components/LanguageToggle';
+import { useAppStore } from '@/store/useAppStore';
 import { getTranslation } from '@/utils/translations';
-import { usePropertyStore } from '@/store/propertyStore';
+import StepIndicator from '@/components/UI/StepIndicator';
+import BuyerInfoStep from '@/components/Input/BuyerInfoStep';
+import PropertyInputStep from '@/components/Property/PropertyInputStep';
+import ComparisonResultsStep from '@/components/Comparison/ComparisonResultsStep';
+import LanguageToggle from '@/components/LanguageToggle';
 
 export default function Home() {
-  const { language } = usePropertyStore();
+  const { currentStep, nextStep, prevStep, canProceedToNextStep, language } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
+
+  const renderCurrentStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <BuyerInfoStep />;
+      case 2:
+        return <PropertyInputStep />;
+      case 3:
+        return <ComparisonResultsStep />;
+      default:
+        return <BuyerInfoStep />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,16 +41,34 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          {/* Financial Input Section */}
-          <FinancialInput />
-          
-          {/* Property Input Section */}
-          <PropertyInput />
-          
-          {/* Comparison Results Section */}
-          <ComparisonResults />
+        {/* Step Indicator */}
+        <StepIndicator />
+        
+        {/* Current Step Content */}
+        <div className="mb-8">
+          {renderCurrentStep()}
         </div>
+
+        {/* Navigation Buttons */}
+        {currentStep < 3 && (
+          <div className="flex justify-between items-center">
+            <button
+              onClick={prevStep}
+              disabled={currentStep === 1}
+              className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('navigation.previous')}
+            </button>
+            
+            <button
+              onClick={nextStep}
+              disabled={!canProceedToNextStep()}
+              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {currentStep === 3 ? t('navigation.finish') : t('navigation.next')}
+            </button>
+          </div>
+        )}
       </main>
 
       {/* Footer */}

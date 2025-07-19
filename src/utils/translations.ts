@@ -12,10 +12,72 @@ export const translations: Translations = {
     zh: '香港物業比較',
   },
   
-  // User Financial Input
-  'financial.title': {
+  // Steps
+  'steps.buyerInfo': {
+    en: 'Buyer Information',
+    zh: '買家資料',
+  },
+  'steps.buyerInfoDesc': {
+    en: 'Enter your financial details',
+    zh: '輸入您的財務資料',
+  },
+  'steps.propertyInput': {
+    en: 'Property Details',
+    zh: '物業詳情',
+  },
+  'steps.propertyInputDesc': {
+    en: 'Add properties to compare',
+    zh: '添加物業進行比較',
+  },
+  'steps.results': {
+    en: 'Comparison Results',
+    zh: '比較結果',
+  },
+  'steps.resultsDesc': {
+    en: 'View detailed analysis',
+    zh: '查看詳細分析',
+  },
+  
+  // Buyer Info
+  'buyerInfo.title': {
     en: 'Your Financial Information',
     zh: '您的財務資料',
+  },
+  'buyerInfo.monthlyIncome': {
+    en: 'Monthly Income',
+    zh: '月收入',
+  },
+  'buyerInfo.monthlyIncomeHelp': {
+    en: 'Your total monthly income before tax',
+    zh: '您的稅前月收入總額',
+  },
+  'buyerInfo.downpaymentBudget': {
+    en: 'Downpayment Budget',
+    zh: '首期預算',
+  },
+  'buyerInfo.downpaymentBudgetHelp': {
+    en: 'Maximum amount you can pay upfront',
+    zh: '您能支付的最大前期金額',
+  },
+  'buyerInfo.firstTimeBuyer': {
+    en: 'First-time Buyer (首置)',
+    zh: '首置買家',
+  },
+  'buyerInfo.firstTimeBuyerHelp': {
+    en: 'Eligible for reduced stamp duty rates',
+    zh: '符合減免印花稅資格',
+  },
+  'buyerInfo.mortgageType': {
+    en: 'Mortgage Type',
+    zh: '按揭類型',
+  },
+  'buyerInfo.mortgageYears': {
+    en: 'Mortgage Term',
+    zh: '按揭年期',
+  },
+  'buyerInfo.currentRate': {
+    en: 'Current Rate',
+    zh: '當前利率',
   },
   'financial.monthlySalary': {
     en: 'Monthly Salary',
@@ -93,6 +155,26 @@ export const translations: Translations = {
     en: 'Management Fee (Monthly)',
     zh: '管理費 (每月)',
   },
+  'property.buildingAge': {
+    en: 'Building Age (樓齡)',
+    zh: '樓齡',
+  },
+  'property.district': {
+    en: 'District (地區)',
+    zh: '地區',
+  },
+  'property.schoolNet': {
+    en: 'Primary School Net (小學校網)',
+    zh: '小學校網',
+  },
+  'property.costPerSqFt': {
+    en: 'Cost per ft²',
+    zh: '每平方呎成本',
+  },
+  'property.ratesPerMonth': {
+    en: 'Rates per month (差餉)',
+    zh: '每月差餉',
+  },
   
   // Results
   'results.title': {
@@ -118,6 +200,26 @@ export const translations: Translations = {
   'results.affordability': {
     en: 'Affordability %',
     zh: '負擔能力 %',
+  },
+  'results.mostAffordable': {
+    en: 'Most Affordable',
+    zh: '最可負擔',
+  },
+  'results.bestValue': {
+    en: 'Best Value',
+    zh: '最佳價值',
+  },
+  'results.averageMonthly': {
+    en: 'Average Monthly',
+    zh: '平均每月',
+  },
+  'results.detailedComparison': {
+    en: 'Detailed Comparison',
+    zh: '詳細比較',
+  },
+  'results.affordabilityAnalysis': {
+    en: 'Affordability Analysis',
+    zh: '負擔能力分析',
   },
   'results.stampDuty': {
     en: 'Stamp Duty',
@@ -182,6 +284,34 @@ export const translations: Translations = {
   'message.noProperties': {
     en: 'Add properties to start comparing',
     zh: '添加物業開始比較',
+  },
+  
+  // Common
+  'common.years': {
+    en: 'years',
+    zh: '年',
+  },
+  'common.ft2': {
+    en: 'ft²',
+    zh: '平方呎',
+  },
+  'common.optional': {
+    en: 'Optional',
+    zh: '可選',
+  },
+  
+  // Navigation
+  'navigation.previous': {
+    en: 'Previous',
+    zh: '上一步',
+  },
+  'navigation.next': {
+    en: 'Next',
+    zh: '下一步',
+  },
+  'navigation.finish': {
+    en: 'Finish',
+    zh: '完成',
   },
 };
 
