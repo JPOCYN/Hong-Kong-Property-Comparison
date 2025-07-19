@@ -56,8 +56,8 @@ export const translations: Translations = {
     zh: '首期預算',
   },
   'buyerInfo.downpaymentBudgetHelp': {
-    en: 'Maximum amount you can pay upfront',
-    zh: '您能支付的最大前期金額',
+    en: 'Maximum amount you can pay upfront (in 萬 HKD)',
+    zh: '您能支付的最大前期金額（以萬港元為單位）',
   },
   'buyerInfo.firstTimeBuyer': {
     en: 'First-time Buyer (首置)',
@@ -319,6 +319,14 @@ export const translations: Translations = {
     en: 'Clear All',
     zh: '清除全部',
   },
+  'actions.editProperties': {
+    en: 'Edit Properties',
+    zh: '編輯物業',
+  },
+  'actions.goHome': {
+    en: 'Go Home',
+    zh: '返回首頁',
+  },
   'actions.downloadPDF': {
     en: 'Download PDF',
     zh: '下載PDF',
@@ -460,8 +468,8 @@ export const translations: Translations = {
     zh: '面積',
   },
   'propertyInput.price': {
-    en: 'Price',
-    zh: '價格',
+    en: 'Price (萬 HKD)',
+    zh: '價格（萬港元）',
   },
   'propertyInput.costPerSqFt': {
     en: 'Cost per ft²',
