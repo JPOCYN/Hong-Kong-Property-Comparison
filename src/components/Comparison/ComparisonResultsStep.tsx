@@ -5,17 +5,27 @@ import { getTranslation } from '@/utils/translations';
 import { calculatePropertyAffordability, getAffordabilityColor, getAffordabilityBackgroundColor } from '@/utils/affordability';
 import { formatCurrency, formatNumber } from '@/utils/calculations';
 import { exportToPDF } from '@/utils/pdfExport';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ComparisonResultsStep() {
   const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep } = useAppStore();
   const [showClearModal, setShowClearModal] = useState(false);
   const t = (key: string) => getTranslation(key, language);
 
+  // Auto-redirect to Step 2 when all properties are deleted
+  useEffect(() => {
+    if (properties.length === 0) {
+      setCurrentStep(2);
+    }
+  }, [properties.length, setCurrentStep]);
+
   if (properties.length === 0) {
     return (
       <div className="card text-center py-12">
-        <p className="text-gray-500 text-lg">{t('message.noProperties')}</p>
+        <div className="space-y-4">
+          <p className="text-gray-500 text-lg">{t('message.noProperties')}</p>
+          <p className="text-gray-400 text-sm">{t('message.redirectingToStep2')}</p>
+        </div>
       </div>
     );
   }

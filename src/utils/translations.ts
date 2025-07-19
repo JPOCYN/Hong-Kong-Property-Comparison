@@ -387,6 +387,10 @@ export const translations: Translations = {
     en: 'Add properties to start comparing',
     zh: '添加物業開始比較',
   },
+  'message.redirectingToStep2': {
+    en: 'Redirecting to Step 2 to add properties...',
+    zh: '正在返回第2步添加物業...',
+  },
   
   // Common
   'common.years': {
