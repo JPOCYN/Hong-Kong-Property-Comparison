@@ -79,6 +79,62 @@ export const translations: Translations = {
     en: 'Current Rate',
     zh: '當前利率',
   },
+  'buyerInfo.stepTitle': {
+    en: 'Step 1: Enter Your Income & Mortgage Preferences',
+    zh: '第1步：輸入您的收入與按揭偏好',
+  },
+  'buyerInfo.stepDescription': {
+    en: 'Tell us about your financial situation and mortgage preferences',
+    zh: '告訴我們您的財務狀況和按揭偏好',
+  },
+  'buyerInfo.tipTitle': {
+    en: 'Pro Tip',
+    zh: '專業提示',
+  },
+  'buyerInfo.tipDescription': {
+    en: 'Most buyers choose 30-year mortgages with Prime − 2% for better affordability',
+    zh: '大多數買家選擇30年期按揭，Prime減2%，以獲得更好的負擔能力',
+  },
+  'buyerInfo.incomeSection': {
+    en: 'Income & Budget',
+    zh: '收入與預算',
+  },
+  'buyerInfo.buyerTypeSection': {
+    en: 'Buyer Type',
+    zh: '買家類型',
+  },
+  'buyerInfo.mortgageSection': {
+    en: 'Mortgage Options',
+    zh: '按揭選項',
+  },
+  'buyerInfo.firstTimeBuyerTooltip': {
+    en: 'First-time buyers get reduced stamp duty rates in Hong Kong',
+    zh: '首置買家在香港享有減免印花稅優惠',
+  },
+  'buyerInfo.hiborTooltip': {
+    en: 'Hong Kong Interbank Offered Rate - the benchmark interest rate',
+    zh: '香港銀行同業拆息 - 基準利率',
+  },
+  'buyerInfo.spreadTooltip': {
+    en: 'Additional percentage added to HIBOR by the bank',
+    zh: '銀行在HIBOR基礎上增加的百分比',
+  },
+  'buyerInfo.primeTooltip': {
+    en: 'Prime rate set by major Hong Kong banks',
+    zh: '香港主要銀行設定的最優惠利率',
+  },
+  'buyerInfo.discountTooltip': {
+    en: 'Discount percentage applied to the prime rate',
+    zh: '應用於最優惠利率的折扣百分比',
+  },
+  'buyerInfo.validationTitle': {
+    en: 'Required Fields Missing',
+    zh: '缺少必填欄位',
+  },
+  'buyerInfo.validationMessage': {
+    en: 'Please enter your monthly income and downpayment budget to continue',
+    zh: '請輸入您的月收入和首期預算以繼續',
+  },
   'financial.monthlySalary': {
     en: 'Monthly Salary',
     zh: '月薪',
@@ -221,6 +277,30 @@ export const translations: Translations = {
     en: 'Affordability Analysis',
     zh: '負擔能力分析',
   },
+  'results.monthlyBurdenBreakdown': {
+    en: 'Monthly Burden Breakdown',
+    zh: '每月負擔明細',
+  },
+  'results.bestFitBasedOnIncome': {
+    en: 'Best Fit Based on Income',
+    zh: '基於收入的最佳選擇',
+  },
+  'results.affordabilityTooltip': {
+    en: 'Lowest monthly burden vs income',
+    zh: '最低月負擔與收入比',
+  },
+  'results.affordabilityAlert': {
+    en: 'Affordability Warning',
+    zh: '負擔能力警告',
+  },
+  'results.affordabilityAlertDesc': {
+    en: 'All properties exceed 50% of your monthly income. Consider increasing your budget or looking at smaller properties.',
+    zh: '所有物業都超過您月收入的50%。考慮增加預算或尋找較小的物業。',
+  },
+  'results.healthyMortgageHint': {
+    en: 'Healthy mortgage ratio: < 50% of income',
+    zh: '健康按揭比例：< 收入的50%',
+  },
   'results.stampDuty': {
     en: 'Stamp Duty',
     zh: '印花稅',
@@ -260,6 +340,20 @@ export const translations: Translations = {
   'status.expensive': {
     en: 'Expensive',
     zh: '昂貴',
+  },
+  
+  // Affordability Labels
+  'affordability.healthy': {
+    en: 'Healthy',
+    zh: '健康',
+  },
+  'affordability.manageable': {
+    en: 'Manageable',
+    zh: '可管理',
+  },
+  'affordability.strained': {
+    en: 'Strained',
+    zh: '緊張',
   },
   
   // Placeholders
@@ -312,6 +406,24 @@ export const translations: Translations = {
   'navigation.finish': {
     en: 'Finish',
     zh: '完成',
+  },
+  
+  // Modal
+  'modal.clearAllTitle': {
+    en: 'Clear All Properties',
+    zh: '清除所有物業',
+  },
+  'modal.clearAllMessage': {
+    en: 'Are you sure you want to remove all properties? This action cannot be undone.',
+    zh: '您確定要移除所有物業嗎？此操作無法撤銷。',
+  },
+  'modal.cancel': {
+    en: 'Cancel',
+    zh: '取消',
+  },
+  'modal.confirm': {
+    en: 'Clear All',
+    zh: '清除全部',
   },
 };
 
