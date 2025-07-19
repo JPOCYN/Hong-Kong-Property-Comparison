@@ -111,12 +111,15 @@ export default function BuyerInfoStep() {
               </span>
               <input
                 type="number"
-                value={buyerInfo.downpaymentBudget}
-                onChange={(e) => handleInputChange('downpaymentBudget', Number(e.target.value))}
+                value={buyerInfo.downpaymentBudget / 10000}
+                onChange={(e) => handleInputChange('downpaymentBudget', Number(e.target.value) * 10000)}
                 className="input-field pl-8"
-                placeholder="2000000"
+                placeholder="200"
                 required
               />
+              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                萬
+              </span>
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {t('buyerInfo.downpaymentBudgetHelp')}

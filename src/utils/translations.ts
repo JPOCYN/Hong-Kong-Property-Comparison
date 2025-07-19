@@ -425,6 +425,132 @@ export const translations: Translations = {
     en: 'Clear All',
     zh: '清除全部',
   },
+  
+  // Property Input Step
+  'propertyInput.stepTitle': {
+    en: 'Step 2: Add Properties to Compare',
+    zh: '第2步：添加要比較的物業',
+  },
+  'propertyInput.stepDescription': {
+    en: 'Enter details for up to 3 properties you want to compare',
+    zh: '輸入您要比較的物業詳情（最多3個）',
+  },
+  'propertyInput.basicInfoSection': {
+    en: 'Basic Information',
+    zh: '基本資料',
+  },
+  'propertyInput.layoutLocationSection': {
+    en: 'Layout & Location',
+    zh: '佈局與位置',
+  },
+  'propertyInput.extrasFeesSection': {
+    en: 'Extras & Fees',
+    zh: '額外項目與費用',
+  },
+  'propertyInput.propertyName': {
+    en: 'Property Name',
+    zh: '物業名稱',
+  },
+  'propertyInput.propertyNamePlaceholder': {
+    en: 'e.g., Lohas Park Phase 3',
+    zh: '例如：日出康城三期',
+  },
+  'propertyInput.size': {
+    en: 'Size',
+    zh: '面積',
+  },
+  'propertyInput.price': {
+    en: 'Price',
+    zh: '價格',
+  },
+  'propertyInput.costPerSqFt': {
+    en: 'Cost per ft²',
+    zh: '每呎價格',
+  },
+  'propertyInput.expensiveWarning': {
+    en: 'This is quite expensive!',
+    zh: '這個價格相當高！',
+  },
+  'propertyInput.rooms': {
+    en: 'Rooms',
+    zh: '房間',
+  },
+  'propertyInput.room': {
+    en: 'Room',
+    zh: '房',
+  },
+  'propertyInput.toilets': {
+    en: 'Toilets',
+    zh: '洗手間',
+  },
+  'propertyInput.toilet': {
+    en: 'Toilet',
+    zh: '廁',
+  },
+  'propertyInput.buildingAge': {
+    en: 'Building Age',
+    zh: '樓齡',
+  },
+  'propertyInput.years': {
+    en: 'years',
+    zh: '年',
+  },
+  'propertyInput.district': {
+    en: 'District',
+    zh: '地區',
+  },
+  'propertyInput.selectDistrict': {
+    en: 'Select District',
+    zh: '選擇地區',
+  },
+  'propertyInput.schoolNet': {
+    en: 'School Net',
+    zh: '校網',
+  },
+  'propertyInput.hasCarPark': {
+    en: 'Has Car Park',
+    zh: '有車位',
+  },
+  'propertyInput.carParkTooltip': {
+    en: 'Include car park in the property price',
+    zh: '車位包含在物業價格內',
+  },
+  'propertyInput.carParkHelp': {
+    en: 'Check if car park is included in the property price',
+    zh: '勾選如果車位包含在物業價格內',
+  },
+  'propertyInput.carParkPrice': {
+    en: 'Car Park Price',
+    zh: '車位價格',
+  },
+  'propertyInput.managementFee': {
+    en: 'Management Fee',
+    zh: '管理費',
+  },
+  'propertyInput.perMonth': {
+    en: 'per month',
+    zh: '每月',
+  },
+  'propertyInput.managementFeeSuggestion': {
+    en: 'Estimated',
+    zh: '估算',
+  },
+  'propertyInput.managementFeeWarning': {
+    en: 'Most units have monthly management fees',
+    zh: '大多數單位都有每月管理費',
+  },
+  'propertyInput.autoFilled': {
+    en: 'Auto-filled from district',
+    zh: '根據地區自動填寫',
+  },
+  'propertyInput.addProperty': {
+    en: 'Add Property',
+    zh: '添加物業',
+  },
+  'propertyInput.addedProperties': {
+    en: 'Added Properties',
+    zh: '已添加的物業',
+  },
 };
 
 export const getTranslation = (key: string, language: 'en' | 'zh'): string => {

@@ -1,17 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { getTranslation } from '@/utils/translations';
-import { Property } from '@/store/useAppStore';
-import { getSchoolNetByDistrict, getAllDistricts } from '@/utils/schoolNetMap';
-import { estimateManagementFee } from '@/utils/affordability';
+import { getSchoolNetByDistrict } from '@/utils/schoolNetMap';
+import { useState } from 'react';
 
 export default function PropertyInputStep() {
-  const { properties, addProperty, language } = useAppStore();
+  const { properties, addProperty, updateProperty, language } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
-
-  const [formData, setFormData] = useState<Partial<Property>>({
+  const [currentProperty, setCurrentProperty] = useState({
     name: '',
     size: 0,
     price: 0,
@@ -25,334 +22,415 @@ export default function PropertyInputStep() {
     managementFee: 0,
   });
 
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-
-  const handleInputChange = (field: keyof Property, value: any) => {
-    const newData = { ...formData, [field]: value };
-    setFormData(newData);
-
-    // Auto-calculate management fee when size changes
-    if (field === 'size' && value > 0) {
-      newData.managementFee = estimateManagementFee(value);
-    }
-
-    // Auto-fill school net when district changes
-    if (field === 'district') {
-      const schoolNets = getSchoolNetByDistrict(value);
-      if (schoolNets.length > 0) {
-        newData.schoolNet = schoolNets[0].code;
-      }
-    }
-
-    setFormData(newData);
+  const handleInputChange = (field: string, value: any) => {
+    setCurrentProperty(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleDistrictInput = (value: string) => {
-    setFormData(prev => ({ ...prev, district: value }));
-    
-    if (value.length > 0) {
-      const districts = getAllDistricts();
-      const filtered = districts.filter(district => 
-        district.toLowerCase().includes(value.toLowerCase())
-      );
-      setSuggestions(filtered.slice(0, 5));
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
-    }
-  };
-
-  const selectDistrict = (district: string) => {
-    setFormData(prev => ({ ...prev, district }));
-    setShowSuggestions(false);
-    
-    // Auto-fill school net
+  const handleDistrictChange = (district: string) => {
     const schoolNets = getSchoolNetByDistrict(district);
-    if (schoolNets.length > 0) {
-      setFormData(prev => ({ ...prev, schoolNet: schoolNets[0].code }));
+    setCurrentProperty(prev => ({ 
+      ...prev, 
+      district,
+      schoolNet: schoolNets.length > 0 ? schoolNets[0].code : ''
+    }));
+  };
+
+  const calculateCostPerSqFt = (): number => {
+    if (currentProperty.size > 0 && currentProperty.price > 0) {
+      return currentProperty.price / currentProperty.size;
+    }
+    return 0;
+  };
+
+  const getManagementFeeSuggestion = (): number => {
+    if (currentProperty.size > 0) {
+      return Math.round(currentProperty.size * 2.5);
+    }
+    return 0;
+  };
+
+  const isPropertyValid = (): boolean => {
+    return currentProperty.name.trim() !== '' && 
+           currentProperty.price > 0 && 
+           currentProperty.size > 0;
+  };
+
+  const handleAddProperty = () => {
+    if (isPropertyValid()) {
+      addProperty({
+        ...currentProperty,
+        id: Date.now().toString(),
+      });
+      setCurrentProperty({
+        name: '',
+        size: 0,
+        price: 0,
+        rooms: 1,
+        toilets: 1,
+        buildingAge: 0,
+        district: '',
+        schoolNet: '',
+        carParkIncluded: false,
+        carParkPrice: 0,
+        managementFee: 0,
+      });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.size || !formData.price) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    if (properties.length >= 3) {
-      alert(t('message.maxProperties'));
-      return;
-    }
-
-    const newProperty: Property = {
-      id: Date.now().toString(),
-      name: formData.name!,
-      size: formData.size!,
-      price: formData.price!,
-      rooms: formData.rooms || 1,
-      toilets: formData.toilets || 1,
-      buildingAge: formData.buildingAge || 0,
-      district: formData.district || '',
-      schoolNet: formData.schoolNet || '',
-      carParkIncluded: formData.carParkIncluded || false,
-      carParkPrice: formData.carParkPrice || 0,
-      managementFee: formData.managementFee || 0,
-    };
-
-    addProperty(newProperty);
-    
-    // Reset form
-    setFormData({
-      name: '',
-      size: 0,
-      price: 0,
-      rooms: 1,
-      toilets: 1,
-      buildingAge: 0,
-      district: '',
-      schoolNet: '',
-      carParkIncluded: false,
-      carParkPrice: 0,
-      managementFee: 0,
-    });
-  };
-
-  const calculateCostPerSqFt = () => {
-    if (formData.price && formData.size) {
-      return (formData.price / formData.size).toFixed(0);
-    }
-    return '';
-  };
+  const costPerSqFt = calculateCostPerSqFt();
+  const managementFeeSuggestion = getManagementFeeSuggestion();
+  const isExpensive = costPerSqFt > 25000;
 
   return (
-    <div className="card">
-      <h2 className="text-xl font-semibold mb-6">{t('property.title')}</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Property Name */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.name')} *
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              className="input-field"
-              placeholder={t('placeholder.propertyName')}
-              required
-            />
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          {t('propertyInput.stepTitle')}
+        </h2>
+        <p className="text-gray-600">
+          {t('propertyInput.stepDescription')}
+        </p>
+      </div>
 
-          {/* Size */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.size')} *
-            </label>
-            <div className="relative">
+      {/* Property Form Card */}
+      <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+        {/* Basic Info Section */}
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="text-lg mr-2">🏠</span>
+            {t('propertyInput.basicInfoSection')}
+          </h3>
+          
+          <div className="space-y-4">
+            {/* Property Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('propertyInput.propertyName')} *
+              </label>
               <input
-                type="number"
-                value={formData.size || ''}
-                onChange={(e) => handleInputChange('size', Number(e.target.value))}
-                className="input-field pr-12"
-                placeholder={t('placeholder.size')}
-                required
-              />
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                {t('common.ft2')}
-              </span>
-            </div>
-          </div>
-
-          {/* Price */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.price')} *
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                $
-              </span>
-              <input
-                type="number"
-                value={formData.price || ''}
-                onChange={(e) => handleInputChange('price', Number(e.target.value))}
-                className="input-field pl-8"
-                placeholder={t('placeholder.price')}
+                type="text"
+                value={currentProperty.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                className="input-field"
+                placeholder={t('propertyInput.propertyNamePlaceholder')}
                 required
               />
             </div>
-            {calculateCostPerSqFt() && (
-              <p className="text-xs text-gray-500 mt-1">
-                {t('property.costPerSqFt')}: ${calculateCostPerSqFt()}/{t('common.ft2')}
-              </p>
-            )}
-          </div>
 
-          {/* Rooms */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.rooms')}
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={formData.rooms || 1}
-              onChange={(e) => handleInputChange('rooms', Number(e.target.value))}
-              className="input-field"
-            />
-          </div>
-
-          {/* Toilets */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.toilets')}
-            </label>
-            <input
-              type="number"
-              min="1"
-              value={formData.toilets || 1}
-              onChange={(e) => handleInputChange('toilets', Number(e.target.value))}
-              className="input-field"
-            />
-          </div>
-
-          {/* Building Age */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.buildingAge')}
-            </label>
-            <div className="relative">
-              <input
-                type="number"
-                value={formData.buildingAge || ''}
-                onChange={(e) => handleInputChange('buildingAge', Number(e.target.value))}
-                className="input-field pr-12"
-                placeholder="0"
-              />
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                years
-              </span>
+            {/* Size and Price - Paired Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.size')} (ft²) *
+                </label>
+                <input
+                  type="number"
+                  value={currentProperty.size || ''}
+                  onChange={(e) => handleInputChange('size', Number(e.target.value))}
+                  className="input-field"
+                  placeholder="500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.price')} *
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    value={currentProperty.price || ''}
+                    onChange={(e) => handleInputChange('price', Number(e.target.value))}
+                    className="input-field pl-8"
+                    placeholder="8000000"
+                    required
+                  />
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* District */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.district')}
-            </label>
-            <input
-              type="text"
-              value={formData.district}
-              onChange={(e) => handleDistrictInput(e.target.value)}
-              className="input-field"
-              placeholder="e.g., 中西區"
-            />
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                {suggestions.map((district) => (
-                  <button
-                    key={district}
-                    type="button"
-                    onClick={() => selectDistrict(district)}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    {district}
-                  </button>
-                ))}
+            {/* Cost per ft² Feedback */}
+            {costPerSqFt > 0 && (
+              <div className={`p-3 rounded-lg text-sm ${
+                isExpensive 
+                  ? 'bg-red-50 border border-red-200 text-red-700' 
+                  : 'bg-blue-50 border border-blue-200 text-blue-700'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <span>👉</span>
+                  <span>
+                    {t('propertyInput.costPerSqFt')}: <strong>${costPerSqFt.toLocaleString()}/ft²</strong>
+                    {isExpensive && (
+                      <span className="ml-2 text-red-600">
+                        {t('propertyInput.expensiveWarning')}
+                      </span>
+                    )}
+                  </span>
+                </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* School Net */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.schoolNet')} ({t('common.optional')})
-            </label>
-            <input
-              type="text"
-              value={formData.schoolNet}
-              onChange={(e) => handleInputChange('schoolNet', e.target.value)}
-              className="input-field"
-              placeholder="e.g., 11"
-            />
-          </div>
-
-          {/* Car Park */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.carPark')}
-            </label>
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={formData.carParkIncluded || false}
-                  onChange={(e) => handleInputChange('carParkIncluded', e.target.checked)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm text-gray-700">{t('property.carParkIncluded')}</span>
-              </label>
+        {/* Layout & Location Section */}
+        <div className="mb-6 border-t border-gray-200 pt-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="text-lg mr-2">📍</span>
+            {t('propertyInput.layoutLocationSection')}
+          </h3>
+          
+          <div className="space-y-4">
+            {/* Rooms and Toilets - Paired Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.rooms')}
+                </label>
+                <select
+                  value={currentProperty.rooms}
+                  onChange={(e) => handleInputChange('rooms', Number(e.target.value))}
+                  className="input-field"
+                >
+                  {[1, 2, 3, 4, 5].map(num => (
+                    <option key={num} value={num}>
+                      {num} {t('propertyInput.room')}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
-              {!formData.carParkIncluded && (
-                <div className="flex-1">
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                      $
-                    </span>
-                    <input
-                      type="number"
-                      value={formData.carParkPrice || ''}
-                      onChange={(e) => handleInputChange('carParkPrice', Number(e.target.value))}
-                      className="input-field pl-8"
-                      placeholder={t('property.carParkPrice')}
-                    />
-                  </div>
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.toilets')}
+                </label>
+                <select
+                  value={currentProperty.toilets}
+                  onChange={(e) => handleInputChange('toilets', Number(e.target.value))}
+                  className="input-field"
+                >
+                  {[1, 2, 3, 4].map(num => (
+                    <option key={num} value={num}>
+                      {num} {t('propertyInput.toilet')}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
 
-          {/* Management Fee */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('property.managementFee')}
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                $
-              </span>
-              <input
-                type="number"
-                value={formData.managementFee || ''}
-                onChange={(e) => handleInputChange('managementFee', Number(e.target.value))}
-                className="input-field pl-8"
-                placeholder="0"
-              />
+            {/* Building Age and District - Paired Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.buildingAge')} ({t('propertyInput.years')})
+                </label>
+                <input
+                  type="number"
+                  value={currentProperty.buildingAge || ''}
+                  onChange={(e) => handleInputChange('buildingAge', Number(e.target.value))}
+                  className="input-field"
+                  placeholder="10"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.district')}
+                </label>
+                <select
+                  value={currentProperty.district}
+                  onChange={(e) => handleDistrictChange(e.target.value)}
+                  className="input-field"
+                >
+                  <option value="">{t('propertyInput.selectDistrict')}</option>
+                  <option value="中西區">中西區</option>
+                  <option value="灣仔">灣仔</option>
+                  <option value="東區">東區</option>
+                  <option value="南區">南區</option>
+                  <option value="油尖旺">油尖旺</option>
+                  <option value="深水埗">深水埗</option>
+                  <option value="九龍城">九龍城</option>
+                  <option value="黃大仙">黃大仙</option>
+                  <option value="觀塘">觀塘</option>
+                  <option value="葵青">葵青</option>
+                  <option value="荃灣">荃灣</option>
+                  <option value="屯門">屯門</option>
+                  <option value="元朗">元朗</option>
+                  <option value="北區">北區</option>
+                  <option value="大埔">大埔</option>
+                  <option value="西貢">西貢</option>
+                  <option value="沙田">沙田</option>
+                  <option value="離島">離島</option>
+                </select>
+              </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Estimated: ${formData.size ? estimateManagementFee(formData.size).toFixed(0) : '0'}/month
-            </p>
+
+            {/* School Net - Auto-filled */}
+            {currentProperty.schoolNet && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <span className="text-green-600">✅</span>
+                  <span className="text-sm text-green-700">
+                    <strong>{t('propertyInput.schoolNet')}:</strong> {currentProperty.schoolNet}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">
-            {properties.length}/3 {t('message.maxProperties')}
-          </span>
+        {/* Extras & Fees Section */}
+        <div className="border-t border-gray-200 pt-6">
+          <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+            <span className="text-lg mr-2">💰</span>
+            {t('propertyInput.extrasFeesSection')}
+          </h3>
+          
+          <div className="space-y-4">
+            {/* Car Park Toggle */}
+            <label className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+              <input
+                type="checkbox"
+                checked={currentProperty.carParkIncluded}
+                onChange={(e) => handleInputChange('carParkIncluded', e.target.checked)}
+                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-1"
+              />
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-900">
+                    {t('propertyInput.hasCarPark')}
+                  </span>
+                  <span className="text-gray-400 cursor-help" title={t('propertyInput.carParkTooltip')}>
+                    ℹ️
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {t('propertyInput.carParkHelp')}
+                </p>
+              </div>
+            </label>
+
+            {/* Car Park Price - Conditional */}
+            {currentProperty.carParkIncluded && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.carParkPrice')}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    value={currentProperty.carParkPrice || ''}
+                    onChange={(e) => handleInputChange('carParkPrice', Number(e.target.value))}
+                    className="input-field pl-8"
+                    placeholder="500000"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Management Fee and School Net - Paired Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.managementFee')} ({t('propertyInput.perMonth')})
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                  <input
+                    type="number"
+                    value={currentProperty.managementFee || ''}
+                    onChange={(e) => handleInputChange('managementFee', Number(e.target.value))}
+                    className="input-field pl-8"
+                    placeholder="1250"
+                  />
+                </div>
+                {managementFeeSuggestion > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t('propertyInput.managementFeeSuggestion')}: ${managementFeeSuggestion.toLocaleString()}/month
+                  </p>
+                )}
+                {currentProperty.managementFee === 0 && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    ⚠️ {t('propertyInput.managementFeeWarning')}
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.schoolNet')}
+                </label>
+                <input
+                  type="text"
+                  value={currentProperty.schoolNet}
+                  onChange={(e) => handleInputChange('schoolNet', e.target.value)}
+                  className="input-field"
+                  placeholder="e.g., 11, 34, 91"
+                  disabled={!!getSchoolNetByDistrict(currentProperty.district)}
+                />
+                {getSchoolNetByDistrict(currentProperty.district) && (
+                  <p className="text-xs text-green-600 mt-1">
+                    ✅ {t('propertyInput.autoFilled')}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Add Property Button */}
+        <div className="mt-8 flex justify-end">
           <button
-            type="submit"
-            disabled={properties.length >= 3}
-            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleAddProperty}
+            disabled={!isPropertyValid()}
+            className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t('actions.addProperty')}
+            {t('propertyInput.addProperty')}
           </button>
         </div>
-      </form>
+      </div>
+
+      {/* Properties List */}
+      {properties.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t('propertyInput.addedProperties')} ({properties.length}/3)
+          </h3>
+          
+          {properties.map((property, index) => (
+            <div key={property.id} className="card">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">{property.name}</h4>
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                    <span>${property.price.toLocaleString()}</span>
+                    <span>{property.size} ft²</span>
+                    <span>{property.rooms}R {property.toilets}T</span>
+                    {property.district && <span>{property.district}</span>}
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    // Remove property logic would go here
+                  }}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                >
+                  {t('common.remove')}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 } 
