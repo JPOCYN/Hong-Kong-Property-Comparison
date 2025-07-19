@@ -8,7 +8,7 @@ import { exportToPDF } from '@/utils/pdfExport';
 import { useState } from 'react';
 
 export default function ComparisonResultsStep() {
-  const { properties, buyerInfo, removeProperty, clearProperties, language } = useAppStore();
+  const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep } = useAppStore();
   const [showClearModal, setShowClearModal] = useState(false);
   const t = (key: string) => getTranslation(key, language);
 
