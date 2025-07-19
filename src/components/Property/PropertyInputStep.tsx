@@ -6,7 +6,7 @@ import { getSchoolNetByDistrict } from '@/utils/schoolNetMap';
 import { useState } from 'react';
 
 export default function PropertyInputStep() {
-  const { properties, addProperty, updateProperty, language } = useAppStore();
+  const { properties, addProperty, updateProperty, removeProperty, language } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
   const [currentProperty, setCurrentProperty] = useState({
     name: '',
@@ -422,12 +422,10 @@ export default function PropertyInputStep() {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    // Remove property logic would go here
-                  }}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                  onClick={() => removeProperty(property.id)}
+                  className="text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-2 py-1 rounded transition-colors"
                 >
-                  {t('common.remove')}
+                  🗑️ {t('common.remove')}
                 </button>
               </div>
             </div>
