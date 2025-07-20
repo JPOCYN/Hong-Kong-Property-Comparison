@@ -685,6 +685,23 @@ export default function PropertyInputStep() {
                 </p>
               </div>
             </div>
+
+            {/* Property Link - Optional */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('propertyInput.propertyLink')} ({t('propertyInput.optional')})
+              </label>
+              <input
+                type="url"
+                value={form.propertyLink}
+                onChange={(e) => handleInputChange(formIndex, 'propertyLink', e.target.value)}
+                className="input-field"
+                placeholder="https://example.com/property-listing"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                🔗 {t('propertyInput.propertyLinkHelp')}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -709,6 +726,7 @@ export default function PropertyInputStep() {
                     carParkIncluded: false,
                     carParkPrice: 0,
                     managementFee: 0,
+                    propertyLink: '',
                   } : form
                 ));
               }}
@@ -864,6 +882,7 @@ export default function PropertyInputStep() {
                   carParkIncluded: false,
                   carParkPrice: 0,
                   managementFee: 0,
+                  propertyLink: '',
                 }]);
               }}
               className="btn-secondary text-sm"

@@ -29,6 +29,7 @@ export interface Property {
   carParkIncluded: boolean;
   carParkPrice: number;
   managementFee: number;
+  propertyLink?: string; // 物業連結 (optional)
 }
 
 export interface AppState {

@@ -825,6 +825,14 @@ export const translations: Translations = {
     en: 'Most units have monthly management fees',
     zh: '大多數單位都有每月管理費',
   },
+  'propertyInput.propertyLink': {
+    en: 'Property Link',
+    zh: '物業連結',
+  },
+  'propertyInput.propertyLinkHelp': {
+    en: 'For easy reference to property details',
+    zh: '方便日後查看物業詳情',
+  },
   'propertyInput.autoFilled': {
     en: 'Auto-filled from district',
     zh: '根據地區自動填寫',
