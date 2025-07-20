@@ -158,34 +158,33 @@ export function calculateTotalCost(
 }
 
 /**
- * Calculate affordability score (0-100)
+ * Calculate affordability score (0-100) based on maximum monthly payment
  */
 export function calculateAffordabilityScore(
-  monthlyIncome: number,
+  maxMonthlyPayment: number,
   monthlyPayment: number,
   otherDebts: number = 0
 ): number {
   const totalMonthlyDebt = monthlyPayment + otherDebts;
-  const debtToIncomeRatio = totalMonthlyDebt / monthlyIncome;
+  const paymentRatio = totalMonthlyDebt / maxMonthlyPayment;
   
-  // Score based on DSR (lower is better)
-  if (debtToIncomeRatio <= 0.3) return 100;
-  if (debtToIncomeRatio <= 0.4) return 80;
-  if (debtToIncomeRatio <= 0.5) return 60;
-  if (debtToIncomeRatio <= 0.6) return 40;
-  if (debtToIncomeRatio <= 0.7) return 20;
+  // Score based on payment ratio (lower is better)
+  if (paymentRatio <= 0.5) return 100;
+  if (paymentRatio <= 0.7) return 80;
+  if (paymentRatio <= 0.9) return 60;
+  if (paymentRatio <= 1.0) return 40;
+  if (paymentRatio <= 1.2) return 20;
   return 0;
 }
 
 /**
- * Calculate maximum loan amount based on income
+ * Calculate maximum loan amount based on maximum monthly payment
  */
 export function calculateMaxLoanAmount(
-  monthlyIncome: number,
+  maxMonthlyPayment: number,
   loanTerm: number = 30,
   interestRate: number = CURRENT_RATES.primeRate
 ): number {
-  const maxMonthlyPayment = monthlyIncome * CURRENT_RATES.maxDebtToIncome;
   const monthlyRate = interestRate / 100 / 12;
   const numberOfPayments = loanTerm * 12;
 
@@ -198,14 +197,14 @@ export function calculateMaxLoanAmount(
 }
 
 /**
- * Calculate maximum property price based on down payment and income
+ * Calculate maximum property price based on down payment and maximum monthly payment
  */
 export function calculateMaxPropertyPrice(
   downPayment: number,
-  monthlyIncome: number,
+  maxMonthlyPayment: number,
   loanTerm: number = 30
 ): number {
-  const maxLoanAmount = calculateMaxLoanAmount(monthlyIncome, loanTerm);
+  const maxLoanAmount = calculateMaxLoanAmount(maxMonthlyPayment, loanTerm);
   const maxPropertyPrice = downPayment + maxLoanAmount;
   
   return Math.floor(maxPropertyPrice);
@@ -368,7 +367,7 @@ export function calculatePropertyDetails(property: any, userFinancials: any) {
   const monthlyMortgage = calculateMortgage(loanAmount, property.price, 30);
   const stampDuty = calculateStampDuty(property.price);
   const monthlyRecurringCosts = monthlyMortgage.monthlyPayment + property.managementFee;
-  const affordabilityPercentage = (monthlyRecurringCosts / userFinancials.monthlySalary) * 100;
+  const affordabilityPercentage = (monthlyRecurringCosts / userFinancials.maxMonthlyPayment) * 100;
   const ratesPerMonth = (property.price * 0.03) / 12; // 3% annually
   
       return {
@@ -376,7 +375,7 @@ export function calculatePropertyDetails(property: any, userFinancials: any) {
       monthlyMortgage: monthlyMortgage.monthlyPayment,
       monthlyRecurringCosts,
       affordabilityPercentage,
-      affordabilityStatus: (affordabilityPercentage <= 40 ? 'affordable' : affordabilityPercentage <= 60 ? 'moderate' : 'expensive') as 'affordable' | 'moderate' | 'expensive',
+      affordabilityStatus: (affordabilityPercentage <= 80 ? 'affordable' : affordabilityPercentage <= 100 ? 'moderate' : 'expensive') as 'affordable' | 'moderate' | 'expensive',
       upfrontCosts: downpayment + stampDuty.totalDuty,
       costPerSqFt: calculateCostPerSqFt(property.price, property.size),
       stampDuty: stampDuty.totalDuty,

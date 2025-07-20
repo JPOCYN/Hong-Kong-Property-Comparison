@@ -77,7 +77,7 @@ export default function BuyerInfoStep() {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-          {/* Monthly Income */}
+          {/* Maximum Monthly Payment */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t('buyerInfo.maxMonthlyPayment')} *

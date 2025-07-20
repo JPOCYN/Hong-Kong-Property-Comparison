@@ -244,9 +244,8 @@ export default function ComparisonResultsStep() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {calculations.map((calc) => {
-            // Calculate DSR ratio: monthlyMortgage / (maxMonthlyPayment * maxDebtToIncome) * 100%
-            const maxDebtToIncome = 0.5; // 50% DSR
-            const dsrRatio = (calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * maxDebtToIncome)) * 100;
+            // Calculate payment ratio: monthlyMortgage / maxMonthlyPayment * 100%
+            const paymentRatio = (calc.monthlyMortgage / buyerInfo.maxMonthlyPayment) * 100;
             
             // Calculate downpayment shortfall: downpaymentBudget - upfrontCosts
             const downpaymentShortfall = calc.upfrontCosts - buyerInfo.downpaymentBudget;
@@ -260,9 +259,9 @@ export default function ComparisonResultsStep() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
-                      <span className={`font-medium ${dsrRatio <= 100 ? 'text-green-600' : 'text-red-600'}`}>
-                        {dsrRatio.toFixed(1)}%
-                        {dsrRatio > 100 && <span className="ml-1">🔴</span>}
+                      <span className={`font-medium ${paymentRatio <= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                        {paymentRatio.toFixed(1)}%
+                        {paymentRatio > 100 && <span className="ml-1">🔴</span>}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -276,12 +275,12 @@ export default function ComparisonResultsStep() {
                   </div>
                   
                   {/* Status indicators */}
-                  {dsrRatio <= 100 && downpaymentShortfall <= 0 && (
+                  {paymentRatio <= 100 && downpaymentShortfall <= 0 && (
                     <div className="text-xs text-green-600 bg-green-50 p-2 rounded mt-2">
                       ✅ {t('results.withinBudget')}
                     </div>
                   )}
-                  {dsrRatio > 100 && (
+                  {paymentRatio > 100 && (
                     <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
                       🛑 {t('results.monthlyPaymentExceeded')}
                     </div>

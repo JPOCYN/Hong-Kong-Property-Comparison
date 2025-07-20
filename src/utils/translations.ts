@@ -286,12 +286,12 @@ export const translations: Translations = {
     zh: '改善建議',
   },
   'results.improvementDescription': {
-    en: 'Display the recommended monthly income and downpayment amount for each property to achieve "mortgage payment not exceeding 50% of income" as the goal.',
-    zh: '顯示每個物業所需的建議月收入與首期金額，以達到「供款不超過收入 50%」為目標。',
+    en: 'Display the recommended maximum monthly payment and downpayment amount for each property to achieve "mortgage payment not exceeding maximum monthly payment" as the goal.',
+    zh: '顯示每個物業所需的建議最大可月供與首期金額，以達到「供款不超過最大可月供」為目標。',
   },
   'results.suggestedMonthlyIncome': {
-    en: 'Suggested Monthly Income',
-    zh: '建議月入',
+    en: 'Suggested Max Monthly Payment',
+    zh: '建議最大可月供',
   },
   'results.suggestedDownpayment': {
     en: 'Suggested Downpayment',
@@ -319,7 +319,7 @@ export const translations: Translations = {
   },
   'results.monthlyPaymentRatio': {
     en: 'Monthly Payment Ratio',
-    zh: '每月供款佔最高可接受供款比例',
+    zh: '每月供款佔最大可月供比例',
   },
   'results.downpaymentRemaining': {
     en: 'Downpayment Remaining',
@@ -350,8 +350,8 @@ export const translations: Translations = {
     zh: '🛑 可能申請不到貸款（超出DSR上限）',
   },
   'results.dsrExplanation': {
-    en: 'Bank mortgage common limit: monthly payment cannot exceed 50% of income (HKMA guidelines)',
-    zh: '銀行按揭常見上限：月供不得超過收入50%（HKMA指引）',
+    en: 'Bank mortgage common limit: monthly payment should not exceed your maximum monthly payment capacity',
+    zh: '銀行按揭常見上限：月供不應超過您的最大可月供能力',
   },
   'results.dsr': {
     en: 'DSR',
@@ -394,12 +394,12 @@ export const translations: Translations = {
     zh: '每月負擔明細',
   },
   'results.bestFitBasedOnIncome': {
-    en: 'Best Fit Based on Income',
-    zh: '基於收入的最佳選擇',
+    en: 'Best Fit Based on Max Payment',
+    zh: '基於最大可月供的最佳選擇',
   },
   'results.affordabilityTooltip': {
-    en: 'Lowest monthly burden vs income',
-    zh: '最低月負擔與收入比',
+    en: 'Lowest monthly burden vs max payment',
+    zh: '最低月負擔與最大可月供比',
   },
   'results.affordabilityAlert': {
     en: 'Affordability Warning',
