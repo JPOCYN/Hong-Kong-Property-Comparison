@@ -8,8 +8,8 @@ export interface Translations {
 export const translations: Translations = {
   // Navigation
   'app.title': {
-    en: 'Hong Kong Property Comparison',
-    zh: '香港物業比較',
+    en: 'Buy What House Ho?',
+    zh: '買乜樓好?',
   },
   
   // Steps
@@ -495,6 +495,14 @@ export const translations: Translations = {
     en: 'Toilets',
     zh: '洗手間',
   },
+  'propertyInput.roomsHint': {
+    en: 'Number of bedrooms',
+    zh: '房間數量',
+  },
+  'propertyInput.toiletsHint': {
+    en: 'Number of bathrooms',
+    zh: '洗手間數量',
+  },
   'propertyInput.toilet': {
     en: 'Toilet',
     zh: '廁',
@@ -510,6 +518,10 @@ export const translations: Translations = {
   'propertyInput.district': {
     en: 'District',
     zh: '地區',
+  },
+  'propertyInput.districtPlaceholder': {
+    en: 'Start typing district name...',
+    zh: '開始輸入地區名稱...',
   },
   'propertyInput.selectDistrict': {
     en: 'Select District',

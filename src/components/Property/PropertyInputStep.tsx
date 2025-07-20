@@ -29,6 +29,17 @@ export default function PropertyInputStep() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingEstates, setIsLoadingEstates] = useState(true);
 
+  // District autocomplete state
+  const [districtSuggestions, setDistrictSuggestions] = useState<string[]>([]);
+  const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
+
+  // Hong Kong districts
+  const hkDistricts = [
+    '中西區', '灣仔', '東區', '南區',
+    '油尖旺', '深水埗', '九龍城', '黃大仙', '觀塘',
+    '葵青', '荃灣', '屯門', '元朗', '北區', '大埔', '西貢', '沙田', '離島'
+  ];
+
   const handleInputChange = (field: string, value: any) => {
     setCurrentProperty(prev => ({ ...prev, [field]: value }));
   };
@@ -123,6 +134,28 @@ export default function PropertyInputStep() {
       schoolNet: estate.schoolNet,
     }));
     setShowSuggestions(false);
+  };
+
+  // Handle district input with autocomplete
+  const handleDistrictInputChange = (value: string) => {
+    setCurrentProperty(prev => ({ ...prev, district: value }));
+    
+    if (value.trim().length > 0) {
+      const filtered = hkDistricts.filter(district => 
+        district.toLowerCase().includes(value.toLowerCase())
+      );
+      setDistrictSuggestions(filtered);
+      setShowDistrictSuggestions(true);
+    } else {
+      setDistrictSuggestions([]);
+      setShowDistrictSuggestions(false);
+    }
+  };
+
+  // Handle district selection
+  const handleDistrictSelect = (district: string) => {
+    setCurrentProperty(prev => ({ ...prev, district }));
+    setShowDistrictSuggestions(false);
   };
 
   return (
@@ -279,34 +312,36 @@ export default function PropertyInputStep() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('propertyInput.rooms')}
                 </label>
-                <select
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
                   value={currentProperty.rooms}
-                  onChange={(e) => handleInputChange('rooms', Number(e.target.value))}
+                  onChange={(e) => handleInputChange('rooms', parseInt(e.target.value) || 1)}
                   className="input-field"
-                >
-                  {[1, 2, 3, 4, 5].map(num => (
-                    <option key={num} value={num}>
-                      {num} {t('propertyInput.room')}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {t('propertyInput.roomsHint')}
+                </p>
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('propertyInput.toilets')}
                 </label>
-                <select
+                <input
+                  type="number"
+                  min="1"
+                  max="8"
                   value={currentProperty.toilets}
-                  onChange={(e) => handleInputChange('toilets', Number(e.target.value))}
+                  onChange={(e) => handleInputChange('toilets', parseInt(e.target.value) || 1)}
                   className="input-field"
-                >
-                  {[1, 2, 3, 4].map(num => (
-                    <option key={num} value={num}>
-                      {num} {t('propertyInput.toilet')}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {t('propertyInput.toiletsHint')}
+                </p>
               </div>
             </div>
 
@@ -325,35 +360,33 @@ export default function PropertyInputStep() {
                 />
               </div>
               
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('propertyInput.district')}
                 </label>
-                <select
+                <input
+                  type="text"
                   value={currentProperty.district}
-                  onChange={(e) => handleDistrictChange(e.target.value)}
+                  onChange={(e) => handleDistrictInputChange(e.target.value)}
                   className="input-field"
-                >
-                  <option value="">{t('propertyInput.selectDistrict')}</option>
-                  <option value="中西區">中西區</option>
-                  <option value="灣仔">灣仔</option>
-                  <option value="東區">東區</option>
-                  <option value="南區">南區</option>
-                  <option value="油尖旺">油尖旺</option>
-                  <option value="深水埗">深水埗</option>
-                  <option value="九龍城">九龍城</option>
-                  <option value="黃大仙">黃大仙</option>
-                  <option value="觀塘">觀塘</option>
-                  <option value="葵青">葵青</option>
-                  <option value="荃灣">荃灣</option>
-                  <option value="屯門">屯門</option>
-                  <option value="元朗">元朗</option>
-                  <option value="北區">北區</option>
-                  <option value="大埔">大埔</option>
-                  <option value="西貢">西貢</option>
-                  <option value="沙田">沙田</option>
-                  <option value="離島">離島</option>
-                </select>
+                  placeholder={t('propertyInput.districtPlaceholder')}
+                />
+                
+                {/* District Suggestions */}
+                {showDistrictSuggestions && districtSuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                    {districtSuggestions.map((district, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleDistrictSelect(district)}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
+                      >
+                        {district}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -508,9 +541,12 @@ export default function PropertyInputStep() {
                 </div>
                 <button
                   onClick={() => removeProperty(property.id)}
-                  className="text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-2 py-1 rounded transition-colors"
+                  className="flex items-center space-x-1 text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-3 py-2 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-300"
                 >
-                  🗑️ {t('common.remove')}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>{t('common.remove')}</span>
                 </button>
               </div>
             </div>

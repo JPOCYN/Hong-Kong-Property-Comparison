@@ -5,8 +5,11 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Hong Kong Property Comparison',
+  title: '買乜樓好? | Buy What House Ho?',
   description: 'Compare residential properties in Hong Kong for self-use buyers',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({

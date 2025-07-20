@@ -31,7 +31,8 @@ export default function Home() {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+              <span className="mr-2">🏠</span>
               {t('app.title')}
             </h1>
             <LanguageToggle />
@@ -77,7 +78,7 @@ export default function Home() {
       <footer className="bg-white border-t border-gray-200 mt-8 lg:mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
           <div className="text-center text-gray-500 text-xs lg:text-sm">
-            <p>© 2025 OC</p>
+            <p>© 2025 Creator: OC</p>
           </div>
         </div>
       </footer>
