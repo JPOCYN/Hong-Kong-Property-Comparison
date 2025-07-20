@@ -361,6 +361,18 @@ export const translations: Translations = {
     en: 'Required Downpayment',
     zh: '所需首期',
   },
+  'results.actualLTV': {
+    en: 'Actual LTV',
+    zh: '實際按揭成數',
+  },
+  'results.actualLoan': {
+    en: 'Actual Loan',
+    zh: '實際貸款額',
+  },
+  'results.actualDownpayment': {
+    en: 'Actual Downpayment',
+    zh: '實際首期',
+  },
   'results.detailedComparison': {
     en: 'Detailed Comparison',
     zh: '詳細比較',

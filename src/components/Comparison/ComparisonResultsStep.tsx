@@ -75,34 +75,43 @@ export default function ComparisonResultsStep() {
     };
   };
 
-  const calculateMIP = (propertyPrice: number, isFirstTime: boolean, isSalaried: boolean) => {
-    let maxLTV = 0.7; // Default for non-first-time buyers
+  const calculateMIP = (propertyPrice: number, downpaymentBudget: number, isFirstTime: boolean, isSalaried: boolean) => {
+    // Calculate actual LTV based on user's downpayment budget
+    const actualDownpayment = Math.min(downpaymentBudget, propertyPrice * 0.3); // Cap at 30% of property price
+    const actualLoan = propertyPrice - actualDownpayment;
+    const actualLTV = actualLoan / propertyPrice;
+    
+    // Calculate maximum allowed LTV for reference
+    let maxAllowedLTV = 0.7; // Default for non-first-time buyers
     
     if (isFirstTime && isSalaried) {
       if (propertyPrice <= 4000000) {
-        maxLTV = 0.9;
+        maxAllowedLTV = 0.9;
       } else if (propertyPrice <= 6000000) {
-        maxLTV = 0.8;
+        maxAllowedLTV = 0.8;
       } else if (propertyPrice <= 10000000) {
-        maxLTV = 0.9;
+        maxAllowedLTV = 0.9;
       } else if (propertyPrice <= 11250000) {
-        maxLTV = Math.min(0.9, 9000000 / propertyPrice);
+        maxAllowedLTV = Math.min(0.9, 9000000 / propertyPrice);
       } else if (propertyPrice <= 15000000) {
-        maxLTV = 0.8;
+        maxAllowedLTV = 0.8;
       } else if (propertyPrice <= 17150000) {
-        maxLTV = Math.min(0.8, 12000000 / propertyPrice);
+        maxAllowedLTV = Math.min(0.8, 12000000 / propertyPrice);
       } else {
-        maxLTV = 0.7;
+        maxAllowedLTV = 0.7;
       }
     }
     
-    const maxLoan = propertyPrice * maxLTV;
-    const downPayment = propertyPrice - maxLoan;
+    const maxAllowedLoan = propertyPrice * maxAllowedLTV;
+    const requiredDownpayment = propertyPrice - maxAllowedLoan;
     
     return {
-      maxLTV,
-      maxLoan,
-      downPayment
+      actualLTV,
+      actualLoan,
+      actualDownpayment,
+      maxAllowedLTV,
+      maxAllowedLoan,
+      requiredDownpayment
     };
   };
 
@@ -522,6 +531,7 @@ export default function ComparisonResultsStep() {
                               
                               const mipAnalysis = calculateMIP(
                                 calc.property.price, 
+                                buyerInfo.downpaymentBudget,
                                 buyerInfo.isFirstTimeBuyer, 
                                 true // Assuming salaried for now
                               );
@@ -548,21 +558,21 @@ export default function ComparisonResultsStep() {
                                   {/* MIP Analysis */}
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                      <span className="font-medium text-gray-900">{t('results.maxLTV')}:</span>
+                                      <span className="font-medium text-gray-900">{t('results.actualLTV')}:</span>
                                       <span className="font-medium text-blue-600">
-                                        {(mipAnalysis.maxLTV * 100).toFixed(0)}%
+                                        {(mipAnalysis.actualLTV * 100).toFixed(0)}%
                                       </span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                      <span className="font-medium text-gray-900">{t('results.maxLoan')}:</span>
+                                      <span className="font-medium text-gray-900">{t('results.actualLoan')}:</span>
                                       <span className="font-medium text-blue-600">
-                                        {formatCurrency(mipAnalysis.maxLoan)}
+                                        {formatCurrency(mipAnalysis.actualLoan)}
                                       </span>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                      <span className="font-medium text-gray-900">{t('results.requiredDownpayment')}:</span>
+                                      <span className="font-medium text-gray-900">{t('results.actualDownpayment')}:</span>
                                       <span className="font-medium text-blue-600">
-                                        {formatCurrency(mipAnalysis.downPayment)}
+                                        {formatCurrency(mipAnalysis.actualDownpayment)}
                                       </span>
                                     </div>
                                   </div>
