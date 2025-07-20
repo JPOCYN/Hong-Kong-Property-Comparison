@@ -709,24 +709,24 @@ export const translations: Translations = {
     zh: '🚗 車位',
   },
   'propertyInput.parkingNone': {
-    en: 'No parking',
+    en: 'No parking space',
     zh: '無車位',
   },
   'propertyInput.parkingIncluded': {
-    en: 'Parking included',
-    zh: '已包車位',
+    en: 'Free parking included',
+    zh: '免費車位已包',
   },
   'propertyInput.parkingAdditional': {
-    en: 'Additional purchase (HK$)',
-    zh: '需額外購買（HK$）',
+    en: 'Extra pay to buy parking',
+    zh: '需額外付費購買車位',
   },
   'propertyInput.additionalParkingPrice': {
     en: 'Additional parking price (HK$)',
     zh: '額外車位價格 (HK$)',
   },
   'propertyInput.parkingHelp': {
-    en: 'Select "Parking included" if parking is included in total price; "Additional purchase" requires extra payment.',
-    zh: '選擇「已包車位」表示車位已包含於總價；「需額外購買」則需另付金額。',
+    en: 'Choose your parking situation: No parking, Free parking included, or Extra payment required.',
+    zh: '選擇車位情況：無車位、免費車位已包、或需額外付費購買。',
   },
   'propertyInput.managementFee': {
     en: 'Management Fee',
