@@ -317,6 +317,22 @@ export const translations: Translations = {
     en: 'Downpayment Shortfall',
     zh: '首期預算不足',
   },
+  'results.monthlyPaymentRatio': {
+    en: 'Monthly Payment Ratio',
+    zh: '每月供款佔收入',
+  },
+  'results.downpaymentRemaining': {
+    en: 'Downpayment Remaining',
+    zh: '首期預算剩餘',
+  },
+  'results.monthlyPaymentExceeded': {
+    en: 'Monthly payment exceeds 50% of income',
+    zh: '每月供款超出收入50%',
+  },
+  'results.downpaymentInsufficient': {
+    en: 'Insufficient downpayment budget',
+    zh: '首期預算不足',
+  },
   'results.withinBudget': {
     en: 'Within Budget',
     zh: '在預算範圍內',

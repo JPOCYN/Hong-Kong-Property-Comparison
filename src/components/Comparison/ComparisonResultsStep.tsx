@@ -248,30 +248,30 @@ export default function ComparisonResultsStep() {
                 </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('results.monthlyPaymentGap')}:</span>
-                    <span className={`font-medium ${monthlyPaymentGap > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {monthlyPaymentGap > 0 ? '+' : ''}{formatCurrency(monthlyPaymentGap)}
+                    <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
+                    <span className={`font-medium ${(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 0.5 ? 'text-green-600' : 'text-red-600'}`}>
+                      {((calc.monthlyMortgage / buyerInfo.monthlyIncome) * 100).toFixed(1)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('results.downpaymentGap')}:</span>
-                    <span className={`font-medium ${downpaymentGap > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {downpaymentGap > 0 ? '+' : ''}{formatCurrency(downpaymentGap)}
+                    <span className="text-gray-600">{t('results.downpaymentRemaining')}:</span>
+                    <span className={`font-medium ${downpaymentGap <= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      HK${formatNumber(Math.abs(downpaymentGap))}M
                     </span>
                   </div>
-                  {monthlyPaymentGap > 0 && (
+                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 0.5 && downpaymentGap <= 0 && (
+                    <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
+                      ✅ {t('results.withinBudget')}
+                    </div>
+                  )}
+                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) > 0.5 && (
                     <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                      {t('results.monthlyPaymentExcess')}: {formatCurrency(monthlyPaymentGap)}
+                      {t('results.monthlyPaymentExceeded')}
                     </div>
                   )}
                   {downpaymentGap > 0 && (
                     <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                      {t('results.downpaymentShortfall')}: {formatCurrency(downpaymentGap)}
-                    </div>
-                  )}
-                  {(monthlyPaymentGap <= 0 && downpaymentGap <= 0) && (
-                    <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
-                      ✅ {t('results.withinBudget')}
+                      {t('results.downpaymentInsufficient')}
                     </div>
                   )}
                 </div>
@@ -586,8 +586,8 @@ export default function ComparisonResultsStep() {
                   <span className="font-medium">{formatCurrency(buyerInfo.monthlyIncome)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('results.monthlyBurden')}:</span>
-                  <span className="font-medium">{formatCurrency(calc.monthlyRecurringCosts)}</span>
+                  <span className="text-gray-600">{t('results.monthlyMortgage')}:</span>
+                  <span className="font-medium">{formatCurrency(calc.monthlyMortgage)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t('results.affordability')}:</span>
