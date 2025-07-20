@@ -44,12 +44,12 @@ export const translations: Translations = {
     zh: '您的財務資料',
   },
   'buyerInfo.monthlyIncome': {
-    en: 'Monthly Income',
-    zh: '月收入',
+    en: 'Maximum Monthly Payment',
+    zh: '最大可月供',
   },
   'buyerInfo.monthlyIncomeHelp': {
-    en: 'Your total monthly income before tax',
-    zh: '您的稅前月收入總額',
+    en: 'Maximum amount you can afford to pay monthly for mortgage',
+    zh: '您每月能負擔的最大按揭供款金額',
   },
   'buyerInfo.downpaymentBudget': {
     en: 'Downpayment Budget',
@@ -80,12 +80,12 @@ export const translations: Translations = {
     zh: '當前利率',
   },
   'buyerInfo.stepTitle': {
-    en: 'Step 1: Enter Your Income & Mortgage Preferences',
-    zh: '第1步：輸入您的收入與按揭偏好',
+    en: 'Step 1: Enter Your Maximum Monthly Payment & Budget',
+    zh: '第1步：輸入您的最大可月供與預算',
   },
   'buyerInfo.stepDescription': {
-    en: 'Tell us about your financial situation and mortgage preferences',
-    zh: '告訴我們您的財務狀況和按揭偏好',
+    en: 'Tell us about your maximum monthly payment capacity and budget',
+    zh: '告訴我們您的最大可月供能力和預算',
   },
   'buyerInfo.tipTitle': {
     en: 'Pro Tip',
@@ -96,8 +96,8 @@ export const translations: Translations = {
     zh: '大多數買家選擇30年期按揭，Prime減2%，以獲得更好的負擔能力',
   },
   'buyerInfo.incomeSection': {
-    en: 'Income & Budget',
-    zh: '收入與預算',
+    en: 'Monthly Payment & Budget',
+    zh: '月供與預算',
   },
   'buyerInfo.buyerTypeSection': {
     en: 'Buyer Type',
@@ -132,8 +132,8 @@ export const translations: Translations = {
     zh: '缺少必填欄位',
   },
   'buyerInfo.validationMessage': {
-    en: 'Please enter your monthly income and downpayment budget to continue',
-    zh: '請輸入您的月收入和首期預算以繼續',
+    en: 'Please enter your maximum monthly payment and downpayment budget to continue',
+    zh: '請輸入您的最大可月供和首期預算以繼續',
   },
   'financial.monthlySalary': {
     en: 'Monthly Salary',
@@ -319,15 +319,15 @@ export const translations: Translations = {
   },
   'results.monthlyPaymentRatio': {
     en: 'Monthly Payment Ratio',
-    zh: '每月供款佔收入',
+    zh: '每月供款佔最大可月供',
   },
   'results.downpaymentRemaining': {
     en: 'Downpayment Remaining',
     zh: '首期預算剩餘',
   },
   'results.monthlyPaymentExceeded': {
-    en: 'Monthly payment exceeds 50% of income',
-    zh: '每月供款超出收入50%',
+    en: 'Monthly payment exceeds maximum monthly payment',
+    zh: '每月供款超出最大可月供',
   },
   'results.downpaymentInsufficient': {
     en: 'Insufficient downpayment budget',

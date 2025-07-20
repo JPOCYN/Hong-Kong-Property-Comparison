@@ -61,17 +61,17 @@ export default function ComparisonResultsStep() {
   };
 
   // Enhanced DSR and MIP calculations
-  const calculateDSR = (monthlyMortgage: number, userIncome: number, propertyPrice: number, hasExistingMortgage: boolean) => {
-    const dsr = monthlyMortgage / userIncome;
+  const calculateDSR = (monthlyMortgage: number, maxMonthlyPayment: number, propertyPrice: number, hasExistingMortgage: boolean) => {
+    const dsr = monthlyMortgage / maxMonthlyPayment;
     const threshold = (propertyPrice > 30000000 || hasExistingMortgage) ? 0.4 : 0.5;
     const isCompliant = dsr <= threshold;
-    const requiredIncome = monthlyMortgage / threshold;
+    const requiredMaxPayment = monthlyMortgage / threshold;
     
     return {
       dsr,
       threshold,
       isCompliant,
-      requiredIncome
+      requiredMaxPayment
     };
   };
 
@@ -258,7 +258,7 @@ export default function ComparisonResultsStep() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
-                    <span className={`font-medium ${(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 0.5 ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`font-medium ${(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 1 ? 'text-green-600' : 'text-red-600'}`}>
                       {((calc.monthlyMortgage / buyerInfo.monthlyIncome) * 100).toFixed(1)}%
                     </span>
                   </div>
@@ -268,12 +268,12 @@ export default function ComparisonResultsStep() {
                       HK${formatNumber(Math.abs(downpaymentGap))}M
                     </span>
                   </div>
-                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 0.5 && downpaymentGap <= 0 && (
+                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 1 && downpaymentGap <= 0 && (
                     <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
                       ✅ {t('results.withinBudget')}
                     </div>
                   )}
-                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) > 0.5 && (
+                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) > 1 && (
                     <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
                       {t('results.monthlyPaymentExceeded')}
                     </div>
