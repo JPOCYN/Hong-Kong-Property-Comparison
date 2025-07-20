@@ -259,9 +259,9 @@ export function convertHKDToWan(hkdAmount: number): number {
  */
 export function calculateManagementFee(
   size: number,
-  feePerSqFt: number = 3.5
+  feePerSqFt: number = 2.7
 ): number {
-  return size * feePerSqFt;
+  return Math.round(size * feePerSqFt);
 }
 
 /**

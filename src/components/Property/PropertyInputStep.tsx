@@ -18,6 +18,7 @@ interface PropertyFormData {
   carParkIncluded: boolean;
   carParkPrice: number;
   managementFee: number;
+  propertyLink: string;
 }
 
 export default function PropertyInputStep() {
@@ -39,6 +40,7 @@ export default function PropertyInputStep() {
       carParkIncluded: false,
       carParkPrice: 0,
       managementFee: 0,
+      propertyLink: '',
     },
     {
       name: '',
@@ -53,6 +55,7 @@ export default function PropertyInputStep() {
       carParkIncluded: false,
       carParkPrice: 0,
       managementFee: 0,
+      propertyLink: '',
     }
   ]);
 
@@ -91,6 +94,11 @@ export default function PropertyInputStep() {
           }
         }
         
+        // Auto-calculate management fee when size changes
+        if (field === 'size' && value > 0) {
+          updatedForm.managementFee = Math.round(value * 2.7);
+        }
+        
         return updatedForm;
       }
       return form;
@@ -115,7 +123,7 @@ export default function PropertyInputStep() {
 
   const getManagementFeeSuggestion = (form: PropertyFormData): number => {
     if (form.size > 0) {
-      return Math.round(form.size * 2.5);
+      return Math.round(form.size * 2.7);
     }
     return 0;
   };
@@ -160,6 +168,7 @@ export default function PropertyInputStep() {
           carParkIncluded: false,
           carParkPrice: 0,
           managementFee: 0,
+          propertyLink: '',
         } : f
       ));
       // Collapse the form after adding property (mobile UX)
@@ -198,6 +207,7 @@ export default function PropertyInputStep() {
             carParkIncluded: editingProperty.carParkIncluded,
             carParkPrice: editingProperty.carParkPrice,
             managementFee: editingProperty.managementFee,
+            propertyLink: editingProperty.propertyLink || '',
           } : form
         ));
         
@@ -235,6 +245,8 @@ export default function PropertyInputStep() {
         district: estate.district,
         buildingAge: getBuildingAgeNumber(estate.buildingAge),
         schoolNet: estate.schoolNet,
+        // Keep existing management fee - user will need to enter size manually
+        managementFee: form.managementFee,
       } : form
     ));
     setShowSuggestions(false);
@@ -647,12 +659,12 @@ export default function PropertyInputStep() {
                 </div>
                 {managementFeeSuggestion > 0 && (
                   <p className="text-xs text-gray-500 mt-1">
-                    每呎管理費（平均）：HK$2.7
+                    每呎管理費（平均）：HK$2.7 • 已自動計算
                   </p>
                 )}
-                {form.managementFee === 0 && (
+                {form.managementFee === 0 && form.size > 0 && (
                   <p className="text-xs text-yellow-600 mt-1">
-                    ⚠️ {t('propertyInput.managementFeeWarning')}
+                    ⚠️ 大多數單位都有每月管理費
                   </p>
                 )}
               </div>

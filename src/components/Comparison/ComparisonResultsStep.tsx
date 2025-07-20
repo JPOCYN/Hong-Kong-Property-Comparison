@@ -6,6 +6,7 @@ import { calculatePropertyAffordability, getAffordabilityColor, getAffordability
 import { formatCurrency, formatNumber } from '@/utils/calculations';
 import { exportToPDF } from '@/utils/pdfExport';
 import { calculateStampDuty, getTotalStampDuty } from '@/utils/stampDuty';
+import { calculateHongKongRanking, getRankingExplanation, getRankingBadgeColor, getRankingBadgeText } from '@/utils/ranking';
 import { useState, useEffect } from 'react';
 
 export default function ComparisonResultsStep() {
@@ -35,6 +36,10 @@ export default function ComparisonResultsStep() {
   const calculations = properties.map(property => 
     calculatePropertyAffordability(property, buyerInfo)
   );
+
+  // Calculate Hong Kong-specific rankings
+  const rankings = calculateHongKongRanking(calculations);
+  const topRankedProperty = rankings[0];
 
   const getBestValueProperty = () => {
     return calculations.reduce((best, current) => 
@@ -187,54 +192,38 @@ export default function ComparisonResultsStep() {
 
         <div className="card bg-purple-50 border-purple-200 p-3 lg:p-4">
           <div className="flex items-center mb-2 lg:mb-3">
-            <span className="text-xl lg:text-2xl mr-2 lg:mr-3">👨‍👩‍👧‍👦</span>
+            <span className="text-xl lg:text-2xl mr-2 lg:mr-3">🏆</span>
             <h3 className="text-xs lg:text-sm font-medium text-purple-800">
-              {t('results.bestForFamily')}
+              {t('results.topRanked')}
             </h3>
           </div>
           {(() => {
-            // Find the best property for family living
-            const familyProperties = calculations.filter(calc => 
-              calc.property.rooms >= 2 && 
-              calc.property.toilets >= 1 && 
-              calc.property.size >= 600
-            );
-            
-            if (familyProperties.length === 0) {
+            if (!topRankedProperty) {
               return (
                 <div>
                   <p className="text-sm text-purple-700 mb-1">
-                    {t('results.noFamilySuitable')}
-                  </p>
-                  <p className="text-xs text-purple-600">
-                    {t('results.familyCriteria')}
+                    {t('results.noRankingAvailable')}
                   </p>
                 </div>
               );
             }
             
-            // Prioritize properties with car park, then by size
-            const bestFamilyProperty = familyProperties.sort((a, b) => {
-              // First priority: has car park
-              if (a.property.carParkIncluded && !b.property.carParkIncluded) return -1;
-              if (!a.property.carParkIncluded && b.property.carParkIncluded) return 1;
-              // Second priority: larger size
-              return b.property.size - a.property.size;
-            })[0];
+            const topProperty = calculations.find(calc => calc.property.id === topRankedProperty.propertyId);
+            if (!topProperty) return null;
             
-            const parkingText = bestFamilyProperty.property.carParkIncluded 
-              ? (bestFamilyProperty.property.carParkPrice > 0 
-                ? `${t('results.parkingPrice').replace('$XXX', formatCurrency(bestFamilyProperty.property.carParkPrice).replace('$', ''))}`
-                : t('results.parkingIncluded'))
-              : t('results.noParking');
+            const rankingBadge = getRankingBadgeText(topRankedProperty.totalScore, language);
+            const rankingExplanation = getRankingExplanation(topRankedProperty, language);
             
             return (
               <div>
-                <p className="text-base lg:text-lg font-semibold text-purple-900 mb-1">
-                  {bestFamilyProperty.property.name}
+                <p className="text-base lg:text-lg font-semibold text-purple-900">
+                  {topProperty.property.name}
                 </p>
-                <p className="text-sm text-purple-700">
-                  {bestFamilyProperty.property.rooms}{t('results.rooms')} {bestFamilyProperty.property.toilets}{t('results.toilets')}，{bestFamilyProperty.property.size}{t('common.ft2')}，{parkingText}
+                <p className="text-xs lg:text-sm text-purple-700">
+                  {rankingBadge} ({topRankedProperty.totalScore.toFixed(0)}分)
+                </p>
+                <p className="text-xs text-purple-600">
+                  {rankingExplanation}
                 </p>
               </div>
             );
@@ -380,18 +369,18 @@ export default function ComparisonResultsStep() {
             <div className="flex items-center space-x-2">
               <span className="text-blue-600">📊</span>
               <span className="text-sm font-medium text-blue-800">
-                已按月供佔比排序（最低到最高）
+                已按香港買家偏好排序（綜合評分）
               </span>
             </div>
             <div className="text-xs text-blue-600">
-              💡 月供佔比 = 月供 ÷ 最大可月供 × 100%
+              💡 評分標準：價錢(30%) + 尺數(20%) + 房數(15%) + 廁所(10%) + 車位(10%) + 負擔能力(10%) + 呎價(3%) + 樓齡(2%)
             </div>
           </div>
         </div>
         <div className="space-y-4">
-          {calculations
-            .sort((a, b) => a.affordabilityPercentage - b.affordabilityPercentage) // Sort by affordability (best to worst)
-            .map((calc, index) => {
+          {rankings.map((ranking, index) => {
+            const calc = calculations.find(c => c.property.id === ranking.propertyId);
+            if (!calc) return null;
             const isBestValue = calc.property.id === bestValue.property.id;
             const isMostAffordable = calc.property.id === mostAffordable.property.id;
             const dsrAnalysis = calculateDSR(
@@ -436,6 +425,9 @@ export default function ComparisonResultsStep() {
                           <h3 className="text-lg font-semibold text-gray-900">
                             {calc.property.name}
                           </h3>
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getRankingBadgeColor(ranking.totalScore)}`}>
+                            {getRankingBadgeText(ranking.totalScore, language)}
+                          </span>
                         </div>
                         {isBestValue && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800 border border-success-200">

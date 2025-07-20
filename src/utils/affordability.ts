@@ -137,8 +137,8 @@ export const calculatePropertyAffordability = (
 };
 
 export const estimateManagementFee = (size: number): number => {
-  // Estimate management fee based on size: $2.5/ft²
-  return size * 2.5;
+  // Estimate management fee based on size: $2.7/ft² (Hong Kong average)
+  return Math.round(size * 2.7);
 };
 
 export const getAffordabilityColor = (status: 'affordable' | 'moderate' | 'expensive'): string => {

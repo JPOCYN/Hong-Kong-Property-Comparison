@@ -269,17 +269,13 @@ export const translations: Translations = {
     en: 'Average Monthly',
     zh: '平均每月',
   },
-  'results.bestForFamily': {
-    en: 'Best for Family Living',
-    zh: '最適合家庭居住',
+  'results.topRanked': {
+    en: 'Top Ranked',
+    zh: '綜合排名第一',
   },
-  'results.noFamilySuitable': {
-    en: 'No properties meet family criteria',
-    zh: '沒有符合家庭標準的物業',
-  },
-  'results.familyCriteria': {
-    en: 'Need: 2+ rooms, 1+ toilet, 600+ ft²',
-    zh: '需要：2房以上，1廁以上，600呎以上',
+  'results.noRankingAvailable': {
+    en: 'No ranking available',
+    zh: '暫無排名',
   },
   'results.improvementSuggestions': {
     en: 'Improvement Suggestions',
