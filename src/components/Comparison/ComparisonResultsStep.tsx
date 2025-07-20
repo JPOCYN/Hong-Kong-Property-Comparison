@@ -258,49 +258,7 @@ export default function ComparisonResultsStep() {
         </>
       )}
       
-      {/* Income Requirements Summary */}
-      <div className="card bg-purple-50 border-purple-200 p-4 lg:p-6">
-        <div className="flex items-center mb-4">
-          <span className="text-lg lg:text-xl mr-2 lg:mr-3">💼</span>
-          <h3 className="font-medium text-purple-800 text-base lg:text-lg">{t('results.incomeRequirements')}</h3>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {calculations.map((calc) => {
-            const dsrAnalysis = calculateDSR(
-              calc.monthlyMortgage, 
-              buyerInfo.maxMonthlyPayment, 
-              calc.property.price, 
-              false
-            );
-            
-            return (
-              <div key={calc.property.id} className="bg-white rounded-lg p-4 border border-purple-200">
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm lg:text-base">
-                  【{calc.property.name}】
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">{t('results.monthlyPayment')}:</span>
-                    <span className="font-medium">{formatCurrency(calc.monthlyMortgage)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">{t('results.requiredMonthlyIncome')}:</span>
-                    <span className={`font-medium ${dsrAnalysis.needsHigherIncome ? 'text-orange-600' : 'text-green-600'}`}>
-                      {formatCurrency(dsrAnalysis.requiredMonthlyIncome)}
-                    </span>
-                  </div>
-                  {dsrAnalysis.needsHigherIncome && (
-                    <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
-                      ⚠️ {t('results.incomeGap')}: {formatCurrency(dsrAnalysis.incomeGap)}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+
 
 
 
@@ -343,293 +301,217 @@ export default function ComparisonResultsStep() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Property
-                </th>
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  {t('results.costPerSqFt')}
-                </th>
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  {t('results.upfrontCosts')}
-                </th>
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  {t('results.monthlyMortgage')}
-                </th>
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  {t('results.affordability')}
-                </th>
-                <th className="text-left py-3 px-4 font-medium text-gray-700">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {calculations.map((calc, index) => {
-                const isBestValue = calc.property.id === bestValue.property.id;
-                const isMostAffordable = calc.property.id === mostAffordable.property.id;
-                
-                return (
-                  <>
-                    <tr 
-                      key={calc.property.id} 
-                      className={`border-b border-gray-100 hover:bg-gray-50 ${
-                        isBestValue ? 'bg-success-50' : isMostAffordable ? 'bg-blue-50' : ''
-                      }`}
-                    >
-                      <td className="py-4 px-4">
-                        <div>
-                          <h3 className="font-medium text-gray-900">
-                            {calc.property.name}
-                            {isBestValue && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800">
-                                🏆 {t('results.bestValue')}
-                              </span>
-                            )}
-                            {isMostAffordable && (
-                              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                💰 {t('results.mostAffordable')}
-                              </span>
-                            )}
-                          </h3>
-                          <p className="text-sm font-medium text-gray-700">
-                            {formatCurrency(calc.property.price)}
-                          </p>
-                        </div>
-                      </td>
-                      
-                      <td className="py-4 px-4">
-                        <span className="font-medium">
-                          {formatCurrency(calc.costPerSqFt)}/ft²
-                        </span>
-                      </td>
-                      
-                      <td className="py-4 px-4">
-                        <div>
-                          <p className="font-medium">{formatCurrency(calc.upfrontCosts)}</p>
-                          <p className="text-xs text-gray-500">
-                            {t('results.stampDuty')}: {formatCurrency(calc.stampDuty)}
-                          </p>
-                        </div>
-                      </td>
-                      
-                      <td className="py-4 px-4">
-                        <span className="font-medium">
-                          {formatCurrency(calc.monthlyMortgage)}
-                        </span>
-                      </td>
-                      
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-lg ${getAffordabilityColor(calc.affordabilityStatus)}`}>
-                            {calc.affordabilityPercentage <= 80 ? '🟢' : 
-                             calc.affordabilityPercentage <= 100 ? '🟡' : '🔴'}
+        {/* Modern Card-Based Comparison */}
+        <div className="space-y-4">
+          {calculations.map((calc, index) => {
+            const isBestValue = calc.property.id === bestValue.property.id;
+            const isMostAffordable = calc.property.id === mostAffordable.property.id;
+            const dsrAnalysis = calculateDSR(
+              calc.monthlyMortgage, 
+              buyerInfo.maxMonthlyPayment, 
+              calc.property.price, 
+              false
+            );
+            const mipAnalysis = calculateMIP(
+              calc.property.price, 
+              buyerInfo.downpaymentBudget,
+              buyerInfo.isFirstTimeBuyer, 
+              true
+            );
+            
+            return (
+              <div 
+                key={calc.property.id}
+                className={`relative rounded-xl border-2 shadow-sm transition-all duration-200 hover:shadow-md ${
+                  isBestValue 
+                    ? 'border-success-200 bg-success-50' 
+                    : isMostAffordable 
+                    ? 'border-blue-200 bg-blue-50' 
+                    : 'border-gray-200 bg-white'
+                }`}
+              >
+                {/* Property Header */}
+                <div className="p-4 border-b border-gray-100">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {calc.property.name}
+                        </h3>
+                        {isBestValue && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800 border border-success-200">
+                            🏆 {t('results.bestValue')}
                           </span>
-                          <div>
-                            <span className={`font-medium ${getAffordabilityColor(calc.affordabilityStatus)}`}>
-                              {formatNumber(calc.affordabilityPercentage)}%
-                            </span>
-                            <p className="text-xs text-gray-500">
-                              {getAffordabilityLabel(calc.affordabilityPercentage)}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+                        )}
+                        {isMostAffordable && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                            💰 {t('results.mostAffordable')}
+                          </span>
+                        )}
+                      </div>
                       
-                      <td className="py-4 px-4">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setEditingProperty(calc.property.id);
-                              setCurrentStep(2);
-                            }}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                          >
-                            ✏️ {t('actions.editProperty')}
-                          </button>
-                          <button
-                            onClick={() => removeProperty(calc.property.id)}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium"
-                          >
-                            🗑️ {t('actions.removeProperty')}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    {/* Property Details Row */}
-                    <tr className="border-b border-gray-100 bg-gray-50">
-                      <td colSpan={6} className="py-3 px-4">
-                        {/* Property Tags */}
-                        <div className="mb-3">
-                          <div className="flex flex-wrap gap-2">
-                            {calc.property.district && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {calc.property.district}
-                              </span>
-                            )}
-                            {calc.property.schoolNet && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {t('results.schoolNet')}：{calc.property.schoolNet}
-                              </span>
-                            )}
+                      {/* Property Tags */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {calc.property.district && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                            📍 {calc.property.district}
+                          </span>
+                        )}
+                        {calc.property.schoolNet && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                            🎓 {t('results.schoolNet')}：{calc.property.schoolNet}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Key Metrics Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="text-2xl font-bold text-gray-900">
+                            {formatCurrency(calc.property.price)}
                           </div>
+                          <div className="text-xs text-gray-500">總價</div>
                         </div>
                         
-                        {/* Enhanced Property Details - 2 Column Mobile Layout */}
-                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                          {/* Critical Info - Rooms & Toilets (Prominent Position) */}
-                          <div className="col-span-2 md:col-span-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium text-gray-900">{t('results.rooms')}:</span>
-                              <span className="text-lg font-semibold text-blue-600">{calc.property.rooms}</span>
-                              <span className="text-gray-400">•</span>
-                              <span className="font-medium text-gray-900">{t('results.toilets')}:</span>
-                              <span className="text-lg font-semibold text-blue-600">{calc.property.toilets}</span>
-                            </div>
+                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="text-xl font-bold text-blue-600">
+                            {formatCurrency(calc.monthlyMortgage)}
                           </div>
-                          
-                          {/* Building Age with Warning */}
-                          <div className="col-span-2 md:col-span-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium text-gray-900">{t('results.buildingAge')}:</span>
-                              <span className={`text-lg font-semibold ${calc.property.buildingAge > 30 ? 'text-red-600' : 'text-gray-700'}`}>
-                                {calc.property.buildingAge} {t('common.years')}
-                              </span>
-                              {calc.property.buildingAge > 30 && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                  ⚠️ {t('results.age')} {t('common.years')}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Parking Information */}
-                          <div className="col-span-2 md:col-span-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium text-gray-900">{t('results.parking')}:</span>
-                              {calc.property.carParkIncluded ? (
-                                <span className="text-green-600 font-medium">
-                                  {calc.property.carParkPrice > 0 
-                                    ? `${t('results.parkingPrice').replace('$XXX', formatCurrency(calc.property.carParkPrice).replace('$', ''))}`
-                                    : t('results.parkingIncluded')
-                                  }
-                                </span>
-                              ) : (
-                                <span className="text-red-600 font-medium">{t('results.noParking')}</span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Size */}
-                          <div className="col-span-2 md:col-span-1">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium text-gray-900">{t('results.size')}:</span>
-                              <span className="text-lg font-semibold text-gray-700">{calc.property.size} {t('common.ft2')}</span>
-                            </div>
-                          </div>
+                          <div className="text-xs text-gray-500">月供</div>
                         </div>
                         
-                        {/* DSR and MIP Analysis */}
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            {(() => {
-                              const dsrAnalysis = calculateDSR(
-                                calc.monthlyMortgage, 
-                                buyerInfo.maxMonthlyPayment, 
-                                calc.property.price, 
-                                false // Assuming no existing mortgage for now
-                              );
-                              
-                              const mipAnalysis = calculateMIP(
-                                calc.property.price, 
-                                buyerInfo.downpaymentBudget,
-                                buyerInfo.isFirstTimeBuyer, 
-                                true // Assuming salaried for now
-                              );
-                              
-                              return (
-                                <>
-                                  {/* DSR Analysis */}
-                                  <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                      <span className="font-medium text-gray-900">{t('results.dsr')}:</span>
-                                      <span className={`font-medium ${dsrAnalysis.isCompliant ? 'text-green-600' : 'text-red-600'}`}>
-                                        {dsrAnalysis.dsrRatio.toFixed(1)}%
-                                      </span>
-                                    </div>
-                                    <div className="text-xs">
-                                      {dsrAnalysis.isCompliant ? (
-                                        <span className="text-green-600">{t('results.dsrCompliant')}</span>
-                                      ) : (
-                                        <div className="space-y-1">
-                                          <span className="text-orange-600">{t('results.incomeInsufficient')}</span>
-                                          <div className="text-gray-600 text-xs" style={{ fontSize: '0.85em' }}>
-                                            {t('results.dsrExplanation')}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                    
-                                    {/* Income Suggestion */}
-                                    <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
-                                      <div className="text-xs text-blue-800 font-medium mb-1">
-                                        {t('results.incomeSuggestion')}:
-                                      </div>
-                                      <div className="text-xs text-blue-700 space-y-1">
-                                        <div>
-                                          {t('results.requiredMonthlyIncome')}: {formatCurrency(dsrAnalysis.requiredMonthlyIncome)}
-                                        </div>
-                                        <div>
-                                          {t('results.requiredAnnualIncome')}: {formatCurrency(dsrAnalysis.requiredAnnualIncome)}
-                                        </div>
-                                        {dsrAnalysis.needsHigherIncome && (
-                                          <div className="text-orange-600 font-medium">
-                                            ⚠️ {t('results.incomeGap')}: {formatCurrency(dsrAnalysis.incomeGap)}
-                                          </div>
-                                        )}
-                                        <div className="text-xs text-gray-600 mt-1">
-                                          💡 {t('results.incomeHint')}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  
-                                  {/* MIP Analysis */}
-                                  <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                      <span className="font-medium text-gray-900">{t('results.actualLTV')}:</span>
-                                      <span className="font-medium text-blue-600">
-                                        {(mipAnalysis.actualLTV * 100).toFixed(0)}%
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                      <span className="font-medium text-gray-900">{t('results.actualLoan')}:</span>
-                                      <span className="font-medium text-blue-600">
-                                        {formatCurrency(mipAnalysis.actualLoan)}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                      <span className="font-medium text-gray-900">{t('results.actualDownpayment')}:</span>
-                                      <span className="font-medium text-blue-600">
-                                        {formatCurrency(mipAnalysis.actualDownpayment)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </>
-                              );
-                            })()}
+                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="text-xl font-bold text-purple-600">
+                            {formatCurrency(calc.costPerSqFt)}/ft²
                           </div>
+                          <div className="text-xs text-gray-500">呎價</div>
                         </div>
-                      </td>
-                    </tr>
-                  </>
-                );
-              })}
-            </tbody>
-          </table>
+                        
+                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                          <div className={`text-xl font-bold ${getAffordabilityColor(calc.affordabilityStatus)}`}>
+                            {formatNumber(calc.affordabilityPercentage)}%
+                          </div>
+                          <div className="text-xs text-gray-500">負擔能力</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Actions */}
+                    <div className="flex flex-col space-y-2 ml-4">
+                      <button
+                        onClick={() => {
+                          setEditingProperty(calc.property.id);
+                          setCurrentStep(2);
+                        }}
+                        className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        ✏️ {t('actions.editProperty')}
+                      </button>
+                      <button
+                        onClick={() => removeProperty(calc.property.id)}
+                        className="px-3 py-1 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        🗑️ {t('actions.removeProperty')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Property Details */}
+                <div className="p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Property Specs */}
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-900 text-sm">🏠 物業規格</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.size')}:</span>
+                          <span className="font-medium">{calc.property.size} {t('common.ft2')}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.rooms')}:</span>
+                          <span className="font-medium text-blue-600">{calc.property.rooms}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.toilets')}:</span>
+                          <span className="font-medium text-blue-600">{calc.property.toilets}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.buildingAge')}:</span>
+                          <span className={`font-medium ${calc.property.buildingAge > 30 ? 'text-red-600' : 'text-gray-700'}`}>
+                            {calc.property.buildingAge} {t('common.years')}
+                            {calc.property.buildingAge > 30 && <span className="ml-1">⚠️</span>}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.parking')}:</span>
+                          <span className={`font-medium ${calc.property.carParkIncluded ? 'text-green-600' : 'text-red-600'}`}>
+                            {calc.property.carParkIncluded ? 
+                              (calc.property.carParkPrice > 0 
+                                ? `${t('results.parkingPrice').replace('$XXX', formatCurrency(calc.property.carParkPrice).replace('$', ''))}`
+                                : t('results.parkingIncluded'))
+                              : t('results.noParking')
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Financial Analysis */}
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-gray-900 text-sm">💰 財務分析</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.upfrontCosts')}:</span>
+                          <span className="font-medium">{formatCurrency(calc.upfrontCosts)}</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>{t('results.stampDuty')}:</span>
+                          <span>{formatCurrency(calc.stampDuty)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.actualLTV')}:</span>
+                          <span className="font-medium text-blue-600">{(mipAnalysis.actualLTV * 100).toFixed(0)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.actualLoan')}:</span>
+                          <span className="font-medium text-blue-600">{formatCurrency(mipAnalysis.actualLoan)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">{t('results.actualDownpayment')}:</span>
+                          <span className="font-medium text-blue-600">{formatCurrency(mipAnalysis.actualDownpayment)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                                         {/* Income Requirements */}
+                     <div className="space-y-3">
+                       <h4 className="font-medium text-gray-900 text-sm">💼 銀行批核所需收入建議</h4>
+                       <div className="space-y-2 text-sm">
+                         <div className="flex justify-between">
+                           <span className="text-gray-600">{t('results.requiredMonthlyIncome')}:</span>
+                           <span className="font-medium text-blue-600">
+                             {formatCurrency(dsrAnalysis.requiredMonthlyIncome)}
+                           </span>
+                         </div>
+                         {dsrAnalysis.needsHigherIncome && (
+                           <div className="flex justify-between">
+                             <span className="text-gray-600">{t('results.incomeGap')}:</span>
+                             <span className="font-medium text-orange-600">
+                               {formatCurrency(dsrAnalysis.incomeGap)}
+                             </span>
+                           </div>
+                         )}
+                         <div className="text-xs text-gray-500 mt-2">
+                           💡 {t('results.incomeHint')}
+                         </div>
+                       </div>
+                     </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
