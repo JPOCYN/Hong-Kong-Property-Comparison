@@ -256,31 +256,35 @@ export default function ComparisonResultsStep() {
                   【{calc.property.name}】
                 </h4>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
-                    <span className={`font-medium ${(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 1 ? 'text-green-600' : 'text-red-600'}`}>
-                      {((calc.monthlyMortgage / buyerInfo.monthlyIncome) * 100).toFixed(1)}%
-                    </span>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
+                      <span className={`font-medium ${(calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) <= 1 ? 'text-green-600' : 'text-red-600'}`}>
+                        {((calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">{t('results.downpaymentSurplus')}:</span>
+                      <span className={`font-medium ${downpaymentGap <= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        HK${formatCurrency(Math.abs(downpaymentGap)).replace('$', '')}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">{t('results.downpaymentRemaining')}:</span>
-                    <span className={`font-medium ${downpaymentGap <= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      HK${formatNumber(Math.abs(downpaymentGap))}M
-                    </span>
-                  </div>
-                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) <= 1 && downpaymentGap <= 0 && (
-                    <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
+                  
+                  {/* Status indicators */}
+                  {(calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) <= 1 && downpaymentGap <= 0 && (
+                    <div className="text-xs text-green-600 bg-green-50 p-2 rounded mt-2">
                       ✅ {t('results.withinBudget')}
                     </div>
                   )}
-                  {(calc.monthlyMortgage / buyerInfo.monthlyIncome) > 1 && (
-                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                      {t('results.monthlyPaymentExceeded')}
+                  {(calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) > 1 && (
+                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
+                      🛑 {t('results.monthlyPaymentExceeded')}
                     </div>
                   )}
                   {downpaymentGap > 0 && (
-                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                      {t('results.downpaymentInsufficient')}
+                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
+                      🛑 {t('results.downpaymentInsufficient')}
                     </div>
                   )}
                 </div>
@@ -550,7 +554,12 @@ export default function ComparisonResultsStep() {
                                       {dsrAnalysis.isCompliant ? (
                                         <span className="text-green-600">{t('results.dsrCompliant')}</span>
                                       ) : (
-                                        <span className="text-red-600">{t('results.dsrExceeded')}</span>
+                                        <div className="space-y-1">
+                                          <span className="text-red-600">{t('results.dsrExceeded')}</span>
+                                          <div className="text-gray-600 text-xs" style={{ fontSize: '0.85em' }}>
+                                            {t('results.dsrExplanation')}
+                                          </div>
+                                        </div>
                                       )}
                                     </div>
                                   </div>

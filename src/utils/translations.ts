@@ -319,15 +319,19 @@ export const translations: Translations = {
   },
   'results.monthlyPaymentRatio': {
     en: 'Monthly Payment Ratio',
-    zh: '每月供款佔最大可月供',
+    zh: '每月供款佔最高可接受供款比例',
   },
   'results.downpaymentRemaining': {
     en: 'Downpayment Remaining',
     zh: '首期預算剩餘',
   },
+  'results.downpaymentSurplus': {
+    en: 'Downpayment Surplus',
+    zh: '首期預算剩餘',
+  },
   'results.monthlyPaymentExceeded': {
-    en: 'Monthly payment exceeds maximum monthly payment',
-    zh: '每月供款超出最大可月供',
+    en: 'Monthly payment exceeds maximum acceptable payment',
+    zh: '每月供款超出最高可接受供款',
   },
   'results.downpaymentInsufficient': {
     en: 'Insufficient downpayment budget',
@@ -344,6 +348,10 @@ export const translations: Translations = {
   'results.dsrExceeded': {
     en: '🛑 May not qualify for loan (exceeds DSR limit)',
     zh: '🛑 可能申請不到貸款（超出DSR上限）',
+  },
+  'results.dsrExplanation': {
+    en: 'Bank mortgage common limit: monthly payment cannot exceed 50% of income (HKMA guidelines)',
+    zh: '銀行按揭常見上限：月供不得超過收入50%（HKMA指引）',
   },
   'results.dsr': {
     en: 'DSR',
@@ -688,6 +696,30 @@ export const translations: Translations = {
     en: 'Car Park Price',
     zh: '車位價格',
   },
+  'propertyInput.parkingSection': {
+    en: '🚗 Parking',
+    zh: '🚗 車位',
+  },
+  'propertyInput.parkingNone': {
+    en: 'No parking',
+    zh: '無車位',
+  },
+  'propertyInput.parkingIncluded': {
+    en: 'Parking included',
+    zh: '已包車位',
+  },
+  'propertyInput.parkingAdditional': {
+    en: 'Additional purchase (HK$)',
+    zh: '需額外購買（HK$）',
+  },
+  'propertyInput.additionalParkingPrice': {
+    en: 'Additional parking price (HK$)',
+    zh: '額外車位價格 (HK$)',
+  },
+  'propertyInput.parkingHelp': {
+    en: 'Select "Parking included" if parking is included in total price; "Additional purchase" requires extra payment.',
+    zh: '選擇「已包車位」表示車位已包含於總價；「需額外購買」則需另付金額。',
+  },
   'propertyInput.managementFee': {
     en: 'Management Fee',
     zh: '管理費',
@@ -719,6 +751,22 @@ export const translations: Translations = {
   'propertyInput.remove': {
     en: 'Remove',
     zh: '移除',
+  },
+  'propertyInput.newProperty': {
+    en: 'New Property',
+    zh: '新增物業',
+  },
+  'propertyInput.editProperty': {
+    en: 'Edit Property',
+    zh: '編輯物業',
+  },
+  'propertyInput.schoolNetPlaceholder': {
+    en: 'Enter school net code...',
+    zh: '請輸入校網',
+  },
+  'propertyInput.schoolNetRequired': {
+    en: 'Please select at least one school net',
+    zh: '請選擇至少一個校網',
   },
   
   // Additional Results
