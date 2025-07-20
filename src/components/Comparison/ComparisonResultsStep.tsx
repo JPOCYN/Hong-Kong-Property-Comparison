@@ -134,6 +134,13 @@ export default function ComparisonResultsStep() {
 
       {/* Enhanced Comparison Table */}
       <div className="card p-4 lg:p-6">
+        {/* Summary Tip */}
+        <div className="mb-4 lg:mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800 font-medium">
+            {t('results.comparisonTip')}
+          </p>
+        </div>
+        
         <div className="flex justify-between items-center mb-4 lg:mb-6">
           <h2 className="text-xl font-semibold">{t('results.detailedComparison')}</h2>
           <div className="flex space-x-2">
@@ -272,24 +279,74 @@ export default function ComparisonResultsStep() {
                     {/* Property Details Row */}
                     <tr className="border-b border-gray-100 bg-gray-50">
                       <td colSpan={6} className="py-3 px-4">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
-                          <div>
-                            <span className="font-medium">{t('results.size')}:</span> {calc.property.size} {t('common.ft2')}
+                        {/* Property Tags */}
+                        <div className="mb-3">
+                          <div className="flex flex-wrap gap-2">
+                            {calc.property.district && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {calc.property.district}
+                              </span>
+                            )}
+                            {calc.property.schoolNet && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                {t('results.schoolNet')}：{calc.property.schoolNet}
+                              </span>
+                            )}
                           </div>
-                          <div>
-                            <span className="font-medium">{t('results.rooms')}:</span> {calc.property.rooms} • {calc.property.toilets} {t('results.toilets')}
+                        </div>
+                        
+                        {/* Enhanced Property Details - 2 Column Mobile Layout */}
+                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                          {/* Critical Info - Rooms & Toilets (Prominent Position) */}
+                          <div className="col-span-2 md:col-span-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium text-gray-900">{t('results.rooms')}:</span>
+                              <span className="text-lg font-semibold text-blue-600">{calc.property.rooms}</span>
+                              <span className="text-gray-400">•</span>
+                              <span className="font-medium text-gray-900">{t('results.toilets')}:</span>
+                              <span className="text-lg font-semibold text-blue-600">{calc.property.toilets}</span>
+                            </div>
                           </div>
-                          {calc.property.buildingAge > 0 && (
-                            <div>
-                              <span className="font-medium">{t('results.age')}:</span> {calc.property.buildingAge} {t('results.years')}
+                          
+                          {/* Building Age with Warning */}
+                          <div className="col-span-2 md:col-span-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium text-gray-900">{t('results.buildingAge')}:</span>
+                              <span className={`text-lg font-semibold ${calc.property.buildingAge > 30 ? 'text-red-600' : 'text-gray-700'}`}>
+                                {calc.property.buildingAge} {t('common.years')}
+                              </span>
+                              {calc.property.buildingAge > 30 && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  ⚠️ {t('results.age')} {t('common.years')}
+                                </span>
+                              )}
                             </div>
-                          )}
-                          {calc.property.district && (
-                            <div>
-                              <span className="font-medium">{t('results.district')}:</span> {calc.property.district}
-                              {calc.property.schoolNet && ` (${calc.property.schoolNet})`}
+                          </div>
+                          
+                          {/* Parking Information */}
+                          <div className="col-span-2 md:col-span-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium text-gray-900">{t('results.parking')}:</span>
+                              {calc.property.carParkIncluded ? (
+                                <span className="text-green-600 font-medium">
+                                  {calc.property.carParkPrice > 0 
+                                    ? `${t('results.parkingPrice').replace('$XXX', formatCurrency(calc.property.carParkPrice).replace('$', ''))}`
+                                    : t('results.parkingIncluded')
+                                  }
+                                </span>
+                              ) : (
+                                <span className="text-red-600 font-medium">{t('results.noParking')}</span>
+                              )}
                             </div>
-                          )}
+                          </div>
+                          
+                          {/* Size */}
+                          <div className="col-span-2 md:col-span-1">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium text-gray-900">{t('results.size')}:</span>
+                              <span className="text-lg font-semibold text-gray-700">{calc.property.size} {t('common.ft2')}</span>
+                            </div>
+                          </div>
                         </div>
                       </td>
                     </tr>

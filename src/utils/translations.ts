@@ -56,7 +56,7 @@ export const translations: Translations = {
     zh: '首期預算',
   },
   'buyerInfo.downpaymentBudgetHelp': {
-    en: 'Maximum amount you can pay upfront (in 萬 HKD)',
+    en: 'Maximum amount you can pay upfront (in M HKD)',
     zh: '您能支付的最大前期金額（以萬港元為單位）',
   },
   'buyerInfo.firstTimeBuyer': {
@@ -297,6 +297,31 @@ export const translations: Translations = {
     en: 'All properties exceed 50% of your monthly income. Consider increasing your budget or looking at smaller properties.',
     zh: '所有物業都超過您月收入的50%。考慮增加預算或尋找較小的物業。',
   },
+  'results.comparisonTip': {
+    en: '**Compare building age, parking, and room-toilet ratios to understand if the unit is truly suitable for family self-use.**',
+    zh: '**比較樓齡、車位與房廁比例，有助了解單位是否真正適合家庭自住。**',
+  },
+  'results.buildingAge': {
+    en: 'Building Age',
+    zh: '樓齡',
+  },
+  'results.parking': {
+    en: 'Parking',
+    zh: '車位',
+  },
+  'results.parkingIncluded': {
+    en: 'Included',
+    zh: '有（已包）',
+  },
+  'results.parkingPrice': {
+    en: 'Available ($XXX M)',
+    zh: '有（$XXX萬）',
+  },
+  'results.noParking': {
+    en: 'None 🚫',
+    zh: '無 🚫',
+  },
+
   'results.healthyMortgageHint': {
     en: 'Healthy mortgage ratio: < 50% of income',
     zh: '健康按揭比例：< 收入的50%',
@@ -402,7 +427,7 @@ export const translations: Translations = {
     zh: '平方呎',
   },
   'common.tenThousand': {
-    en: '萬',
+    en: 'M',
     zh: '萬',
   },
   'common.optional': {
@@ -476,7 +501,7 @@ export const translations: Translations = {
     zh: '面積',
   },
   'propertyInput.price': {
-    en: 'Price (萬 HKD)',
+    en: 'Price (M HKD)',
     zh: '價格（萬港元）',
   },
   'propertyInput.costPerSqFt': {

@@ -60,7 +60,6 @@ export const metadata: Metadata = {
     yahoo: 'your-yahoo-verification-code',
   },
   icons: {
-    icon: '/favicon.svg',
     apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
