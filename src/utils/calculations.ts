@@ -212,7 +212,7 @@ export function calculateMaxPropertyPrice(
 }
 
 /**
- * Format currency for display
+ * Format currency for display with full HK$ and thousand separators
  */
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('zh-HK', {
@@ -220,6 +220,7 @@ export function formatCurrency(amount: number): string {
     currency: 'HKD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
+    useGrouping: true,
   }).format(amount);
 }
 
@@ -234,10 +235,10 @@ export function formatNumber(num: number, decimals: number = 2): string {
 }
 
 /**
- * Format percentage for display
+ * Format percentage for display with one decimal place
  */
 export function formatPercentage(value: number): string {
-  return `${value.toFixed(2)}%`;
+  return `${value.toFixed(1)}%`;
 }
 
 /**

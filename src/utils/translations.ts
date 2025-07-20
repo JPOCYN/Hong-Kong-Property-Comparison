@@ -314,8 +314,8 @@ export const translations: Translations = {
     zh: '每月供款超出',
   },
   'results.downpaymentShortfall': {
-    en: 'Downpayment Shortfall',
-    zh: '首期預算不足',
+    en: 'Upfront Costs Shortfall',
+    zh: '前期費用不足',
   },
   'results.monthlyPaymentRatio': {
     en: 'Monthly Payment Ratio',
@@ -326,8 +326,8 @@ export const translations: Translations = {
     zh: '首期預算剩餘',
   },
   'results.downpaymentSurplus': {
-    en: 'Downpayment Surplus',
-    zh: '首期預算剩餘',
+    en: 'Upfront Costs Covered',
+    zh: '前期費用已覆蓋',
   },
   'results.monthlyPaymentExceeded': {
     en: 'Monthly payment exceeds maximum acceptable payment',

@@ -17,7 +17,8 @@ export const calculateMonthlyMortgage = (
   const monthlyRate = getMonthlyRate(config);
   const totalMonths = years * 12;
   
-  // Monthly Payment Formula: (Loan * r * (1 + r)^n) / ((1 + r)^n – 1)
+  // Standard Amortization Formula: P = L[c(1 + c)^n]/[(1 + c)^n - 1]
+  // Where: P = monthly payment, L = loan amount, c = monthly interest rate, n = total number of payments
   const numerator = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths);
   const denominator = Math.pow(1 + monthlyRate, totalMonths) - 1;
   

@@ -62,7 +62,8 @@ export default function ComparisonResultsStep() {
 
   // Enhanced DSR and MIP calculations
   const calculateDSR = (monthlyMortgage: number, maxMonthlyPayment: number, propertyPrice: number, hasExistingMortgage: boolean) => {
-    const dsr = monthlyMortgage / maxMonthlyPayment;
+    const maxDebtToIncome = 0.5; // 50% DSR
+    const dsr = monthlyMortgage / (maxMonthlyPayment * maxDebtToIncome);
     const threshold = (propertyPrice > 30000000 || hasExistingMortgage) ? 0.4 : 0.5;
     const isCompliant = dsr <= threshold;
     const requiredMaxPayment = monthlyMortgage / threshold;
@@ -243,12 +244,12 @@ export default function ComparisonResultsStep() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {calculations.map((calc) => {
-            // Calculate monthly payment gap (target: 50% of income)
-            const targetMonthlyPayment = buyerInfo.maxMonthlyPayment * 0.5;
-            const monthlyPaymentGap = calc.monthlyRecurringCosts - targetMonthlyPayment;
+            // Calculate DSR ratio: monthlyMortgage / (maxMonthlyPayment * maxDebtToIncome) * 100%
+            const maxDebtToIncome = 0.5; // 50% DSR
+            const dsrRatio = (calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * maxDebtToIncome)) * 100;
             
-            // Calculate downpayment gap (target: user's budget)
-            const downpaymentGap = calc.upfrontCosts - buyerInfo.downpaymentBudget;
+            // Calculate downpayment shortfall: downpaymentBudget - upfrontCosts
+            const downpaymentShortfall = calc.upfrontCosts - buyerInfo.downpaymentBudget;
             
             return (
               <div key={calc.property.id} className="bg-white rounded-lg p-4 border border-blue-200">
@@ -259,30 +260,33 @@ export default function ComparisonResultsStep() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
-                                  <span className={`font-medium ${(calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) <= 1 ? 'text-green-600' : 'text-red-600'}`}>
-              {((calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) * 100).toFixed(1)}%
-            </span>
+                      <span className={`font-medium ${dsrRatio <= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                        {dsrRatio.toFixed(1)}%
+                        {dsrRatio > 100 && <span className="ml-1">🔴</span>}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-600">{t('results.downpaymentSurplus')}:</span>
-                      <span className={`font-medium ${downpaymentGap <= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        HK${formatCurrency(Math.abs(downpaymentGap)).replace('$', '')}
+                      <span className="text-gray-600">
+                        {downpaymentShortfall <= 0 ? t('results.downpaymentSurplus') : t('results.downpaymentShortfall')}
+                      </span>
+                      <span className={`font-medium ${downpaymentShortfall <= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(Math.abs(downpaymentShortfall))}
                       </span>
                     </div>
                   </div>
                   
                   {/* Status indicators */}
-                  {(calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) <= 1 && downpaymentGap <= 0 && (
+                  {dsrRatio <= 100 && downpaymentShortfall <= 0 && (
                     <div className="text-xs text-green-600 bg-green-50 p-2 rounded mt-2">
                       ✅ {t('results.withinBudget')}
                     </div>
                   )}
-                  {(calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) > 1 && (
+                  {dsrRatio > 100 && (
                     <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
                       🛑 {t('results.monthlyPaymentExceeded')}
                     </div>
                   )}
-                  {downpaymentGap > 0 && (
+                  {downpaymentShortfall > 0 && (
                     <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
                       🛑 {t('results.downpaymentInsufficient')}
                     </div>
