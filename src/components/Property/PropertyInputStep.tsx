@@ -739,7 +739,7 @@ export default function PropertyInputStep() {
               <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
                 {properties.length}
               </span>
-              {t('propertyInput.addedProperties')} ({properties.length}/3)
+              {t('propertyInput.addedProperties')} ({properties.length}/5)
             </h3>
             {properties.length >= 2 && (
               <button
@@ -751,7 +751,7 @@ export default function PropertyInputStep() {
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {properties.map((property, index) => (
               <div key={property.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
@@ -811,9 +811,17 @@ export default function PropertyInputStep() {
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     index === 0 ? 'bg-green-100 text-green-800' :
                     index === 1 ? 'bg-blue-100 text-blue-800' :
-                    'bg-purple-100 text-purple-800'
+                    index === 2 ? 'bg-purple-100 text-purple-800' :
+                    index === 3 ? 'bg-orange-100 text-orange-800' :
+                    index === 4 ? 'bg-pink-100 text-pink-800' :
+                    'bg-gray-100 text-gray-800'
                   }`}>
-                    {index === 0 ? '🏆 最佳' : index === 1 ? '🥈 次選' : '🥉 第三'}
+                    {index === 0 ? '🏆 最佳' : 
+                     index === 1 ? '🥈 次選' : 
+                     index === 2 ? '🥉 第三' : 
+                     index === 3 ? '4️⃣ 第四' :
+                     index === 4 ? '5️⃣ 第五' :
+                     `#${index + 1}`}
                   </span>
                 </div>
               </div>
@@ -828,7 +836,7 @@ export default function PropertyInputStep() {
           <h3 className="text-lg font-semibold text-gray-900">
             {t('propertyInput.addNewProperty')}
           </h3>
-          {properties.length < 3 && (
+          {properties.length < 5 ? (
             <button
               onClick={() => {
                 setPropertyForms(prev => [...prev, {
@@ -850,6 +858,10 @@ export default function PropertyInputStep() {
             >
               + {t('propertyInput.addProperty')}
             </button>
+          ) : (
+            <span className="text-sm text-gray-500">
+              ✅ 已達上限 (5個物業)
+            </span>
           )}
         </div>
 

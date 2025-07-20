@@ -666,8 +666,8 @@ export const translations: Translations = {
     zh: '第2步：添加要比較的物業',
   },
   'propertyInput.stepDescription': {
-    en: 'Enter details for up to 3 properties you want to compare',
-    zh: '輸入您要比較的物業詳情（最多3個）',
+    en: 'Enter details for up to 5 properties you want to compare',
+    zh: '輸入您要比較的物業詳情（最多5個）',
   },
   'propertyInput.basicInfoSection': {
     en: 'Basic Information',

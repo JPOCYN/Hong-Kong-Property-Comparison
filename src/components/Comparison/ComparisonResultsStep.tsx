@@ -636,16 +636,21 @@ export default function ComparisonResultsStep() {
                   </span>
                 </div>
                 <div className="pt-3 border-t border-gray-200">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  {/* Progress bar labels with overflow protection */}
+                  <div className="flex justify-between text-xs text-gray-500 mb-1 relative">
                     <span>0%</span>
                     <span>80%</span>
                     <span>100%</span>
                     <span>120%</span>
                     {calc.affordabilityPercentage > 120 && (
-                      <span className="text-red-500 font-medium">{formatNumber(calc.affordabilityPercentage)}%</span>
+                      <span className="text-red-500 font-medium truncate max-w-16">
+                        {formatNumber(calc.affordabilityPercentage)}%
+                      </span>
                     )}
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                  
+                  {/* Progress bar container with overflow protection */}
+                  <div className="w-full bg-gray-200 rounded-full h-3 relative overflow-hidden">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${
                         calc.affordabilityStatus === 'affordable' ? 'bg-success-500' :
@@ -658,26 +663,35 @@ export default function ComparisonResultsStep() {
                       <div className="w-0.5 h-3 bg-gray-300"></div>
                       <div className="w-0.5 h-3 bg-gray-300"></div>
                     </div>
-                    {/* Current position marker */}
+                    
+                    {/* Current position marker with boundary protection */}
                     <div 
                       className="absolute top-0 w-1 h-3 bg-black rounded-full"
-                      style={{ left: `${Math.min(calc.affordabilityPercentage, 120)}%`, transform: 'translateX(-50%)' }}
+                      style={{ 
+                        left: `${Math.min(Math.max(calc.affordabilityPercentage, 0), 120)}%`, 
+                        transform: 'translateX(-50%)'
+                      }}
                     />
-                    {/* Exceeded indicator */}
+                    
+                    {/* Exceeded indicator with better positioning */}
                     {calc.affordabilityPercentage > 120 && (
-                      <div className="absolute top-0 w-1 h-3 bg-red-600 rounded-full" style={{ left: '100%', transform: 'translateX(-50%)' }}>
-                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-red-600 font-medium">
+                      <div className="absolute top-0 w-1 h-3 bg-red-600 rounded-full" style={{ left: 'calc(100% - 2px)' }}>
+                        <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 text-xs text-red-600 font-medium bg-white px-1 rounded">
                           ⚠️
                         </div>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {calc.affordabilityPercentage > 120 ? 
-                      `⚠️ 超出預算 ${formatNumber(calc.affordabilityPercentage - 100)}%` : 
-                      t('results.healthyMortgageHint')
-                    }
-                  </p>
+                  
+                  {/* Status message with overflow protection */}
+                  <div className="mt-1 min-h-[1rem]">
+                    <p className="text-xs text-gray-500 truncate">
+                      {calc.affordabilityPercentage > 120 ? 
+                        `⚠️ 超出預算 ${formatNumber(calc.affordabilityPercentage - 100)}%` : 
+                        t('results.healthyMortgageHint')
+                      }
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
