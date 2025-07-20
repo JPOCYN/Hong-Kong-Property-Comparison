@@ -405,6 +405,18 @@ export const translations: Translations = {
     en: 'Banks require monthly mortgage ≤ 50% of monthly income',
     zh: '銀行要求每月按揭供款不超過月收入的50%',
   },
+  'results.quickEditTitle': {
+    en: 'Quick Edit Budget Settings',
+    zh: '快速編輯預算設定',
+  },
+  'results.maxMonthlyPaymentHint': {
+    en: 'Your maximum affordable monthly mortgage payment',
+    zh: '您最大可負擔的月供款',
+  },
+  'results.downpaymentBudgetHint': {
+    en: 'Your available downpayment budget',
+    zh: '您的可用首期預算',
+  },
   'results.incomeRequirements': {
     en: 'Income Requirements for Bank Approval',
     zh: '銀行批核所需收入',
@@ -441,10 +453,7 @@ export const translations: Translations = {
     en: 'All properties exceed your maximum monthly payment. Consider increasing your budget or looking at smaller properties.',
     zh: '所有物業都超過您最大可月供。考慮增加預算或尋找較小的物業。',
   },
-  'results.comparisonTip': {
-    en: '**Compare building age, parking, and room-toilet ratios to understand if the unit is truly suitable for family self-use.**',
-    zh: '**比較樓齡、車位與房廁比例，有助了解單位是否真正適合家庭自住。**',
-  },
+
   'results.buildingAge': {
     en: 'Building Age',
     zh: '樓齡',
@@ -516,6 +525,14 @@ export const translations: Translations = {
     en: 'Download PDF',
     zh: '下載PDF',
   },
+  'actions.quickEdit': {
+    en: 'Quick Edit',
+    zh: '快速編輯',
+  },
+  'actions.apply': {
+    en: 'Apply',
+    zh: '應用',
+  },
   'actions.language': {
     en: 'Language',
     zh: '語言',
@@ -561,6 +578,14 @@ export const translations: Translations = {
   'placeholder.price': {
     en: '8000000',
     zh: '8000000',
+  },
+  'placeholder.maxMonthlyPayment': {
+    en: '50000',
+    zh: '50000',
+  },
+  'placeholder.downpaymentBudget': {
+    en: '2000000',
+    zh: '2000000',
   },
   
   // Messages

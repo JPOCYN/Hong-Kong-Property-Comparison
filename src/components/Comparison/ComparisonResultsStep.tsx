@@ -9,8 +9,13 @@ import { calculateStampDuty, getTotalStampDuty } from '@/utils/stampDuty';
 import { useState, useEffect } from 'react';
 
 export default function ComparisonResultsStep() {
-  const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep, setEditingProperty } = useAppStore();
+  const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep, setEditingProperty, updateBuyerInfo } = useAppStore();
   const [showClearModal, setShowClearModal] = useState(false);
+  const [showQuickEdit, setShowQuickEdit] = useState(false);
+  const [quickEditData, setQuickEditData] = useState({
+    maxMonthlyPayment: buyerInfo.maxMonthlyPayment,
+    downpaymentBudget: buyerInfo.downpaymentBudget
+  });
   const t = (key: string) => getTranslation(key, language);
 
   // Auto-redirect to Step 2 when all properties are deleted
@@ -275,6 +280,12 @@ export default function ComparisonResultsStep() {
           <h2 className="text-xl font-semibold">{t('results.detailedComparison')}</h2>
           <div className="flex space-x-2">
             <button
+              onClick={() => setShowQuickEdit(!showQuickEdit)}
+              className="btn-secondary text-sm"
+            >
+              ⚙️ {t('actions.quickEdit')}
+            </button>
+            <button
               onClick={() => setCurrentStep(2)}
               className="btn-secondary text-sm"
             >
@@ -300,6 +311,89 @@ export default function ComparisonResultsStep() {
             </button>
           </div>
         </div>
+
+        {/* Quick Edit Section */}
+        {showQuickEdit && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-blue-900">⚙️ {t('results.quickEditTitle')}</h3>
+              <button
+                onClick={() => setShowQuickEdit(false)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  💰 {t('results.maxMonthlyPayment')}
+                </label>
+                <input
+                  type="number"
+                  value={quickEditData.maxMonthlyPayment}
+                  onChange={(e) => setQuickEditData({
+                    ...quickEditData,
+                    maxMonthlyPayment: Number(e.target.value)
+                  })}
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('placeholder.maxMonthlyPayment')}
+                />
+                <p className="text-xs text-blue-600 mt-1">
+                  {t('results.maxMonthlyPaymentHint')}
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-blue-800 mb-2">
+                  💳 {t('results.downpaymentBudget')}
+                </label>
+                <input
+                  type="number"
+                  value={quickEditData.downpaymentBudget}
+                  onChange={(e) => setQuickEditData({
+                    ...quickEditData,
+                    downpaymentBudget: Number(e.target.value)
+                  })}
+                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('placeholder.downpaymentBudget')}
+                />
+                <p className="text-xs text-blue-600 mt-1">
+                  {t('results.downpaymentBudgetHint')}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-4">
+              <button
+                onClick={() => {
+                  setQuickEditData({
+                    maxMonthlyPayment: buyerInfo.maxMonthlyPayment,
+                    downpaymentBudget: buyerInfo.downpaymentBudget
+                  });
+                  setShowQuickEdit(false);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                {t('actions.cancel')}
+              </button>
+              <button
+                onClick={() => {
+                  updateBuyerInfo({
+                    ...buyerInfo,
+                    maxMonthlyPayment: quickEditData.maxMonthlyPayment,
+                    downpaymentBudget: quickEditData.downpaymentBudget
+                  });
+                  setShowQuickEdit(false);
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              >
+                {t('actions.apply')}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Modern Card-Based Comparison */}
         <div className="space-y-4">
