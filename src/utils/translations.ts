@@ -401,6 +401,10 @@ export const translations: Translations = {
     en: 'ft²',
     zh: '平方呎',
   },
+  'common.tenThousand': {
+    en: '萬',
+    zh: '萬',
+  },
   'common.optional': {
     en: 'Optional',
     zh: '可選',
@@ -578,6 +582,36 @@ export const translations: Translations = {
   'propertyInput.remove': {
     en: 'Remove',
     zh: '移除',
+  },
+  
+  // Additional Results
+  'results.rooms': {
+    en: 'Rooms',
+    zh: '房間',
+  },
+  'results.toilets': {
+    en: 'toilets',
+    zh: '廁所',
+  },
+  'results.age': {
+    en: 'Age',
+    zh: '樓齡',
+  },
+  'results.years': {
+    en: 'years',
+    zh: '年',
+  },
+  'results.district': {
+    en: 'District',
+    zh: '地區',
+  },
+  'results.monthlyIncome': {
+    en: 'Monthly Income',
+    zh: '月收入',
+  },
+  'results.monthlyBurden': {
+    en: 'Monthly Burden',
+    zh: '每月負擔',
   },
 };
 

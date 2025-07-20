@@ -281,7 +281,7 @@ export default function PropertyInputStep() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.size')} (ft²) *
+                  {t('propertyInput.size')} ({t('common.ft2')}) *
                 </label>
                 <input
                   type="number"
@@ -310,7 +310,7 @@ export default function PropertyInputStep() {
                     required
                   />
                   <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                    萬
+                    {t('common.tenThousand')}
                   </span>
                 </div>
               </div>
@@ -326,7 +326,7 @@ export default function PropertyInputStep() {
                 <div className="flex items-center space-x-2">
                   <span>👉</span>
                   <span>
-                    {t('propertyInput.costPerSqFt')}: <strong>${costPerSqFt.toLocaleString()}/ft²</strong>
+                    {t('propertyInput.costPerSqFt')}: <strong>${costPerSqFt.toLocaleString()}/{t('common.ft2')}</strong>
                     {isExpensive && (
                       <span className="ml-2 text-red-600">
                         {t('propertyInput.expensiveWarning')}
@@ -619,9 +619,9 @@ export default function PropertyInputStep() {
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">{property.name}</h4>
                   <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                    <span>${(property.price / 10000).toFixed(0)}萬</span>
-                    <span>{property.size} ft²</span>
-                    <span>{property.rooms}R {property.toilets}T</span>
+                    <span>${(property.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>
+                                          <span>{property.size} {t('common.ft2')}</span>
+                      <span>{property.rooms}R {property.toilets}T</span>
                     {property.district && <span>{property.district}</span>}
                   </div>
                 </div>

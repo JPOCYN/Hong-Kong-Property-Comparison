@@ -207,12 +207,12 @@ export default function ComparisonResultsStep() {
                             {calc.property.name}
                             {isBestValue && (
                               <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800">
-                                🏆 Best Value
+                                🏆 {t('results.bestValue')}
                               </span>
                             )}
                             {isMostAffordable && (
                               <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                💰 Most Affordable
+                                💰 {t('results.mostAffordable')}
                               </span>
                             )}
                           </h3>
@@ -274,19 +274,19 @@ export default function ComparisonResultsStep() {
                       <td colSpan={6} className="py-3 px-4">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                           <div>
-                            <span className="font-medium">Size:</span> {calc.property.size} ft²
+                            <span className="font-medium">{t('results.size')}:</span> {calc.property.size} {t('common.ft2')}
                           </div>
                           <div>
-                            <span className="font-medium">Rooms:</span> {calc.property.rooms} • {calc.property.toilets} toilets
+                            <span className="font-medium">{t('results.rooms')}:</span> {calc.property.rooms} • {calc.property.toilets} {t('results.toilets')}
                           </div>
                           {calc.property.buildingAge > 0 && (
                             <div>
-                              <span className="font-medium">Age:</span> {calc.property.buildingAge} years
+                              <span className="font-medium">{t('results.age')}:</span> {calc.property.buildingAge} {t('results.years')}
                             </div>
                           )}
                           {calc.property.district && (
                             <div>
-                              <span className="font-medium">District:</span> {calc.property.district}
+                              <span className="font-medium">{t('results.district')}:</span> {calc.property.district}
                               {calc.property.schoolNet && ` (${calc.property.schoolNet})`}
                             </div>
                           )}
@@ -313,15 +313,15 @@ export default function ComparisonResultsStep() {
               <h4 className="font-medium text-gray-900 mb-3">{calc.property.name}</h4>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Monthly Income:</span>
+                  <span className="text-gray-600">{t('results.monthlyIncome')}:</span>
                   <span className="font-medium">{formatCurrency(buyerInfo.monthlyIncome)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Monthly Burden:</span>
+                  <span className="text-gray-600">{t('results.monthlyBurden')}:</span>
                   <span className="font-medium">{formatCurrency(calc.monthlyRecurringCosts)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Affordability:</span>
+                  <span className="text-gray-600">{t('results.affordability')}:</span>
                   <span className={`font-medium ${getAffordabilityColor(calc.affordabilityStatus)}`}>
                     {formatNumber(calc.affordabilityPercentage)}%
                   </span>
