@@ -269,13 +269,6 @@ export default function ComparisonResultsStep() {
 
       {/* Enhanced Comparison Table */}
       <div className="card p-4 lg:p-6 mt-6 lg:mt-8">
-        {/* Summary Tip */}
-        <div className="mb-4 lg:mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800 font-medium">
-            {t('results.comparisonTip')}
-          </p>
-        </div>
-        
         <div className="flex justify-between items-center mb-4 lg:mb-6">
           <h2 className="text-xl font-semibold">{t('results.detailedComparison')}</h2>
           <div className="flex space-x-2">
@@ -563,6 +556,20 @@ export default function ComparisonResultsStep() {
                           <span>{t('results.stampDuty')}:</span>
                           <span>{formatCurrency(calc.stampDuty)}</span>
                         </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>律師費:</span>
+                          <span>{formatCurrency(5000)}</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>代理佣金 (1%):</span>
+                          <span>{formatCurrency(calc.property.price * 0.01)}</span>
+                        </div>
+                        {!calc.property.carParkIncluded && calc.property.carParkPrice > 0 && (
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>車位費用:</span>
+                            <span>{formatCurrency(calc.property.carParkPrice)}</span>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                           <span className="text-gray-600">{t('results.actualLTV')}:</span>
                           <span className="font-medium text-blue-600">{(mipAnalysis.actualLTV * 100).toFixed(0)}%</span>
