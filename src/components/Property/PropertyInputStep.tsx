@@ -21,7 +21,7 @@ interface PropertyFormData {
 }
 
 export default function PropertyInputStep() {
-  const { properties, addProperty, updateProperty, removeProperty, language } = useAppStore();
+  const { properties, addProperty, updateProperty, removeProperty, language, editingPropertyId, setEditingProperty } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
   
   // Property form data for both columns
@@ -116,10 +116,18 @@ export default function PropertyInputStep() {
   const handleAddProperty = (formIndex: number) => {
     const form = propertyForms[formIndex];
     if (isPropertyValid(form)) {
-      addProperty({
-        ...form,
-        id: Date.now().toString() + formIndex,
-      });
+      if (editingPropertyId) {
+        // Update existing property
+        updateProperty(editingPropertyId, form);
+        setEditingProperty(null); // Clear editing state
+      } else {
+        // Add new property
+        addProperty({
+          ...form,
+          id: Date.now().toString() + formIndex,
+        });
+      }
+      
       // Reset the form and collapse it on mobile
       setPropertyForms(prev => prev.map((f, index) => 
         index === formIndex ? {
@@ -151,6 +159,31 @@ export default function PropertyInputStep() {
     };
     loadData();
   }, []);
+
+  // Handle editing property
+  useEffect(() => {
+    if (editingPropertyId) {
+      const editingProperty = properties.find(p => p.id === editingPropertyId);
+      if (editingProperty) {
+        // Load the editing property data into the first form
+        setPropertyForms(prev => prev.map((form, index) => 
+          index === 0 ? {
+            name: editingProperty.name,
+            size: editingProperty.size,
+            price: editingProperty.price,
+            rooms: editingProperty.rooms,
+            toilets: editingProperty.toilets,
+            buildingAge: editingProperty.buildingAge,
+            district: editingProperty.district,
+            schoolNet: editingProperty.schoolNet || '',
+            carParkIncluded: editingProperty.carParkIncluded,
+            carParkPrice: editingProperty.carParkPrice,
+            managementFee: editingProperty.managementFee,
+          } : form
+        ));
+      }
+    }
+  }, [editingPropertyId, properties]);
 
   // Handle estate name input with autocomplete
   const handleEstateNameChange = (formIndex: number, value: string) => {
@@ -625,7 +658,7 @@ export default function PropertyInputStep() {
             disabled={!isPropertyValid(form)}
             className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t('propertyInput.addProperty')}
+            {editingPropertyId && formIndex === 0 ? t('actions.updateProperty') : t('propertyInput.addProperty')}
           </button>
         </div>
           </div>

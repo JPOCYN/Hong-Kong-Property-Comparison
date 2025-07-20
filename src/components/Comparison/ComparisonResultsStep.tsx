@@ -8,7 +8,7 @@ import { exportToPDF } from '@/utils/pdfExport';
 import { useState, useEffect } from 'react';
 
 export default function ComparisonResultsStep() {
-  const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep } = useAppStore();
+  const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep, setEditingProperty } = useAppStore();
   const [showClearModal, setShowClearModal] = useState(false);
   const t = (key: string) => getTranslation(key, language);
 
@@ -417,12 +417,23 @@ export default function ComparisonResultsStep() {
                       </td>
                       
                       <td className="py-4 px-4">
-                        <button
-                          onClick={() => removeProperty(calc.property.id)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                          {t('actions.removeProperty')}
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              setEditingProperty(calc.property.id);
+                              setCurrentStep(2);
+                            }}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            ✏️ {t('actions.editProperty')}
+                          </button>
+                          <button
+                            onClick={() => removeProperty(calc.property.id)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                          >
+                            🗑️ {t('actions.removeProperty')}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                     {/* Property Details Row */}

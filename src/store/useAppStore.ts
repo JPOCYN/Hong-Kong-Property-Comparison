@@ -43,6 +43,7 @@ export interface AppState {
   // UI state
   language: 'en' | 'zh';
   isLoading: boolean;
+  editingPropertyId: string | null;
   
   // Actions
   setCurrentStep: (step: number) => void;
@@ -55,6 +56,7 @@ export interface AppState {
   clearProperties: () => void;
   setLanguage: (lang: 'en' | 'zh') => void;
   setLoading: (loading: boolean) => void;
+  setEditingProperty: (id: string | null) => void;
   
   // Computed values
   canProceedToNextStep: () => boolean;
@@ -83,6 +85,7 @@ export const useAppStore = create<AppState>()(
       properties: [],
       language: 'en',
       isLoading: false,
+      editingPropertyId: null,
       
       setCurrentStep: (step) => set({ currentStep: step }),
       
@@ -135,6 +138,8 @@ export const useAppStore = create<AppState>()(
       setLanguage: (language) => set({ language }),
       
       setLoading: (isLoading) => set({ isLoading }),
+      
+      setEditingProperty: (id) => set({ editingPropertyId: id }),
       
       canProceedToNextStep: () => {
         const { currentStep, buyerInfo, properties } = get();

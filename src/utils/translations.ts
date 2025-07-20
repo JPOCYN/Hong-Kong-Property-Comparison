@@ -432,6 +432,14 @@ export const translations: Translations = {
     en: 'Remove',
     zh: '移除',
   },
+  'actions.editProperty': {
+    en: 'Edit',
+    zh: '編輯',
+  },
+  'actions.updateProperty': {
+    en: 'Update Property',
+    zh: '更新物業',
+  },
   'actions.clearAll': {
     en: 'Clear All',
     zh: '清除全部',
