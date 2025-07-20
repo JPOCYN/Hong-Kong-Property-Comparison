@@ -221,6 +221,16 @@ export function formatCurrency(amount: number): string {
 }
 
 /**
+ * Format number for display
+ */
+export function formatNumber(num: number, decimals: number = 2): string {
+  return new Intl.NumberFormat('zh-HK', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(num);
+}
+
+/**
  * Format percentage for display
  */
 export function formatPercentage(value: number): string {
