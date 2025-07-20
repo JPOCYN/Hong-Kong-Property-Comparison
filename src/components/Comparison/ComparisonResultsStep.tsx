@@ -13,6 +13,7 @@ export default function ComparisonResultsStep() {
   const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep, setEditingProperty, updateBuyerInfo } = useAppStore();
   const [showClearModal, setShowClearModal] = useState(false);
   const [showBudgetSettings, setShowBudgetSettings] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const t = (key: string) => getTranslation(key, language);
 
   // Auto-redirect to Step 2 when all properties are deleted

@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { PropertyCalculation, formatCurrency, formatNumber } from './calculations';
+import { PropertyCalculation } from './affordability';
+import { formatCurrency, formatNumber } from './calculations';
 import { getTranslation } from './translations';
 
 // For Chinese text, we'll use a fallback approach
@@ -53,9 +54,14 @@ export const exportToPDF = (
   doc.setFontSize(20);
   doc.text(sanitizeText(language === 'zh' ? '香港物業比較報告' : 'Hong Kong Property Comparison Report', language), 20, 20);
   
+  // Date
+  doc.setFontSize(10);
+  const currentDate = new Date().toLocaleDateString(language === 'zh' ? 'zh-HK' : 'en-US');
+  doc.text(sanitizeText(language === 'zh' ? `生成日期: ${currentDate}` : `Generated: ${currentDate}`, language), 20, 30);
+  
   // Summary section
   doc.setFontSize(14);
-  doc.text(sanitizeText(language === 'zh' ? '總結' : 'Summary', language), 20, 40);
+  doc.text(sanitizeText(language === 'zh' ? '總結' : 'Summary', language), 20, 45);
   
   const mostAffordable = calculations.reduce((min, calc) => 
     calc.affordabilityPercentage < min.affordabilityPercentage ? calc : min
@@ -70,9 +76,9 @@ export const exportToPDF = (
   ) / calculations.length;
   
   doc.setFontSize(10);
-  doc.text(sanitizeText(language === 'zh' ? `最可負擔: ${mostAffordable.property.name}` : `Most Affordable: ${mostAffordable.property.name}`, language), 20, 50);
-  doc.text(sanitizeText(language === 'zh' ? `最佳價值 (呎價): ${bestValue.property.name}` : `Best Value (per ft²): ${bestValue.property.name}`, language), 20, 60);
-  doc.text(sanitizeText(language === 'zh' ? `平均月供: ${formatCurrency(avgMonthlyCost)}` : `Average Monthly Cost: ${formatCurrency(avgMonthlyCost)}`, language), 20, 70);
+  doc.text(sanitizeText(language === 'zh' ? `最可負擔: ${mostAffordable.property.name}` : `Most Affordable: ${mostAffordable.property.name}`, language), 20, 55);
+  doc.text(sanitizeText(language === 'zh' ? `最佳價值 (呎價): ${bestValue.property.name}` : `Best Value (per ft²): ${bestValue.property.name}`, language), 20, 65);
+  doc.text(sanitizeText(language === 'zh' ? `平均月供: ${formatCurrency(avgMonthlyCost)}` : `Average Monthly Cost: ${formatCurrency(avgMonthlyCost)}`, language), 20, 75);
   
   // Property comparison table
   const tableData = calculations.map(calc => [
@@ -109,7 +115,7 @@ export const exportToPDF = (
   autoTable(doc, {
     head: [headers],
     body: tableData,
-    startY: 90,
+    startY: 95,
     styles: {
       fontSize: 8,
       font: 'helvetica',
@@ -125,6 +131,41 @@ export const exportToPDF = (
     margin: { top: 10, right: 10, bottom: 10, left: 10 },
   });
   
+  // Add detailed property information
+  let currentY = 150; // Start after the table
+  
+  calculations.forEach((calc, index) => {
+    if (currentY > doc.internal.pageSize.height - 60) {
+      doc.addPage();
+      currentY = 20;
+    }
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${index + 1}. ${calc.property.name}`, 20, currentY);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    currentY += 8;
+    
+    const details = [
+      sanitizeText(language === 'zh' ? `面積: ${calc.property.size} 平方呎` : `Size: ${calc.property.size} ft²`, language),
+      sanitizeText(language === 'zh' ? `總價: ${formatCurrency(calc.property.price)}` : `Price: ${formatCurrency(calc.property.price)}`, language),
+      sanitizeText(language === 'zh' ? `呎價: ${formatCurrency(calc.costPerSqFt)}/呎` : `Cost/ft²: ${formatCurrency(calc.costPerSqFt)}`, language),
+      sanitizeText(language === 'zh' ? `前期費用: ${formatCurrency(calc.upfrontCosts)}` : `Upfront Costs: ${formatCurrency(calc.upfrontCosts)}`, language),
+      sanitizeText(language === 'zh' ? `月供: ${formatCurrency(calc.monthlyMortgage)}` : `Monthly Mortgage: ${formatCurrency(calc.monthlyMortgage)}`, language),
+      sanitizeText(language === 'zh' ? `月支出: ${formatCurrency(calc.monthlyRecurringCosts)}` : `Monthly Expenses: ${formatCurrency(calc.monthlyRecurringCosts)}`, language),
+      sanitizeText(language === 'zh' ? `負擔能力: ${formatNumber(calc.affordabilityPercentage)}%` : `Affordability: ${formatNumber(calc.affordabilityPercentage)}%`, language),
+    ];
+    
+    details.forEach(detail => {
+      doc.text(detail, 25, currentY);
+      currentY += 5;
+    });
+    
+    currentY += 10;
+  });
+  
   // Add footer
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
@@ -135,6 +176,12 @@ export const exportToPDF = (
       20, 
       doc.internal.pageSize.height - 10
     );
+    
+    // Add watermark
+    doc.setFontSize(6);
+    doc.setTextColor(200, 200, 200);
+    doc.text('買乜樓好? | Buy What House Ho?', doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 5);
+    doc.setTextColor(0, 0, 0);
   }
   
   // Save the PDF with proper filename
