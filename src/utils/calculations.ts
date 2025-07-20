@@ -31,6 +31,9 @@ export interface PropertyComparison {
   affordabilityScore: number;
 }
 
+// Re-export PropertyCalculation from affordability for backward compatibility
+export type { PropertyCalculation } from './affordability';
+
 // Current Hong Kong mortgage rates (as of 2024)
 export const CURRENT_RATES = {
   primeRate: 5.875, // HIBOR + 1.5%
