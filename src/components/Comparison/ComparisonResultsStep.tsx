@@ -105,31 +105,119 @@ export default function ComparisonResultsStep() {
           </p>
         </div>
 
-        <div className="card bg-gray-50 border-gray-200 p-3 lg:p-4">
+        <div className="card bg-purple-50 border-purple-200 p-3 lg:p-4">
           <div className="flex items-center mb-2 lg:mb-3">
-            <span className="text-xl lg:text-2xl mr-2 lg:mr-3">📊</span>
-            <h3 className="text-xs lg:text-sm font-medium text-gray-800">
-              {t('results.averageMonthly')}
+            <span className="text-xl lg:text-2xl mr-2 lg:mr-3">👨‍👩‍👧‍👦</span>
+            <h3 className="text-xs lg:text-sm font-medium text-purple-800">
+              {t('results.bestForFamily')}
             </h3>
           </div>
-          <p className="text-base lg:text-lg font-semibold text-gray-900">
-            {formatCurrency(averageMonthly)}
-          </p>
-          <p className="text-xs lg:text-sm text-gray-700">per month</p>
+          {(() => {
+            // Find the best property for family living
+            const familyProperties = calculations.filter(calc => 
+              calc.property.rooms >= 2 && 
+              calc.property.toilets >= 1 && 
+              calc.property.size >= 600
+            );
+            
+            if (familyProperties.length === 0) {
+              return (
+                <div>
+                  <p className="text-sm text-purple-700 mb-1">
+                    {t('results.noFamilySuitable')}
+                  </p>
+                  <p className="text-xs text-purple-600">
+                    {t('results.familyCriteria')}
+                  </p>
+                </div>
+              );
+            }
+            
+            // Prioritize properties with car park, then by size
+            const bestFamilyProperty = familyProperties.sort((a, b) => {
+              // First priority: has car park
+              if (a.property.carParkIncluded && !b.property.carParkIncluded) return -1;
+              if (!a.property.carParkIncluded && b.property.carParkIncluded) return 1;
+              // Second priority: larger size
+              return b.property.size - a.property.size;
+            })[0];
+            
+            const parkingText = bestFamilyProperty.property.carParkIncluded 
+              ? (bestFamilyProperty.property.carParkPrice > 0 
+                ? `${t('results.parkingPrice').replace('$XXX', formatCurrency(bestFamilyProperty.property.carParkPrice).replace('$', ''))}`
+                : t('results.parkingIncluded'))
+              : t('results.noParking');
+            
+            return (
+              <div>
+                <p className="text-base lg:text-lg font-semibold text-purple-900 mb-1">
+                  {bestFamilyProperty.property.name}
+                </p>
+                <p className="text-sm text-purple-700">
+                  {bestFamilyProperty.property.rooms}{t('results.rooms')} {bestFamilyProperty.property.toilets}{t('results.toilets')}，{bestFamilyProperty.property.size}{t('common.ft2')}，{parkingText}
+                </p>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
       {/* Affordability Alert */}
       {!hasSafeOptions && (
-        <div className="card bg-warning-50 border-warning-200 p-3 lg:p-4">
-          <div className="flex items-center">
-            <span className="text-lg lg:text-xl mr-2 lg:mr-3">⚠️</span>
-            <div>
-              <h3 className="font-medium text-warning-800 text-sm lg:text-base">{t('results.affordabilityAlert')}</h3>
-              <p className="text-xs lg:text-sm text-warning-700">{t('results.affordabilityAlertDesc')}</p>
+        <>
+          <div className="card bg-warning-50 border-warning-200 p-3 lg:p-4">
+            <div className="flex items-center">
+              <span className="text-lg lg:text-xl mr-2 lg:mr-3">⚠️</span>
+              <div>
+                <h3 className="font-medium text-warning-800 text-sm lg:text-base">{t('results.affordabilityAlert')}</h3>
+                <p className="text-xs lg:text-sm text-warning-700">{t('results.affordabilityAlertDesc')}</p>
+              </div>
             </div>
           </div>
-        </div>
+          
+          {/* Improvement Suggestions */}
+          <div className="card bg-blue-50 border-blue-200 p-4 lg:p-6">
+            <div className="flex items-center mb-4">
+              <span className="text-lg lg:text-xl mr-2 lg:mr-3">💡</span>
+              <h3 className="font-medium text-blue-800 text-base lg:text-lg">{t('results.improvementSuggestions')}</h3>
+            </div>
+            <p className="text-sm text-blue-700 mb-4">
+              {t('results.improvementDescription')}
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {calculations.map((calc) => {
+                // Calculate required monthly income for 50% affordability
+                const requiredMonthlyIncome = calc.monthlyRecurringCosts * 2; // 50% of income
+                
+                // Calculate suggested downpayment (30% of property price)
+                const suggestedDownpayment = calc.property.price * 0.3;
+                
+                return (
+                  <div key={calc.property.id} className="bg-white rounded-lg p-4 border border-blue-200">
+                    <h4 className="font-semibold text-gray-900 mb-3 text-sm lg:text-base">
+                      【{calc.property.name}】
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">{t('results.suggestedMonthlyIncome')}:</span>
+                        <span className="font-medium text-green-600">
+                          HK${formatNumber(requiredMonthlyIncome)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">{t('results.suggestedDownpayment')}:</span>
+                        <span className="font-medium text-blue-600">
+                          約 HK${formatNumber(suggestedDownpayment)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
       )}
 
       {/* Enhanced Comparison Table */}

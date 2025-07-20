@@ -269,6 +269,34 @@ export const translations: Translations = {
     en: 'Average Monthly',
     zh: '平均每月',
   },
+  'results.bestForFamily': {
+    en: 'Best for Family Living',
+    zh: '最適合家庭居住',
+  },
+  'results.noFamilySuitable': {
+    en: 'No properties meet family criteria',
+    zh: '沒有符合家庭標準的物業',
+  },
+  'results.familyCriteria': {
+    en: 'Need: 2+ rooms, 1+ toilet, 600+ ft²',
+    zh: '需要：2房以上，1廁以上，600呎以上',
+  },
+  'results.improvementSuggestions': {
+    en: 'Improvement Suggestions',
+    zh: '改善建議',
+  },
+  'results.improvementDescription': {
+    en: 'Display the recommended monthly income and downpayment amount for each property to achieve "mortgage payment not exceeding 50% of income" as the goal.',
+    zh: '顯示每個物業所需的建議月收入與首期金額，以達到「供款不超過收入 50%」為目標。',
+  },
+  'results.suggestedMonthlyIncome': {
+    en: 'Suggested Monthly Income',
+    zh: '建議月入',
+  },
+  'results.suggestedDownpayment': {
+    en: 'Suggested Downpayment',
+    zh: '建議首期',
+  },
   'results.detailedComparison': {
     en: 'Detailed Comparison',
     zh: '詳細比較',
