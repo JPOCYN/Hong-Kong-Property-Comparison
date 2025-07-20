@@ -5,6 +5,7 @@ import { getTranslation } from '@/utils/translations';
 import { calculatePropertyAffordability, getAffordabilityColor, getAffordabilityBackgroundColor } from '@/utils/affordability';
 import { formatCurrency, formatNumber } from '@/utils/calculations';
 import { exportToPDF } from '@/utils/pdfExport';
+import { calculateStampDuty, getTotalStampDuty } from '@/utils/stampDuty';
 import { useState, useEffect } from 'react';
 
 export default function ComparisonResultsStep() {
@@ -60,25 +61,47 @@ export default function ComparisonResultsStep() {
     return t('affordability.strained');
   };
 
-  // Enhanced DSR and MIP calculations
+  // Enhanced DSR and income suggestion calculations
   const calculateDSR = (monthlyMortgage: number, maxMonthlyPayment: number, propertyPrice: number, hasExistingMortgage: boolean) => {
-    const maxDebtToIncome = 0.5; // 50% DSR
-    const dsr = monthlyMortgage / (maxMonthlyPayment * maxDebtToIncome);
-    const threshold = (propertyPrice > 30000000 || hasExistingMortgage) ? 0.4 : 0.5;
-    const isCompliant = dsr <= threshold;
-    const requiredMaxPayment = monthlyMortgage / threshold;
+    // Calculate DSR based on user's max monthly payment
+    const dsrRatio = (monthlyMortgage / maxMonthlyPayment) * 100;
+    
+    // Calculate required income for bank approval (50% DSR rule)
+    const requiredMonthlyIncome = monthlyMortgage / 0.5; // 50% DSR threshold
+    const requiredAnnualIncome = requiredMonthlyIncome * 12;
+    
+    // Check if user's max payment is sufficient for bank approval
+    const isCompliant = dsrRatio <= 100;
+    const needsHigherIncome = requiredMonthlyIncome > maxMonthlyPayment;
+    
+    // Calculate income gap if insufficient
+    const incomeGap = needsHigherIncome ? requiredMonthlyIncome - maxMonthlyPayment : 0;
     
     return {
-      dsr,
-      threshold,
+      dsrRatio,
+      requiredMonthlyIncome,
+      requiredAnnualIncome,
       isCompliant,
-      requiredMaxPayment
+      needsHigherIncome,
+      incomeGap,
+      maxDebtToIncome: 0.5
     };
   };
 
   const calculateMIP = (propertyPrice: number, downpaymentBudget: number, isFirstTime: boolean, isSalaried: boolean) => {
-    // Calculate actual LTV based on user's downpayment budget
-    const actualDownpayment = Math.min(downpaymentBudget, propertyPrice * 0.3); // Cap at 30% of property price
+    // Calculate upfront costs first
+    const stampDuty = getTotalStampDuty(
+      calculateStampDuty(propertyPrice, isFirstTime)
+    );
+    const legalFees = 5000; // Estimated legal fees
+    const agentFees = propertyPrice * 0.01; // 1% agent commission
+    const upfrontCosts = stampDuty + legalFees + agentFees;
+    
+    // Calculate available funds for downpayment after covering upfront costs
+    const availableForDownpayment = downpaymentBudget - upfrontCosts;
+    
+    // Use all available funds for downpayment to minimize mortgage ratio
+    const actualDownpayment = Math.max(0, Math.min(availableForDownpayment, propertyPrice * 0.9)); // Cap at 90% of property price
     const actualLoan = propertyPrice - actualDownpayment;
     const actualLTV = actualLoan / propertyPrice;
     
@@ -235,6 +258,56 @@ export default function ComparisonResultsStep() {
         </>
       )}
       
+      {/* Income Requirements Summary */}
+      <div className="card bg-purple-50 border-purple-200 p-4 lg:p-6">
+        <div className="flex items-center mb-4">
+          <span className="text-lg lg:text-xl mr-2 lg:mr-3">💼</span>
+          <h3 className="font-medium text-purple-800 text-base lg:text-lg">{t('results.incomeRequirements')}</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {calculations.map((calc) => {
+            const dsrAnalysis = calculateDSR(
+              calc.monthlyMortgage, 
+              buyerInfo.maxMonthlyPayment, 
+              calc.property.price, 
+              false
+            );
+            
+            return (
+              <div key={calc.property.id} className="bg-white rounded-lg p-4 border border-purple-200">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm lg:text-base">
+                  【{calc.property.name}】
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">{t('results.monthlyPayment')}:</span>
+                    <span className="font-medium">{formatCurrency(calc.monthlyMortgage)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">{t('results.requiredMonthlyIncome')}:</span>
+                    <span className={`font-medium ${dsrAnalysis.needsHigherIncome ? 'text-orange-600' : 'text-green-600'}`}>
+                      {formatCurrency(dsrAnalysis.requiredMonthlyIncome)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">{t('results.requiredAnnualIncome')}:</span>
+                    <span className={`font-medium ${dsrAnalysis.needsHigherIncome ? 'text-orange-600' : 'text-green-600'}`}>
+                      {formatCurrency(dsrAnalysis.requiredAnnualIncome)}
+                    </span>
+                  </div>
+                  {dsrAnalysis.needsHigherIncome && (
+                    <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
+                      ⚠️ {t('results.incomeGap')}: {formatCurrency(dsrAnalysis.incomeGap)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Budget Gap Analysis */}
       <div className="card bg-blue-50 border-blue-200 p-4 lg:p-6">
         <div className="flex items-center mb-4">
@@ -550,7 +623,7 @@ export default function ComparisonResultsStep() {
                                     <div className="flex items-center justify-between">
                                       <span className="font-medium text-gray-900">{t('results.dsr')}:</span>
                                       <span className={`font-medium ${dsrAnalysis.isCompliant ? 'text-green-600' : 'text-red-600'}`}>
-                                        {(dsrAnalysis.dsr * 100).toFixed(1)}%
+                                        {dsrAnalysis.dsrRatio.toFixed(1)}%
                                       </span>
                                     </div>
                                     <div className="text-xs">
@@ -558,12 +631,35 @@ export default function ComparisonResultsStep() {
                                         <span className="text-green-600">{t('results.dsrCompliant')}</span>
                                       ) : (
                                         <div className="space-y-1">
-                                          <span className="text-red-600">{t('results.dsrExceeded')}</span>
+                                          <span className="text-orange-600">{t('results.incomeInsufficient')}</span>
                                           <div className="text-gray-600 text-xs" style={{ fontSize: '0.85em' }}>
                                             {t('results.dsrExplanation')}
                                           </div>
                                         </div>
                                       )}
+                                    </div>
+                                    
+                                    {/* Income Suggestion */}
+                                    <div className="mt-2 p-2 bg-blue-50 rounded border border-blue-200">
+                                      <div className="text-xs text-blue-800 font-medium mb-1">
+                                        {t('results.incomeSuggestion')}:
+                                      </div>
+                                      <div className="text-xs text-blue-700 space-y-1">
+                                        <div>
+                                          {t('results.requiredMonthlyIncome')}: {formatCurrency(dsrAnalysis.requiredMonthlyIncome)}
+                                        </div>
+                                        <div>
+                                          {t('results.requiredAnnualIncome')}: {formatCurrency(dsrAnalysis.requiredAnnualIncome)}
+                                        </div>
+                                        {dsrAnalysis.needsHigherIncome && (
+                                          <div className="text-orange-600 font-medium">
+                                            ⚠️ {t('results.incomeGap')}: {formatCurrency(dsrAnalysis.incomeGap)}
+                                          </div>
+                                        )}
+                                        <div className="text-xs text-gray-600 mt-1">
+                                          💡 {t('results.incomeHint')}
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                   
@@ -641,13 +737,18 @@ export default function ComparisonResultsStep() {
                         calc.affordabilityStatus === 'affordable' ? 'bg-success-500' :
                         calc.affordabilityStatus === 'moderate' ? 'bg-warning-500' : 'bg-red-500'
                       }`}
-                      style={{ width: `${Math.min(calc.affordabilityPercentage, 100)}%` }}
+                      style={{ width: `${Math.min(calc.affordabilityPercentage, 120)}%` }}
                     />
                     <div className="absolute inset-0 flex justify-between px-1">
                       <div className="w-0.5 h-3 bg-gray-300"></div>
                       <div className="w-0.5 h-3 bg-gray-300"></div>
                       <div className="w-0.5 h-3 bg-gray-300"></div>
                     </div>
+                    {/* Current position marker */}
+                    <div 
+                      className="absolute top-0 w-1 h-3 bg-black rounded-full"
+                      style={{ left: `${Math.min(calc.affordabilityPercentage, 120)}%`, transform: 'translateX(-50%)' }}
+                    />
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
                     {t('results.healthyMortgageHint')}

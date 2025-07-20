@@ -350,8 +350,8 @@ export const translations: Translations = {
     zh: '🛑 可能申請不到貸款（超出DSR上限）',
   },
   'results.dsrExplanation': {
-    en: 'Bank mortgage common limit: monthly payment should not exceed your maximum monthly payment capacity',
-    zh: '銀行按揭常見上限：月供不應超過您的最大可月供能力',
+    en: 'To qualify for this loan, you need the suggested monthly income above',
+    zh: '要獲得此貸款，您需要上述建議的月收入',
   },
   'results.dsr': {
     en: 'DSR',
@@ -370,16 +370,48 @@ export const translations: Translations = {
     zh: '所需首期',
   },
   'results.actualLTV': {
-    en: 'Actual LTV',
-    zh: '實際按揭成數',
+    en: 'Actual LTV (Minimized)',
+    zh: '實際按揭成數（最小化）',
   },
   'results.actualLoan': {
     en: 'Actual Loan',
     zh: '實際貸款額',
   },
   'results.actualDownpayment': {
-    en: 'Actual Downpayment',
-    zh: '實際首期',
+    en: 'Actual Downpayment (Optimized)',
+    zh: '實際首期（優化後）',
+  },
+  'results.incomeSuggestion': {
+    en: 'Income Suggestion for Bank Approval',
+    zh: '銀行批核所需收入建議',
+  },
+  'results.requiredMonthlyIncome': {
+    en: 'Required Monthly Income',
+    zh: '所需月收入',
+  },
+  'results.requiredAnnualIncome': {
+    en: 'Required Annual Income',
+    zh: '所需年收入',
+  },
+  'results.incomeInsufficient': {
+    en: 'Your max payment is below bank requirements',
+    zh: '您的最大可月供低於銀行要求',
+  },
+  'results.incomeGap': {
+    en: 'Additional monthly income needed',
+    zh: '需要額外月收入',
+  },
+  'results.incomeHint': {
+    en: 'Banks require monthly mortgage ≤ 50% of monthly income',
+    zh: '銀行要求每月按揭供款不超過月收入的50%',
+  },
+  'results.incomeRequirements': {
+    en: 'Income Requirements for Bank Approval',
+    zh: '銀行批核所需收入',
+  },
+  'results.monthlyPayment': {
+    en: 'Monthly Payment',
+    zh: '每月供款',
   },
   'results.detailedComparison': {
     en: 'Detailed Comparison',
@@ -435,8 +467,8 @@ export const translations: Translations = {
   },
 
   'results.healthyMortgageHint': {
-    en: 'Healthy mortgage ratio: < 100% of maximum monthly payment',
-    zh: '健康按揭比例：< 最大可月供的100%',
+    en: 'Progress bar shows: 0-80% (green), 80-100% (yellow), 100-120% (red)',
+    zh: '進度條顯示：0-80%（綠色），80-100%（黃色），100-120%（紅色）',
   },
   'results.stampDuty': {
     en: 'Stamp Duty',
@@ -626,7 +658,7 @@ export const translations: Translations = {
   },
   'propertyInput.size': {
     en: 'Size',
-    zh: '面積',
+    zh: '實用面積',
   },
   'propertyInput.price': {
     en: 'Price (M HKD)',
@@ -781,6 +813,10 @@ export const translations: Translations = {
   'results.toilets': {
     en: 'toilets',
     zh: '廁所',
+  },
+  'results.size': {
+    en: 'Size',
+    zh: '實用面積',
   },
   'results.age': {
     en: 'Age',

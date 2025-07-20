@@ -69,12 +69,23 @@ export const calculatePropertyAffordability = (
   property: Property,
   buyerInfo: BuyerInfo
 ): PropertyCalculation => {
-  const downpayment = Math.min(
-    buyerInfo.downpaymentBudget,
-    property.price * 0.3 // Assume 30% downpayment
+  // Calculate upfront costs first (stamp duty, legal fees, agent fees, parking)
+  const stampDuty = getTotalStampDuty(
+    calculateStampDuty(property.price, buyerInfo.isFirstTimeBuyer)
   );
   
-  const loanAmount = property.price - downpayment;
+  const legalFees = 5000; // Estimated legal fees
+  const agentFees = property.price * 0.01; // 1% agent commission
+  const parkingCost = property.carParkIncluded ? 0 : property.carParkPrice;
+  const upfrontCosts = stampDuty + legalFees + agentFees + parkingCost;
+  
+  // Calculate available funds for downpayment after covering upfront costs
+  const availableForDownpayment = buyerInfo.downpaymentBudget - upfrontCosts;
+  
+  // Use all available funds for downpayment to minimize mortgage ratio
+  const actualDownpayment = Math.max(0, Math.min(availableForDownpayment, property.price * 0.9)); // Cap at 90% of property price
+  
+  const loanAmount = property.price - actualDownpayment;
   
   // Create mortgage config from buyer info
   const mortgageConfig: MortgageConfig = {
@@ -92,15 +103,8 @@ export const calculatePropertyAffordability = (
     mortgageConfig
   );
   
-  const stampDuty = getTotalStampDuty(
-    calculateStampDuty(property.price, buyerInfo.isFirstTimeBuyer)
-  );
-  
-  const upfrontCosts = calculateUpfrontCosts(
-    property,
-    downpayment,
-    buyerInfo.isFirstTimeBuyer
-  );
+  // Use the already calculated stamp duty and upfront costs
+  const totalUpfrontCosts = upfrontCosts;
   
   const monthlyRecurringCosts = calculateMonthlyRecurringCosts(
     monthlyMortgage,
@@ -122,7 +126,7 @@ export const calculatePropertyAffordability = (
     monthlyRecurringCosts,
     affordabilityPercentage,
     affordabilityStatus: getAffordabilityStatus(affordabilityPercentage),
-    upfrontCosts,
+    upfrontCosts: totalUpfrontCosts,
     costPerSqFt,
     ratesPerMonth,
     totalMonthlyBurden: monthlyRecurringCosts,

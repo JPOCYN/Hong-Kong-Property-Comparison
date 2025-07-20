@@ -358,14 +358,21 @@ export function getMortgageRate(
 export function calculatePropertyDetails(property: any, userFinancials: any) {
   // This is a legacy function for backward compatibility
   // It should be replaced with the new affordability calculations
-  const downpayment = Math.min(
-    userFinancials.downpaymentBudget,
-    property.price * 0.3
-  );
   
-  const loanAmount = property.price - downpayment;
-  const monthlyMortgage = calculateMortgage(loanAmount, property.price, 30);
+  // Calculate upfront costs first
   const stampDuty = calculateStampDuty(property.price);
+  const legalFees = 5000; // Estimated legal fees
+  const agentFees = property.price * 0.01; // 1% agent commission
+  const upfrontCosts = stampDuty.totalDuty + legalFees + agentFees;
+  
+  // Calculate available funds for downpayment after covering upfront costs
+  const availableForDownpayment = userFinancials.downpaymentBudget - upfrontCosts;
+  
+  // Use all available funds for downpayment to minimize mortgage ratio
+  const actualDownpayment = Math.max(0, Math.min(availableForDownpayment, property.price * 0.9)); // Cap at 90% of property price
+  
+  const loanAmount = property.price - actualDownpayment;
+  const monthlyMortgage = calculateMortgage(loanAmount, property.price, 30);
   const monthlyRecurringCosts = monthlyMortgage.monthlyPayment + property.managementFee;
   const affordabilityPercentage = (monthlyRecurringCosts / userFinancials.maxMonthlyPayment) * 100;
   const ratesPerMonth = (property.price * 0.03) / 12; // 3% annually
@@ -376,7 +383,7 @@ export function calculatePropertyDetails(property: any, userFinancials: any) {
       monthlyRecurringCosts,
       affordabilityPercentage,
       affordabilityStatus: (affordabilityPercentage <= 80 ? 'affordable' : affordabilityPercentage <= 100 ? 'moderate' : 'expensive') as 'affordable' | 'moderate' | 'expensive',
-      upfrontCosts: downpayment + stampDuty.totalDuty,
+      upfrontCosts: upfrontCosts + actualDownpayment,
       costPerSqFt: calculateCostPerSqFt(property.price, property.size),
       stampDuty: stampDuty.totalDuty,
       ratesPerMonth,
