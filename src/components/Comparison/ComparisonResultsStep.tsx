@@ -376,11 +376,16 @@ export default function ComparisonResultsStep() {
 
         {/* Modern Card-Based Comparison - Auto-sorted by affordability */}
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <span className="text-blue-600">📊</span>
-            <span className="text-sm font-medium text-blue-800">
-              已按負擔能力排序（最佳到最差）
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="text-blue-600">📊</span>
+              <span className="text-sm font-medium text-blue-800">
+                已按月供佔比排序（最低到最高）
+              </span>
+            </div>
+            <div className="text-xs text-blue-600">
+              💡 月供佔比 = 月供 ÷ 最大可月供 × 100%
+            </div>
           </div>
         </div>
         <div className="space-y-4">
@@ -485,7 +490,11 @@ export default function ComparisonResultsStep() {
                           <div className={`text-lg sm:text-xl font-bold ${getAffordabilityColor(calc.affordabilityStatus)} truncate`}>
                             {formatNumber(calc.affordabilityPercentage)}%
                           </div>
-                          <div className="text-xs text-gray-500">負擔能力</div>
+                          <div className="text-xs text-gray-500">月供佔比</div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {calc.affordabilityPercentage <= 80 ? '✅ 健康 (≤80%)' : 
+                             calc.affordabilityPercentage <= 100 ? '⚠️ 可接受 (≤100%)' : '❌ 偏高 (>100%)'}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -667,7 +676,7 @@ export default function ComparisonResultsStep() {
                   <span className="font-medium">{formatCurrency(calc.monthlyMortgage)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('results.affordability')}:</span>
+                  <span className="text-gray-600">月供佔比:</span>
                   <span className={`font-medium ${getAffordabilityColor(calc.affordabilityStatus)}`}>
                     {formatNumber(calc.affordabilityPercentage)}%
                   </span>

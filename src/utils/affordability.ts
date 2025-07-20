@@ -56,6 +56,8 @@ export const calculateAffordability = (
   monthlyMortgage: number,
   maxMonthlyPayment: number
 ): number => {
+  // Calculate what percentage of max monthly payment the mortgage takes
+  // This shows how much of their budget the mortgage consumes
   return (monthlyMortgage / maxMonthlyPayment) * 100;
 };
 
