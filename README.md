@@ -1,6 +1,22 @@
 # 🏠 Hong Kong Property Comparison Tool
 
-A comprehensive web application for comparing Hong Kong properties with intelligent autocomplete and detailed financial calculations.
+A comprehensive web application for comparing Hong Kong properties with intelligent autocomplete and detailed financial calculations. Features a modern SaaS-style landing page and powerful comparison tools.
+
+## 🌟 New Landing Page
+
+The app now includes a professional landing page with:
+- **Modern SaaS Design**: Clean, professional layout with gradient backgrounds
+- **Feature Showcase**: 6 key features with icons and descriptions
+- **How It Works**: 3-step process explanation
+- **Clear CTAs**: Multiple call-to-action buttons
+- **Responsive Design**: Mobile-optimized layout
+- **Hong Kong Localization**: Bilingual content (English/Chinese)
+
+### Landing Page Features
+- **Hero Section**: Compelling headline with dual CTAs
+- **Feature Grid**: Mortgage calculator, stamp duty analysis, autocomplete, PDF export, mobile optimization, privacy-first
+- **Process Steps**: Add properties → Set budget → Compare & decide
+- **Footer**: Comprehensive links and information
 
 ## ✨ Features
 
