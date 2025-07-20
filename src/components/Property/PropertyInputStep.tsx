@@ -3,7 +3,8 @@
 import { useAppStore } from '@/store/useAppStore';
 import { getTranslation } from '@/utils/translations';
 import { getSchoolNetByDistrict } from '@/utils/schoolNetMap';
-import { useState } from 'react';
+import { loadEstateData, searchEstates, getEstateByName, EstateData, formatPricePerFt, getBuildingAgeNumber } from '@/utils/estateData';
+import { useState, useEffect } from 'react';
 
 export default function PropertyInputStep() {
   const { properties, addProperty, updateProperty, removeProperty, language } = useAppStore();
@@ -21,6 +22,12 @@ export default function PropertyInputStep() {
     carParkPrice: 0,
     managementFee: 0,
   });
+
+  // Estate autocomplete state
+  const [estates, setEstates] = useState<EstateData[]>([]);
+  const [suggestions, setSuggestions] = useState<EstateData[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isLoadingEstates, setIsLoadingEstates] = useState(true);
 
   const handleInputChange = (field: string, value: any) => {
     setCurrentProperty(prev => ({ ...prev, [field]: value }));
@@ -81,6 +88,43 @@ export default function PropertyInputStep() {
   const managementFeeSuggestion = getManagementFeeSuggestion();
   const isExpensive = costPerSqFt > 25000;
 
+  // Load estate data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoadingEstates(true);
+      const estateData = await loadEstateData();
+      setEstates(estateData);
+      setIsLoadingEstates(false);
+    };
+    loadData();
+  }, []);
+
+  // Handle estate name input with autocomplete
+  const handleEstateNameChange = (value: string) => {
+    setCurrentProperty(prev => ({ ...prev, name: value }));
+    
+    if (value.trim().length > 0) {
+      const results = searchEstates(value, estates);
+      setSuggestions(results);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // Handle estate selection
+  const handleEstateSelect = (estate: EstateData) => {
+    setCurrentProperty(prev => ({
+      ...prev,
+      name: estate.name,
+      district: estate.district,
+      buildingAge: getBuildingAgeNumber(estate.buildingAge),
+      schoolNet: estate.schoolNet,
+    }));
+    setShowSuggestions(false);
+  };
+
   return (
     <div className="space-y-4 lg:space-y-6">
       {/* Header */}
@@ -103,19 +147,60 @@ export default function PropertyInputStep() {
           </h3>
           
           <div className="space-y-3 lg:space-y-4">
-            {/* Property Name */}
-            <div>
+            {/* Property Name with Autocomplete */}
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('propertyInput.propertyName')} *
               </label>
               <input
                 type="text"
                 value={currentProperty.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => handleEstateNameChange(e.target.value)}
                 className="input-field"
                 placeholder={t('propertyInput.propertyNamePlaceholder')}
                 required
+                onFocus={() => {
+                  if (currentProperty.name.trim().length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+                onBlur={() => {
+                  // Delay hiding suggestions to allow for clicks
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }}
               />
+              
+              {/* Autocomplete Suggestions */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {suggestions.map((estate, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => handleEstateSelect(estate)}
+                      className="block w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">{estate.name}</div>
+                          <div className="text-sm text-gray-500">{estate.address}</div>
+                        </div>
+                        <div className="text-right text-xs text-gray-400">
+                          <div>{estate.district}</div>
+                          <div>{estate.pricePerFt}</div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {/* Loading indicator */}
+              {isLoadingEstates && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+                </div>
+              )}
             </div>
 
             {/* Size and Price - Paired Fields */}

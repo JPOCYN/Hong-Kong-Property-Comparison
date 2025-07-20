@@ -464,8 +464,8 @@ export const translations: Translations = {
     zh: '物業名稱',
   },
   'propertyInput.propertyNamePlaceholder': {
-    en: 'e.g., Lohas Park Phase 3',
-    zh: '例如：日出康城三期',
+    en: 'Start typing estate name...',
+    zh: '開始輸入樓盤名稱...',
   },
   'propertyInput.size': {
     en: 'Size',

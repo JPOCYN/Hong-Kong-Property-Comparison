@@ -1,0 +1,380 @@
+[
+  {
+    "name": "泓都",
+    "address": "西營盤第三街",
+    "district": "中西區",
+    "region": "HK",
+    "buildingAge": "15",
+    "schoolNet": "11",
+    "pricePerFt": "$22,651"
+  },
+  {
+    "name": "帝后華庭",
+    "address": "灣仔軒尼詩道",
+    "district": "灣仔",
+    "region": "HK",
+    "buildingAge": "18",
+    "schoolNet": "12",
+    "pricePerFt": "$24,500"
+  },
+  {
+    "name": "太古城",
+    "address": "鰂魚涌英皇道",
+    "district": "東區",
+    "region": "HK",
+    "buildingAge": "35",
+    "schoolNet": "14",
+    "pricePerFt": "$18,200"
+  },
+  {
+    "name": "海怡半島",
+    "address": "鴨脷洲海怡路",
+    "district": "南區",
+    "region": "HK",
+    "buildingAge": "28",
+    "schoolNet": "16",
+    "pricePerFt": "$16,800"
+  },
+  {
+    "name": "凱旋門",
+    "address": "尖沙咀柯士甸道",
+    "district": "油尖旺",
+    "region": "KLN",
+    "buildingAge": "16",
+    "schoolNet": "31",
+    "pricePerFt": "$28,500"
+  },
+  {
+    "name": "擎天半島",
+    "address": "九龍灣宏光道",
+    "district": "觀塘",
+    "region": "KLN",
+    "buildingAge": "12",
+    "schoolNet": "46",
+    "pricePerFt": "$15,200"
+  },
+  {
+    "name": "日出康城",
+    "address": "將軍澳康城路",
+    "district": "西貢",
+    "region": "NT",
+    "buildingAge": "8",
+    "schoolNet": "95",
+    "pricePerFt": "$12,800"
+  },
+  {
+    "name": "愉景灣",
+    "address": "大嶼山愉景灣",
+    "district": "離島",
+    "region": "NT",
+    "buildingAge": "25",
+    "schoolNet": "3",
+    "pricePerFt": "$14,500"
+  },
+  {
+    "name": "沙田第一城",
+    "address": "沙田銀城街",
+    "district": "沙田",
+    "region": "NT",
+    "buildingAge": "35",
+    "schoolNet": "91",
+    "pricePerFt": "$13,200"
+  },
+  {
+    "name": "荃灣中心",
+    "address": "荃灣青山公路",
+    "district": "荃灣",
+    "region": "NT",
+    "buildingAge": "30",
+    "schoolNet": "62",
+    "pricePerFt": "$11,800"
+  },
+  {
+    "name": "屯門市廣場",
+    "address": "屯門屯順街",
+    "district": "屯門",
+    "region": "NT",
+    "buildingAge": "25",
+    "schoolNet": "70",
+    "pricePerFt": "$10,500"
+  },
+  {
+    "name": "元朗YOHO",
+    "address": "元朗朗日路",
+    "district": "元朗",
+    "region": "NT",
+    "buildingAge": "15",
+    "schoolNet": "72",
+    "pricePerFt": "$11,200"
+  },
+  {
+    "name": "上水中心",
+    "address": "上水智昌路",
+    "district": "北區",
+    "region": "NT",
+    "buildingAge": "20",
+    "schoolNet": "80",
+    "pricePerFt": "$9,800"
+  },
+  {
+    "name": "大埔中心",
+    "address": "大埔安慈路",
+    "district": "大埔",
+    "region": "NT",
+    "buildingAge": "28",
+    "schoolNet": "84",
+    "pricePerFt": "$10,200"
+  },
+  {
+    "name": "葵涌廣場",
+    "address": "葵涌葵富路",
+    "district": "葵青",
+    "region": "NT",
+    "buildingAge": "22",
+    "schoolNet": "65",
+    "pricePerFt": "$11,500"
+  },
+  {
+    "name": "深水埗富昌邨",
+    "address": "深水埗富昌邨",
+    "district": "深水埗",
+    "region": "KLN",
+    "buildingAge": "25",
+    "schoolNet": "40",
+    "pricePerFt": "$12,800"
+  },
+  {
+    "name": "九龍城豪門",
+    "address": "九龍城太子道",
+    "district": "九龍城",
+    "region": "KLN",
+    "buildingAge": "20",
+    "schoolNet": "34",
+    "pricePerFt": "$16,500"
+  },
+  {
+    "name": "黃大仙鳳德邨",
+    "address": "黃大仙鳳德邨",
+    "district": "黃大仙",
+    "region": "KLN",
+    "buildingAge": "30",
+    "schoolNet": "43",
+    "pricePerFt": "$13,200"
+  },
+  {
+    "name": "麗港城",
+    "address": "觀塘茶果嶺道",
+    "district": "觀塘",
+    "region": "KLN",
+    "buildingAge": "25",
+    "schoolNet": "48",
+    "pricePerFt": "$14,800"
+  },
+  {
+    "name": "美孚新邨",
+    "address": "荔枝角美孚新邨",
+    "district": "深水埗",
+    "region": "KLN",
+    "buildingAge": "45",
+    "schoolNet": "40",
+    "pricePerFt": "$13,500"
+  },
+  {
+    "name": "海濱花園",
+    "address": "荃灣海濱花園",
+    "district": "荃灣",
+    "region": "NT",
+    "buildingAge": "20",
+    "schoolNet": "62",
+    "pricePerFt": "$12,800"
+  },
+  {
+    "name": "將軍澳中心",
+    "address": "將軍澳唐德街",
+    "district": "西貢",
+    "region": "NT",
+    "buildingAge": "18",
+    "schoolNet": "95",
+    "pricePerFt": "$15,200"
+  },
+  {
+    "name": "馬鞍山中心",
+    "address": "沙田馬鞍山",
+    "district": "沙田",
+    "region": "NT",
+    "buildingAge": "22",
+    "schoolNet": "89",
+    "pricePerFt": "$13,800"
+  },
+  {
+    "name": "天水圍嘉湖山莊",
+    "address": "元朗天水圍",
+    "district": "元朗",
+    "region": "NT",
+    "buildingAge": "20",
+    "schoolNet": "72",
+    "pricePerFt": "$10,500"
+  },
+  {
+    "name": "粉嶺名都",
+    "address": "北區粉嶺",
+    "district": "北區",
+    "region": "NT",
+    "buildingAge": "25",
+    "schoolNet": "80",
+    "pricePerFt": "$9,500"
+  },
+  {
+    "name": "大埔富亨邨",
+    "address": "大埔富亨邨",
+    "district": "大埔",
+    "region": "NT",
+    "buildingAge": "30",
+    "schoolNet": "84",
+    "pricePerFt": "$10,800"
+  },
+  {
+    "name": "青衣長發邨",
+    "address": "葵青青衣",
+    "district": "葵青",
+    "region": "NT",
+    "buildingAge": "35",
+    "schoolNet": "65",
+    "pricePerFt": "$11,200"
+  },
+  {
+    "name": "東涌東薈城",
+    "address": "離島東涌",
+    "district": "離島",
+    "region": "NT",
+    "buildingAge": "15",
+    "schoolNet": "3",
+    "pricePerFt": "$12,500"
+  },
+  {
+    "name": "赤柱龍德苑",
+    "address": "南區赤柱",
+    "district": "南區",
+    "region": "HK",
+    "buildingAge": "8",
+    "schoolNet": "18",
+    "pricePerFt": "$18,500"
+  },
+  {
+    "name": "淺水灣道",
+    "address": "南區淺水灣",
+    "district": "南區",
+    "region": "HK",
+    "buildingAge": "12",
+    "schoolNet": "18",
+    "pricePerFt": "$25,800"
+  },
+  {
+    "name": "半山區帝景園",
+    "address": "中西區半山",
+    "district": "中西區",
+    "region": "HK",
+    "buildingAge": "20",
+    "schoolNet": "11",
+    "pricePerFt": "$28,500"
+  },
+  {
+    "name": "中環國際金融中心",
+    "address": "中西區中環",
+    "district": "中西區",
+    "region": "HK",
+    "buildingAge": "15",
+    "schoolNet": "11",
+    "pricePerFt": "$32,000"
+  },
+  {
+    "name": "灣仔會展中心",
+    "address": "灣仔會展中心",
+    "district": "灣仔",
+    "region": "HK",
+    "buildingAge": "25",
+    "schoolNet": "12",
+    "pricePerFt": "$26,500"
+  },
+  {
+    "name": "銅鑼灣時代廣場",
+    "address": "灣仔銅鑼灣",
+    "district": "灣仔",
+    "region": "HK",
+    "buildingAge": "30",
+    "schoolNet": "12",
+    "pricePerFt": "$24,800"
+  },
+  {
+    "name": "北角城市花園",
+    "address": "東區北角",
+    "district": "東區",
+    "region": "HK",
+    "buildingAge": "35",
+    "schoolNet": "14",
+    "pricePerFt": "$18,200"
+  },
+  {
+    "name": "筲箕灣愛東邨",
+    "address": "東區筲箕灣",
+    "district": "東區",
+    "region": "HK",
+    "buildingAge": "25",
+    "schoolNet": "16",
+    "pricePerFt": "$16,500"
+  },
+  {
+    "name": "柴灣杏花邨",
+    "address": "東區柴灣",
+    "district": "東區",
+    "region": "HK",
+    "buildingAge": "30",
+    "schoolNet": "16",
+    "pricePerFt": "$15,800"
+  },
+  {
+    "name": "紅磡海逸豪園",
+    "address": "九龍城紅磡",
+    "district": "九龍城",
+    "region": "KLN",
+    "buildingAge": "18",
+    "schoolNet": "34",
+    "pricePerFt": "$17,200"
+  },
+  {
+    "name": "何文田君頤峰",
+    "address": "九龍城何文田",
+    "district": "九龍城",
+    "region": "KLN",
+    "buildingAge": "12",
+    "schoolNet": "34",
+    "pricePerFt": "$19,500"
+  },
+  {
+    "name": "旺角朗豪坊",
+    "address": "油尖旺旺角",
+    "district": "油尖旺",
+    "region": "KLN",
+    "buildingAge": "15",
+    "schoolNet": "31",
+    "pricePerFt": "$22,800"
+  },
+  {
+    "name": "佐敦港景峰",
+    "address": "油尖旺佐敦",
+    "district": "油尖旺",
+    "region": "KLN",
+    "buildingAge": "20",
+    "schoolNet": "31",
+    "pricePerFt": "$20,500"
+  },
+  {
+    "name": "尖沙咀港威豪庭",
+    "address": "油尖旺尖沙咀",
+    "district": "油尖旺",
+    "region": "KLN",
+    "buildingAge": "18",
+    "schoolNet": "31",
+    "pricePerFt": "$25,200"
+  }
+] 
