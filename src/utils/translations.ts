@@ -525,6 +525,10 @@ export const translations: Translations = {
     en: 'Download PDF',
     zh: '下載PDF',
   },
+  'actions.generatingPDF': {
+    en: 'Generating...',
+    zh: '生成中...',
+  },
   'actions.quickEdit': {
     en: 'Quick Edit',
     zh: '快速編輯',

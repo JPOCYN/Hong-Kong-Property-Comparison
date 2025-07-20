@@ -271,10 +271,27 @@ export default function ComparisonResultsStep() {
               🏠 {t('actions.goHome')}
             </button>
             <button
-              onClick={() => exportToPDF(calculations, language)}
-              className="btn-primary text-sm"
+              onClick={async () => {
+                setIsGeneratingPDF(true);
+                try {
+                  await exportToPDF(calculations, language);
+                } catch (error) {
+                  console.error('PDF generation failed:', error);
+                } finally {
+                  setIsGeneratingPDF(false);
+                }
+              }}
+              disabled={isGeneratingPDF}
+              className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              📄 {t('actions.downloadPDF')}
+              {isGeneratingPDF ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {t('actions.generatingPDF')}
+                </>
+              ) : (
+                <>📄 {t('actions.downloadPDF')}</>
+              )}
             </button>
             <button
               onClick={() => setShowClearModal(true)}
