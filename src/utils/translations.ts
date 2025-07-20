@@ -406,8 +406,8 @@ export const translations: Translations = {
     zh: '負擔能力警告',
   },
   'results.affordabilityAlertDesc': {
-    en: 'All properties exceed 50% of your maximum monthly payment. Consider increasing your budget or looking at smaller properties.',
-    zh: '所有物業都超過您最大可月供的50%。考慮增加預算或尋找較小的物業。',
+    en: 'All properties exceed your maximum monthly payment. Consider increasing your budget or looking at smaller properties.',
+    zh: '所有物業都超過您最大可月供。考慮增加預算或尋找較小的物業。',
   },
   'results.comparisonTip': {
     en: '**Compare building age, parking, and room-toilet ratios to understand if the unit is truly suitable for family self-use.**',
@@ -435,8 +435,8 @@ export const translations: Translations = {
   },
 
   'results.healthyMortgageHint': {
-    en: 'Healthy mortgage ratio: < 50% of maximum monthly payment',
-    zh: '健康按揭比例：< 最大可月供的50%',
+    en: 'Healthy mortgage ratio: < 100% of maximum monthly payment',
+    zh: '健康按揭比例：< 最大可月供的100%',
   },
   'results.stampDuty': {
     en: 'Stamp Duty',

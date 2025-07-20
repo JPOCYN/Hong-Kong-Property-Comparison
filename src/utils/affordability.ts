@@ -53,15 +53,15 @@ export const calculateMonthlyRecurringCosts = (
 };
 
 export const calculateAffordability = (
-  monthlyRecurringCosts: number,
+  monthlyMortgage: number,
   maxMonthlyPayment: number
 ): number => {
-  return (monthlyRecurringCosts / maxMonthlyPayment) * 100;
+  return (monthlyMortgage / maxMonthlyPayment) * 100;
 };
 
 export const getAffordabilityStatus = (percentage: number): 'affordable' | 'moderate' | 'expensive' => {
-  if (percentage <= 40) return 'affordable';
-  if (percentage <= 60) return 'moderate';
+  if (percentage <= 80) return 'affordable';
+  if (percentage <= 100) return 'moderate';
   return 'expensive';
 };
 
@@ -109,7 +109,7 @@ export const calculatePropertyAffordability = (
   );
   
   const affordabilityPercentage = calculateAffordability(
-    monthlyRecurringCosts,
+    monthlyMortgage,
     buyerInfo.maxMonthlyPayment
   );
   

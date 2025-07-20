@@ -50,13 +50,13 @@ export default function ComparisonResultsStep() {
   const mostAffordable = getMostAffordableProperty();
   const averageMonthly = calculations.reduce((sum, calc) => sum + calc.monthlyRecurringCosts, 0) / calculations.length;
 
-  // Check if any properties are under safe affordability level
-  const safeProperties = calculations.filter(calc => calc.affordabilityPercentage <= 50);
-  const hasSafeOptions = safeProperties.length > 0;
+  // Check if any properties are within the user's maximum monthly payment
+  const affordableProperties = calculations.filter(calc => calc.monthlyMortgage <= buyerInfo.maxMonthlyPayment);
+  const hasAffordableOptions = affordableProperties.length > 0;
 
   const getAffordabilityLabel = (percentage: number) => {
-    if (percentage <= 30) return t('affordability.healthy');
-    if (percentage <= 50) return t('affordability.manageable');
+    if (percentage <= 80) return t('affordability.healthy');
+    if (percentage <= 100) return t('affordability.manageable');
     return t('affordability.strained');
   };
 
@@ -142,7 +142,7 @@ export default function ComparisonResultsStep() {
             {mostAffordable.property.name}
           </p>
           <p className="text-xs lg:text-sm text-success-700">
-            {formatNumber(mostAffordable.affordabilityPercentage)}% of income
+            {formatNumber(mostAffordable.affordabilityPercentage)}% of max payment
           </p>
         </div>
 
@@ -219,7 +219,7 @@ export default function ComparisonResultsStep() {
       </div>
 
       {/* Affordability Alert */}
-      {!hasSafeOptions && (
+      {!hasAffordableOptions && (
         <>
           <div className="card bg-warning-50 border-warning-200 p-3 lg:p-4">
             <div className="flex items-center">
@@ -419,8 +419,8 @@ export default function ComparisonResultsStep() {
                       <td className="py-4 px-4">
                         <div className="flex items-center space-x-2">
                           <span className={`text-lg ${getAffordabilityColor(calc.affordabilityStatus)}`}>
-                            {calc.affordabilityPercentage <= 30 ? '🟢' : 
-                             calc.affordabilityPercentage <= 50 ? '🟡' : '🔴'}
+                            {calc.affordabilityPercentage <= 80 ? '🟢' : 
+                             calc.affordabilityPercentage <= 100 ? '🟡' : '🔴'}
                           </span>
                           <div>
                             <span className={`font-medium ${getAffordabilityColor(calc.affordabilityStatus)}`}>
@@ -632,9 +632,9 @@ export default function ComparisonResultsStep() {
                 <div className="pt-3 border-t border-gray-200">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
                     <span>0%</span>
-                    <span>30%</span>
-                    <span>50%</span>
+                    <span>80%</span>
                     <span>100%</span>
+                    <span>120%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3 relative">
                     <div 
