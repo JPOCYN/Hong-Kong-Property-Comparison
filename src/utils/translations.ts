@@ -43,11 +43,11 @@ export const translations: Translations = {
     en: 'Your Financial Information',
     zh: '您的財務資料',
   },
-  'buyerInfo.monthlyIncome': {
+  'buyerInfo.maxMonthlyPayment': {
     en: 'Maximum Monthly Payment',
     zh: '最大可月供',
   },
-  'buyerInfo.monthlyIncomeHelp': {
+  'buyerInfo.maxMonthlyPaymentHelp': {
     en: 'Maximum amount you can afford to pay monthly for mortgage',
     zh: '您每月能負擔的最大按揭供款金額',
   },
@@ -406,8 +406,8 @@ export const translations: Translations = {
     zh: '負擔能力警告',
   },
   'results.affordabilityAlertDesc': {
-    en: 'All properties exceed 50% of your monthly income. Consider increasing your budget or looking at smaller properties.',
-    zh: '所有物業都超過您月收入的50%。考慮增加預算或尋找較小的物業。',
+    en: 'All properties exceed 50% of your maximum monthly payment. Consider increasing your budget or looking at smaller properties.',
+    zh: '所有物業都超過您最大可月供的50%。考慮增加預算或尋找較小的物業。',
   },
   'results.comparisonTip': {
     en: '**Compare building age, parking, and room-toilet ratios to understand if the unit is truly suitable for family self-use.**',
@@ -435,8 +435,8 @@ export const translations: Translations = {
   },
 
   'results.healthyMortgageHint': {
-    en: 'Healthy mortgage ratio: < 50% of income',
-    zh: '健康按揭比例：< 收入的50%',
+    en: 'Healthy mortgage ratio: < 50% of maximum monthly payment',
+    zh: '健康按揭比例：< 最大可月供的50%',
   },
   'results.stampDuty': {
     en: 'Stamp Duty',
@@ -725,8 +725,20 @@ export const translations: Translations = {
     zh: '額外車位價格 (HK$)',
   },
   'propertyInput.parkingHelp': {
-    en: 'Choose your parking situation: No parking, Free parking included, or Extra payment required.',
-    zh: '選擇車位情況：無車位、免費車位已包、或需額外付費購買。',
+    en: 'Select your parking option above',
+    zh: '請選擇上方的車位選項',
+  },
+  'propertyInput.parkingNoneDesc': {
+    en: 'No parking space available',
+    zh: '沒有車位可用',
+  },
+  'propertyInput.parkingIncludedDesc': {
+    en: 'Free parking included in property price',
+    zh: '免費車位已包含在物業價格中',
+  },
+  'propertyInput.parkingAdditionalDesc': {
+    en: 'Extra payment required for parking space',
+    zh: '需要額外付費購買車位',
   },
   'propertyInput.managementFee': {
     en: 'Management Fee',
@@ -782,9 +794,9 @@ export const translations: Translations = {
     en: 'District',
     zh: '地區',
   },
-  'results.monthlyIncome': {
-    en: 'Monthly Income',
-    zh: '月收入',
+  'results.maxMonthlyPayment': {
+    en: 'Maximum Monthly Payment',
+    zh: '最大可月供',
   },
   'results.monthlyBurden': {
     en: 'Monthly Burden',

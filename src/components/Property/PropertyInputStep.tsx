@@ -593,13 +593,18 @@ export default function PropertyInputStep() {
           <div className="space-y-3 lg:space-y-4">
             {/* Parking Section */}
             <div>
-              <h5 className="text-sm font-medium text-gray-900 mb-3">
+              <h5 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                <span className="text-lg mr-2">🚗</span>
                 {t('propertyInput.parkingSection')}
               </h5>
               
               {/* Parking Type Radio Group */}
-              <div className="space-y-2">
-                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+              <div className="space-y-3">
+                <label className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                  form.parkingType === 'none' 
+                    ? 'border-gray-400 bg-gray-50' 
+                    : 'border-gray-200 hover:bg-gray-50'
+                }`}>
                   <input
                     type="radio"
                     name={`parking-${formIndex}`}
@@ -607,10 +612,20 @@ export default function PropertyInputStep() {
                     onChange={() => handleInputChange(formIndex, 'parkingType', 'none')}
                     className="text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-900">{t('propertyInput.parkingNone')}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">❌</span>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">{t('propertyInput.parkingNone')}</span>
+                      <p className="text-xs text-gray-500 mt-1">{t('propertyInput.parkingNoneDesc')}</p>
+                    </div>
+                  </div>
                 </label>
                 
-                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                <label className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                  form.parkingType === 'included' 
+                    ? 'border-green-400 bg-green-50' 
+                    : 'border-gray-200 hover:bg-gray-50'
+                }`}>
                   <input
                     type="radio"
                     name={`parking-${formIndex}`}
@@ -618,10 +633,20 @@ export default function PropertyInputStep() {
                     onChange={() => handleInputChange(formIndex, 'parkingType', 'included')}
                     className="text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-900">{t('propertyInput.parkingIncluded')} 🆗</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">✅</span>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">{t('propertyInput.parkingIncluded')}</span>
+                      <p className="text-xs text-gray-500 mt-1">{t('propertyInput.parkingIncludedDesc')}</p>
+                    </div>
+                  </div>
                 </label>
                 
-                <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+                <label className={`flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
+                  form.parkingType === 'additional' 
+                    ? 'border-blue-400 bg-blue-50' 
+                    : 'border-gray-200 hover:bg-gray-50'
+                }`}>
                   <input
                     type="radio"
                     name={`parking-${formIndex}`}
@@ -629,7 +654,13 @@ export default function PropertyInputStep() {
                     onChange={() => handleInputChange(formIndex, 'parkingType', 'additional')}
                     className="text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-900">{t('propertyInput.parkingAdditional')}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">💰</span>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">{t('propertyInput.parkingAdditional')}</span>
+                      <p className="text-xs text-gray-500 mt-1">{t('propertyInput.parkingAdditionalDesc')}</p>
+                    </div>
+                  </div>
                 </label>
               </div>
               
@@ -655,8 +686,8 @@ export default function PropertyInputStep() {
               )}
               
               {/* Help Text */}
-              <p className="text-xs text-gray-500 mt-2">
-                ⚠️ {t('propertyInput.parkingHelp')}
+              <p className="text-xs text-gray-500 mt-3 px-2">
+                💡 {t('propertyInput.parkingHelp')}
               </p>
             </div>
 

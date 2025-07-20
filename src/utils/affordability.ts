@@ -54,9 +54,9 @@ export const calculateMonthlyRecurringCosts = (
 
 export const calculateAffordability = (
   monthlyRecurringCosts: number,
-  monthlyIncome: number
+  maxMonthlyPayment: number
 ): number => {
-  return (monthlyRecurringCosts / monthlyIncome) * 100;
+  return (monthlyRecurringCosts / maxMonthlyPayment) * 100;
 };
 
 export const getAffordabilityStatus = (percentage: number): 'affordable' | 'moderate' | 'expensive' => {
@@ -110,7 +110,7 @@ export const calculatePropertyAffordability = (
   
   const affordabilityPercentage = calculateAffordability(
     monthlyRecurringCosts,
-    buyerInfo.monthlyIncome
+    buyerInfo.maxMonthlyPayment
   );
   
   const costPerSqFt = calculateCostPerSqFt(property.price, property.size);

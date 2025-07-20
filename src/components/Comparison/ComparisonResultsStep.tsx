@@ -244,7 +244,7 @@ export default function ComparisonResultsStep() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {calculations.map((calc) => {
             // Calculate monthly payment gap (target: 50% of income)
-            const targetMonthlyPayment = buyerInfo.monthlyIncome * 0.5;
+            const targetMonthlyPayment = buyerInfo.maxMonthlyPayment * 0.5;
             const monthlyPaymentGap = calc.monthlyRecurringCosts - targetMonthlyPayment;
             
             // Calculate downpayment gap (target: user's budget)
@@ -259,9 +259,9 @@ export default function ComparisonResultsStep() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
-                      <span className={`font-medium ${(calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) <= 1 ? 'text-green-600' : 'text-red-600'}`}>
-                        {((calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) * 100).toFixed(1)}%
-                      </span>
+                                  <span className={`font-medium ${(calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) <= 1 ? 'text-green-600' : 'text-red-600'}`}>
+              {((calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) * 100).toFixed(1)}%
+            </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-gray-600">{t('results.downpaymentSurplus')}:</span>
@@ -272,12 +272,12 @@ export default function ComparisonResultsStep() {
                   </div>
                   
                   {/* Status indicators */}
-                  {(calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) <= 1 && downpaymentGap <= 0 && (
+                  {(calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) <= 1 && downpaymentGap <= 0 && (
                     <div className="text-xs text-green-600 bg-green-50 p-2 rounded mt-2">
                       ✅ {t('results.withinBudget')}
                     </div>
                   )}
-                  {(calc.monthlyMortgage / (buyerInfo.monthlyIncome * 0.5)) > 1 && (
+                  {(calc.monthlyMortgage / (buyerInfo.maxMonthlyPayment * 0.5)) > 1 && (
                     <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
                       🛑 {t('results.monthlyPaymentExceeded')}
                     </div>
@@ -528,7 +528,7 @@ export default function ComparisonResultsStep() {
                             {(() => {
                               const dsrAnalysis = calculateDSR(
                                 calc.monthlyMortgage, 
-                                buyerInfo.monthlyIncome, 
+                                buyerInfo.maxMonthlyPayment, 
                                 calc.property.price, 
                                 false // Assuming no existing mortgage for now
                               );
@@ -612,8 +612,8 @@ export default function ComparisonResultsStep() {
               <h4 className="font-medium text-gray-900 mb-3">{calc.property.name}</h4>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('results.monthlyIncome')}:</span>
-                  <span className="font-medium">{formatCurrency(buyerInfo.monthlyIncome)}</span>
+                  <span className="text-gray-600">{t('results.maxMonthlyPayment')}:</span>
+                  <span className="font-medium">{formatCurrency(buyerInfo.maxMonthlyPayment)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t('results.monthlyMortgage')}:</span>

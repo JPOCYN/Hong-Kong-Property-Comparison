@@ -39,7 +39,7 @@ export default function BuyerInfoStep() {
   };
 
   const isFormValid = (): boolean => {
-    return buyerInfo.monthlyIncome > 0 && buyerInfo.downpaymentBudget > 0;
+    return buyerInfo.maxMonthlyPayment > 0 && buyerInfo.downpaymentBudget > 0;
   };
 
   return (
@@ -80,7 +80,7 @@ export default function BuyerInfoStep() {
           {/* Monthly Income */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('buyerInfo.monthlyIncome')} *
+              {t('buyerInfo.maxMonthlyPayment')} *
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -88,10 +88,10 @@ export default function BuyerInfoStep() {
               </span>
               <input
                 type="number"
-                value={buyerInfo.monthlyIncome || ''}
+                value={buyerInfo.maxMonthlyPayment || ''}
                 onChange={(e) => {
                   const value = e.target.value === '' ? 0 : Number(e.target.value);
-                  handleInputChange('monthlyIncome', value);
+                  handleInputChange('maxMonthlyPayment', value);
                 }}
                 className="input-field pl-8"
                 placeholder="50000"
@@ -99,7 +99,7 @@ export default function BuyerInfoStep() {
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {t('buyerInfo.monthlyIncomeHelp')}
+              {t('buyerInfo.maxMonthlyPaymentHelp')}
             </p>
           </div>
 

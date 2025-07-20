@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { MortgageType } from '@/utils/mortgage';
 
 export interface BuyerInfo {
-  monthlyIncome: number;
+  maxMonthlyPayment: number; // Changed from monthlyIncome to maxMonthlyPayment
   downpaymentBudget: number;
   isFirstTimeBuyer: boolean;
   mortgageType: MortgageType;
@@ -64,7 +64,7 @@ export interface AppState {
 }
 
 const defaultBuyerInfo: BuyerInfo = {
-  monthlyIncome: 50000,
+  maxMonthlyPayment: 50000,
   downpaymentBudget: 2000000,
   isFirstTimeBuyer: true,
   mortgageType: 'H-mortgage',
@@ -146,7 +146,7 @@ export const useAppStore = create<AppState>()(
         
         switch (currentStep) {
           case 1:
-            return buyerInfo.monthlyIncome > 0 && buyerInfo.downpaymentBudget > 0;
+            return buyerInfo.maxMonthlyPayment > 0 && buyerInfo.downpaymentBudget > 0;
           case 2:
             return properties.length > 0;
           default:
