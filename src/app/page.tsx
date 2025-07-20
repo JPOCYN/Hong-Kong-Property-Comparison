@@ -1,7 +1,159 @@
+'use client';
+
 import Link from 'next/link'
-import { FaCalculator, FaChartLine, FaFilePdf, FaSearch, FaMobile, FaShieldAlt } from 'react-icons/fa'
+import { FaCalculator, FaChartLine, FaFilePdf, FaSearch, FaMobile, FaShieldAlt, FaHome, FaMoneyBillWave, FaGraduationCap } from 'react-icons/fa'
+import { useState } from 'react'
 
 export default function HomePage() {
+  const [language, setLanguage] = useState<'en' | 'zh'>('en')
+
+  const content = {
+    en: {
+      nav: {
+        privacy: 'Privacy',
+        startComparing: 'Start Comparing'
+      },
+      hero: {
+        title: 'Compare Hong Kong Properties',
+        subtitle: 'Like a Pro',
+        description: 'Stop guessing which property to buy! Our intelligent tool helps you compare mortgages, stamp duty, and affordability in seconds. No more 睇樓 fatigue! 🏠',
+        ctaPrimary: 'Start Free Comparison',
+        ctaSecondary: 'Watch Demo',
+        trust: 'No registration required • Free forever • No 地產佬 pressure'
+      },
+      features: {
+        title: 'Everything You Need to Compare Properties',
+        subtitle: 'From mortgage calculations to stamp duty analysis, we\'ve got you covered.',
+        mortgage: {
+          title: 'Smart Mortgage Calculator',
+          description: 'Calculate monthly payments based on Hong Kong\'s DSR rules. No more 計到頭都大!'
+        },
+        stampDuty: {
+          title: 'Stamp Duty Analysis',
+          description: 'Automatic calculation of Hong Kong stamp duty, legal fees, and upfront costs. 印花稅唔使估!'
+        },
+        autocomplete: {
+          title: 'Intelligent Autocomplete',
+          description: 'Find properties quickly with our comprehensive Hong Kong property database. 搵樓快過搵工!'
+        },
+        pdf: {
+          title: 'PDF Export',
+          description: 'Download detailed comparison reports to share with family or advisors. 阿媽都睇得明!'
+        },
+        mobile: {
+          title: 'Mobile Optimized',
+          description: 'Compare properties on any device. 搭地鐵都可以睇樓!'
+        },
+        privacy: {
+          title: 'Privacy First',
+          description: 'Your data stays private. No registration required, no data stored. 私隱大過天!'
+        }
+      },
+      howItWorks: {
+        title: 'How It Works',
+        subtitle: 'Get your property comparison in 3 simple steps',
+        step1: {
+          title: 'Add Properties',
+          description: 'Enter property details or use our autocomplete to find properties quickly. 入資料快過入密碼!'
+        },
+        step2: {
+          title: 'Set Your Budget',
+          description: 'Input your maximum monthly payment and downpayment budget. 預算要現實，唔好諗住中六合彩!'
+        },
+        step3: {
+          title: 'Compare & Decide',
+          description: 'Get detailed comparisons with affordability analysis and PDF export. 睇完就知邊個最抵!'
+        }
+      },
+      cta: {
+        title: 'Ready to Find Your Perfect Property?',
+        subtitle: 'Join thousands of Hong Kong buyers making informed property decisions.',
+        button: 'Start Comparing Now',
+        trust: 'Free • No registration • Instant results • 唔使俾地產佬煩!'
+      },
+      footer: {
+        description: 'The smart way to compare Hong Kong properties and make informed buying decisions.',
+        features: 'Features',
+        resources: 'Resources',
+        support: 'Support',
+        copyright: '© 2024 買乜樓好? | Buy What House Ho?. All rights reserved.'
+      }
+    },
+    zh: {
+      nav: {
+        privacy: '私隱政策',
+        startComparing: '開始比較'
+      },
+      hero: {
+        title: '比較香港物業',
+        subtitle: '專業級別',
+        description: '唔好再估估下邊個樓盤最抵！我哋嘅智能工具幫你比較按揭、印花稅同負擔能力，幾秒搞掂。唔使再睇樓睇到眼都花！🏠',
+        ctaPrimary: '免費開始比較',
+        ctaSecondary: '睇示範',
+        trust: '唔使註冊 • 永久免費 • 冇地產佬煩你'
+      },
+      features: {
+        title: '比較物業需要嘅嘢，我哋都有',
+        subtitle: '由按揭計算到印花稅分析，我哋包晒。',
+        mortgage: {
+          title: '智能按揭計算器',
+          description: '根據香港DSR規則計算月供。唔使再計到頭都大！'
+        },
+        stampDuty: {
+          title: '印花稅分析',
+          description: '自動計算香港印花稅、律師費同前期費用。印花稅唔使估！'
+        },
+        autocomplete: {
+          title: '智能自動完成',
+          description: '用我哋嘅香港物業數據庫快速搵樓。搵樓快過搵工！'
+        },
+        pdf: {
+          title: 'PDF匯出',
+          description: '下載詳細比較報告同家人或顧問分享。阿媽都睇得明！'
+        },
+        mobile: {
+          title: '手機優化',
+          description: '任何設備都可以比較物業。搭地鐵都可以睇樓！'
+        },
+        privacy: {
+          title: '私隱優先',
+          description: '你嘅資料保持私密。唔使註冊，唔會儲存資料。私隱大過天！'
+        }
+      },
+      howItWorks: {
+        title: '點樣運作',
+        subtitle: '3個簡單步驟就搞掂物業比較',
+        step1: {
+          title: '加入物業',
+          description: '輸入物業詳情或用我哋嘅自動完成功能快速搵樓。入資料快過入密碼！'
+        },
+        step2: {
+          title: '設定預算',
+          description: '輸入最大月供同首期預算。預算要現實，唔好諗住中六合彩！'
+        },
+        step3: {
+          title: '比較同決定',
+          description: '得到詳細比較同負擔能力分析，仲可以PDF匯出。睇完就知邊個最抵！'
+        }
+      },
+      cta: {
+        title: '準備搵你嘅完美物業？',
+        subtitle: '加入數千個香港買家，做明智嘅物業決定。',
+        button: '立即開始比較',
+        trust: '免費 • 唔使註冊 • 即時結果 • 唔使俾地產佬煩！'
+      },
+      footer: {
+        description: '比較香港物業嘅聰明方法，做明智嘅買樓決定。',
+        features: '功能',
+        resources: '資源',
+        support: '支援',
+        copyright: '© 2024 買乜樓好? | Buy What House Ho?. 版權所有。'
+      }
+    }
+  }
+
+  const t = content[language]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Navigation */}
@@ -13,14 +165,20 @@ export default function HomePage() {
               <span className="ml-2 text-sm text-gray-500">| Buy What House Ho?</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                {language === 'en' ? '中文' : 'English'}
+              </button>
               <Link href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors">
-                Privacy
+                {t.nav.privacy}
               </Link>
               <Link 
                 href="/compare" 
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
-                Start Comparing
+                {t.nav.startComparing}
               </Link>
             </div>
           </div>
@@ -32,26 +190,25 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              Compare Hong Kong Properties
-              <span className="block text-blue-600">Like a Pro</span>
+              {t.hero.title}
+              <span className="block text-blue-600">{t.hero.subtitle}</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Make informed property decisions with our intelligent comparison tool. 
-              Calculate mortgages, stamp duty, and affordability in seconds.
+              {t.hero.description}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 href="/compare"
                 className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg"
               >
-                Start Free Comparison
+                {t.hero.ctaPrimary}
               </Link>
               <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:border-gray-400 transition-colors">
-                Watch Demo
+                {t.hero.ctaSecondary}
               </button>
             </div>
             <p className="text-sm text-gray-500 mt-4">
-              No registration required • Free forever
+              {t.hero.trust}
             </p>
           </div>
         </div>
@@ -62,10 +219,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything You Need to Compare Properties
+              {t.features.title}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              From mortgage calculations to stamp duty analysis, we've got you covered.
+              {t.features.subtitle}
             </p>
           </div>
           
@@ -75,9 +232,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-6">
                 <FaCalculator className="text-white text-xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Smart Mortgage Calculator</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.features.mortgage.title}</h3>
               <p className="text-gray-600">
-                Calculate monthly payments, interest rates, and affordability based on Hong Kong's DSR rules.
+                {t.features.mortgage.description}
               </p>
             </div>
 
@@ -86,9 +243,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-6">
                 <FaChartLine className="text-white text-xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Stamp Duty Analysis</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.features.stampDuty.title}</h3>
               <p className="text-gray-600">
-                Automatic calculation of Hong Kong stamp duty, legal fees, and upfront costs.
+                {t.features.stampDuty.description}
               </p>
             </div>
 
@@ -97,9 +254,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-6">
                 <FaSearch className="text-white text-xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Intelligent Autocomplete</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.features.autocomplete.title}</h3>
               <p className="text-gray-600">
-                Find properties quickly with our comprehensive Hong Kong property database.
+                {t.features.autocomplete.description}
               </p>
             </div>
 
@@ -108,9 +265,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center mb-6">
                 <FaFilePdf className="text-white text-xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">PDF Export</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.features.pdf.title}</h3>
               <p className="text-gray-600">
-                Download detailed comparison reports to share with family or advisors.
+                {t.features.pdf.description}
               </p>
             </div>
 
@@ -119,9 +276,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center mb-6">
                 <FaMobile className="text-white text-xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Mobile Optimized</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.features.mobile.title}</h3>
               <p className="text-gray-600">
-                Compare properties on any device with our responsive design.
+                {t.features.mobile.description}
               </p>
             </div>
 
@@ -130,9 +287,9 @@ export default function HomePage() {
               <div className="w-12 h-12 bg-red-600 rounded-lg flex items-center justify-center mb-6">
                 <FaShieldAlt className="text-white text-xl" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Privacy First</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.features.privacy.title}</h3>
               <p className="text-gray-600">
-                Your data stays private. No registration required, no data stored.
+                {t.features.privacy.description}
               </p>
             </div>
           </div>
@@ -144,10 +301,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How It Works
+              {t.howItWorks.title}
             </h2>
             <p className="text-xl text-gray-600">
-              Get your property comparison in 3 simple steps
+              {t.howItWorks.subtitle}
             </p>
           </div>
           
@@ -156,9 +313,9 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white text-2xl font-bold">1</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Add Properties</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.howItWorks.step1.title}</h3>
               <p className="text-gray-600">
-                Enter property details or use our autocomplete to find properties quickly.
+                {t.howItWorks.step1.description}
               </p>
             </div>
             
@@ -166,9 +323,9 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white text-2xl font-bold">2</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Set Your Budget</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.howItWorks.step2.title}</h3>
               <p className="text-gray-600">
-                Input your maximum monthly payment and downpayment budget.
+                {t.howItWorks.step2.description}
               </p>
             </div>
             
@@ -176,9 +333,9 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-white text-2xl font-bold">3</span>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Compare & Decide</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.howItWorks.step3.title}</h3>
               <p className="text-gray-600">
-                Get detailed comparisons with affordability analysis and PDF export.
+                {t.howItWorks.step3.description}
               </p>
             </div>
           </div>
@@ -189,19 +346,19 @@ export default function HomePage() {
       <section className="py-20 bg-blue-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Ready to Find Your Perfect Property?
+            {t.cta.title}
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of Hong Kong buyers making informed property decisions.
+            {t.cta.subtitle}
           </p>
           <Link 
             href="/compare"
             className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg inline-block"
           >
-            Start Comparing Now
+            {t.cta.button}
           </Link>
           <p className="text-blue-200 mt-4 text-sm">
-            Free • No registration • Instant results
+            {t.cta.trust}
           </p>
         </div>
       </section>
@@ -213,12 +370,12 @@ export default function HomePage() {
             <div>
               <h3 className="text-xl font-bold mb-4">買乜樓好?</h3>
               <p className="text-gray-400">
-                The smart way to compare Hong Kong properties and make informed buying decisions.
+                {t.footer.description}
               </p>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Features</h4>
+              <h4 className="font-semibold mb-4">{t.footer.features}</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>Mortgage Calculator</li>
                 <li>Stamp Duty Analysis</li>
@@ -228,7 +385,7 @@ export default function HomePage() {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Resources</h4>
+              <h4 className="font-semibold mb-4">{t.footer.resources}</h4>
               <ul className="space-y-2 text-gray-400">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li>Hong Kong Property Guide</li>
@@ -238,7 +395,7 @@ export default function HomePage() {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Support</h4>
+              <h4 className="font-semibold mb-4">{t.footer.support}</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>FAQ</li>
                 <li>Contact Us</li>
@@ -249,7 +406,7 @@ export default function HomePage() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 買乜樓好? | Buy What House Ho?. All rights reserved.</p>
+            <p>{t.footer.copyright}</p>
           </div>
         </div>
       </footer>
