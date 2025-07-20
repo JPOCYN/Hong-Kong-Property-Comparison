@@ -16,66 +16,63 @@ export default function HomePage() {
       hero: {
         title: 'Compare Hong Kong Properties',
         subtitle: 'Like a Pro',
-        description: 'Stop guessing which property to buy! Our intelligent tool helps you compare mortgages, stamp duty, and affordability in seconds. No more 睇樓 fatigue! 🏠',
+        description: 'Stop guessing which property to buy! Our intelligent tool helps you compare mortgages, stamp duty, and affordability in seconds. No more property viewing fatigue! 🏠',
         ctaPrimary: 'Start Free Comparison',
         ctaSecondary: 'Watch Demo',
-        trust: 'No registration required • Free forever • No 地產佬 pressure'
+        trust: 'No registration required • Free forever • No agent pressure'
       },
       features: {
         title: 'Everything You Need to Compare Properties',
         subtitle: 'From mortgage calculations to stamp duty analysis, we\'ve got you covered.',
         mortgage: {
           title: 'Smart Mortgage Calculator',
-          description: 'Calculate monthly payments based on Hong Kong\'s DSR rules. No more 計到頭都大!'
+          description: 'Calculate monthly payments based on Hong Kong\'s DSR rules. No more calculation headaches!'
         },
         stampDuty: {
           title: 'Stamp Duty Analysis',
-          description: 'Automatic calculation of Hong Kong stamp duty, legal fees, and upfront costs. 印花稅唔使估!'
+          description: 'Automatic calculation of Hong Kong stamp duty, legal fees, and upfront costs. No more guessing!'
         },
         autocomplete: {
           title: 'Intelligent Autocomplete',
-          description: 'Find properties quickly with our comprehensive Hong Kong property database. 搵樓快過搵工!'
+          description: 'Find properties quickly with our comprehensive Hong Kong property database. Faster than finding a job!'
         },
         pdf: {
           title: 'PDF Export',
-          description: 'Download detailed comparison reports to share with family or advisors. 阿媽都睇得明!'
+          description: 'Download detailed comparison reports to share with family or advisors. Even mom can understand!'
         },
         mobile: {
           title: 'Mobile Optimized',
-          description: 'Compare properties on any device. 搭地鐵都可以睇樓!'
+          description: 'Compare properties on any device. View properties even on the MTR!'
         },
         privacy: {
           title: 'Privacy First',
-          description: 'Your data stays private. No registration required, no data stored. 私隱大過天!'
+          description: 'Your data stays private. No registration required, no data stored. Privacy is everything!'
         }
       },
       howItWorks: {
         title: 'How It Works',
         subtitle: 'Get your property comparison in 3 simple steps',
         step1: {
-          title: 'Add Properties',
-          description: 'Enter property details or use our autocomplete to find properties quickly. 入資料快過入密碼!'
+          title: 'Enter Your Budget',
+          description: 'Set your maximum monthly payment and downpayment budget. We\'ll calculate what you can afford!'
         },
         step2: {
-          title: 'Set Your Budget',
-          description: 'Input your maximum monthly payment and downpayment budget. 預算要現實，唔好諗住中六合彩!'
+          title: 'Add Properties',
+          description: 'Enter property details or use our autocomplete to find properties quickly. Compare up to 5 properties!'
         },
         step3: {
-          title: 'Compare & Decide',
-          description: 'Get detailed comparisons with affordability analysis and PDF export. 睇完就知邊個最抵!'
+          title: 'Get Results',
+          description: 'View detailed comparisons with mortgage calculations, stamp duty analysis, and PDF export!'
         }
       },
       cta: {
         title: 'Ready to Find Your Perfect Property?',
         subtitle: 'Join thousands of Hong Kong buyers making informed property decisions.',
         button: 'Start Comparing Now',
-        trust: 'Free • No registration • Instant results • 唔使俾地產佬煩!'
+        trust: 'Free • No registration • Instant results • No agent hassle!'
       },
       footer: {
         description: 'The smart way to compare Hong Kong properties and make informed buying decisions.',
-        features: 'Features',
-        resources: 'Resources',
-        support: 'Support',
         copyright: '© 2024 買乜樓好? | Buy What House Ho?. All rights reserved.'
       }
     },
@@ -124,16 +121,16 @@ export default function HomePage() {
         title: '點樣運作',
         subtitle: '3個簡單步驟就搞掂物業比較',
         step1: {
-          title: '加入物業',
-          description: '輸入物業詳情或用我哋嘅自動完成功能快速搵樓。入資料快過入密碼！'
+          title: '輸入預算',
+          description: '設定最大月供同首期預算。我哋會計出你可以負擔幾多！'
         },
         step2: {
-          title: '設定預算',
-          description: '輸入最大月供同首期預算。預算要現實，唔好諗住中六合彩！'
+          title: '加入物業',
+          description: '輸入物業詳情或用我哋嘅自動完成功能快速搵樓。最多可以比較5個物業！'
         },
         step3: {
-          title: '比較同決定',
-          description: '得到詳細比較同負擔能力分析，仲可以PDF匯出。睇完就知邊個最抵！'
+          title: '睇結果',
+          description: '睇詳細比較，包括按揭計算、印花稅分析，仲可以PDF匯出！'
         }
       },
       cta: {
@@ -144,9 +141,6 @@ export default function HomePage() {
       },
       footer: {
         description: '比較香港物業嘅聰明方法，做明智嘅買樓決定。',
-        features: '功能',
-        resources: '資源',
-        support: '支援',
         copyright: '© 2024 買乜樓好? | Buy What House Ho?. 版權所有。'
       }
     }
@@ -156,6 +150,16 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Floating Language Selector for Mobile */}
+      <div className="fixed top-4 right-4 z-50 md:hidden">
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
+          className="bg-white/90 backdrop-blur-sm text-gray-700 hover:text-gray-900 transition-colors px-3 py-2 rounded-lg shadow-lg border border-gray-200 text-sm font-medium"
+        >
+          {language === 'en' ? '中文' : 'EN'}
+        </button>
+      </div>
+
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -164,19 +168,19 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold text-gray-900">買乜樓好?</h1>
               <span className="ml-2 text-sm text-gray-500">| Buy What House Ho?</span>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="flex items-center space-x-4 md:space-x-8">
               <button
                 onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-gray-600 hover:text-gray-900 transition-colors px-3 py-1 rounded border border-gray-300 hover:border-gray-400"
               >
                 {language === 'en' ? '中文' : 'English'}
               </button>
-              <Link href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors">
+              <Link href="/privacy" className="text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">
                 {t.nav.privacy}
               </Link>
               <Link 
                 href="/compare" 
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="bg-blue-600 text-white px-4 md:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm md:text-base"
               >
                 {t.nav.startComparing}
               </Link>
@@ -210,6 +214,14 @@ export default function HomePage() {
             <p className="text-sm text-gray-500 mt-4">
               {t.hero.trust}
             </p>
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')}
+                className="text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
+              >
+                {language === 'en' ? '切換至繁體中文' : 'Switch to English'}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -366,47 +378,26 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">買乜樓好?</h3>
-              <p className="text-gray-400">
-                {t.footer.description}
-              </p>
+                      <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-bold mb-4">買乜樓好?</h3>
+                <p className="text-gray-400">
+                  {t.footer.description}
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-4">Links</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                  <li><Link href="/compare" className="hover:text-white transition-colors">Start Comparing</Link></li>
+                </ul>
+              </div>
             </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">{t.footer.features}</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>Mortgage Calculator</li>
-                <li>Stamp Duty Analysis</li>
-                <li>Property Comparison</li>
-                <li>PDF Export</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">{t.footer.resources}</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li>Hong Kong Property Guide</li>
-                <li>Mortgage Tips</li>
-                <li>Stamp Duty Guide</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">{t.footer.support}</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>FAQ</li>
-                <li>Contact Us</li>
-                <li>Feedback</li>
-                <li>Bug Report</li>
-              </ul>
-            </div>
-          </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
             <p>{t.footer.copyright}</p>
+            <p className="mt-2 text-sm">Creator: OC</p>
           </div>
         </div>
       </footer>
