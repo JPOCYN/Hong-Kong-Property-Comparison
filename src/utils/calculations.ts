@@ -347,4 +347,30 @@ export function getMortgageRate(
   if (ltv <= 0.9) return CURRENT_RATES.primeRate + 0.1;
   
   return CURRENT_RATES.primeRate + 0.25;
+}
+
+/**
+ * Calculate property details for comparison (legacy function)
+ */
+export function calculatePropertyDetails(property: any, userFinancials: any) {
+  // This is a legacy function for backward compatibility
+  // It should be replaced with the new affordability calculations
+  const downpayment = Math.min(
+    userFinancials.downpaymentBudget,
+    property.price * 0.3
+  );
+  
+  const loanAmount = property.price - downpayment;
+  const monthlyMortgage = calculateMortgage(loanAmount, property.price, 30);
+  const stampDuty = calculateStampDuty(property.price);
+  
+  return {
+    property,
+    monthlyMortgage: monthlyMortgage.monthlyPayment,
+    monthlyRecurringCosts: monthlyMortgage.monthlyPayment + property.managementFee,
+    affordabilityPercentage: ((monthlyMortgage.monthlyPayment + property.managementFee) / userFinancials.monthlySalary) * 100,
+    upfrontCosts: downpayment + stampDuty.totalDuty,
+    costPerSqFt: calculateCostPerSqFt(property.price, property.size),
+    stampDuty: stampDuty.totalDuty,
+  };
 } 
