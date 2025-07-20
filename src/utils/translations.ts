@@ -321,6 +321,30 @@ export const translations: Translations = {
     en: 'Within Budget',
     zh: '在預算範圍內',
   },
+  'results.dsrCompliant': {
+    en: '✅ DSR Compliant',
+    zh: '✅ DSR 合格',
+  },
+  'results.dsrExceeded': {
+    en: '🛑 May not qualify for loan (exceeds DSR limit)',
+    zh: '🛑 可能申請不到貸款（超出DSR上限）',
+  },
+  'results.dsr': {
+    en: 'DSR',
+    zh: 'DSR',
+  },
+  'results.maxLTV': {
+    en: 'Max LTV',
+    zh: '最高按揭成數',
+  },
+  'results.maxLoan': {
+    en: 'Max Loan',
+    zh: '最高貸款額',
+  },
+  'results.requiredDownpayment': {
+    en: 'Required Downpayment',
+    zh: '所需首期',
+  },
   'results.detailedComparison': {
     en: 'Detailed Comparison',
     zh: '詳細比較',

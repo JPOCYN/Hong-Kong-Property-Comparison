@@ -60,6 +60,52 @@ export default function ComparisonResultsStep() {
     return t('affordability.strained');
   };
 
+  // Enhanced DSR and MIP calculations
+  const calculateDSR = (monthlyMortgage: number, userIncome: number, propertyPrice: number, hasExistingMortgage: boolean) => {
+    const dsr = monthlyMortgage / userIncome;
+    const threshold = (propertyPrice > 30000000 || hasExistingMortgage) ? 0.4 : 0.5;
+    const isCompliant = dsr <= threshold;
+    const requiredIncome = monthlyMortgage / threshold;
+    
+    return {
+      dsr,
+      threshold,
+      isCompliant,
+      requiredIncome
+    };
+  };
+
+  const calculateMIP = (propertyPrice: number, isFirstTime: boolean, isSalaried: boolean) => {
+    let maxLTV = 0.7; // Default for non-first-time buyers
+    
+    if (isFirstTime && isSalaried) {
+      if (propertyPrice <= 4000000) {
+        maxLTV = 0.9;
+      } else if (propertyPrice <= 6000000) {
+        maxLTV = 0.8;
+      } else if (propertyPrice <= 10000000) {
+        maxLTV = 0.9;
+      } else if (propertyPrice <= 11250000) {
+        maxLTV = Math.min(0.9, 9000000 / propertyPrice);
+      } else if (propertyPrice <= 15000000) {
+        maxLTV = 0.8;
+      } else if (propertyPrice <= 17150000) {
+        maxLTV = Math.min(0.8, 12000000 / propertyPrice);
+      } else {
+        maxLTV = 0.7;
+      }
+    }
+    
+    const maxLoan = propertyPrice * maxLTV;
+    const downPayment = propertyPrice - maxLoan;
+    
+    return {
+      maxLTV,
+      maxLoan,
+      downPayment
+    };
+  };
+
   const handleClearAll = () => {
     clearProperties();
     setShowClearModal(false);
@@ -175,48 +221,7 @@ export default function ComparisonResultsStep() {
             </div>
           </div>
           
-          {/* Improvement Suggestions */}
-          <div className="card bg-blue-50 border-blue-200 p-4 lg:p-6">
-            <div className="flex items-center mb-4">
-              <span className="text-lg lg:text-xl mr-2 lg:mr-3">💡</span>
-              <h3 className="font-medium text-blue-800 text-base lg:text-lg">{t('results.improvementSuggestions')}</h3>
-            </div>
-            <p className="text-sm text-blue-700 mb-4">
-              {t('results.improvementDescription')}
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {calculations.map((calc) => {
-                // Calculate required monthly income for 50% affordability
-                const requiredMonthlyIncome = calc.monthlyRecurringCosts * 2; // 50% of income
-                
-                // Calculate suggested downpayment (30% of property price)
-                const suggestedDownpayment = calc.property.price * 0.3;
-                
-                return (
-                  <div key={calc.property.id} className="bg-white rounded-lg p-4 border border-blue-200">
-                    <h4 className="font-semibold text-gray-900 mb-3 text-sm lg:text-base">
-                      【{calc.property.name}】
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">{t('results.suggestedMonthlyIncome')}:</span>
-                        <span className="font-medium text-green-600">
-                          HK${formatNumber(requiredMonthlyIncome)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">{t('results.suggestedDownpayment')}:</span>
-                        <span className="font-medium text-blue-600">
-                          約 HK${formatNumber(suggestedDownpayment)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+
         </>
       )}
       
@@ -490,6 +495,69 @@ export default function ComparisonResultsStep() {
                               <span className="font-medium text-gray-900">{t('results.size')}:</span>
                               <span className="text-lg font-semibold text-gray-700">{calc.property.size} {t('common.ft2')}</span>
                             </div>
+                          </div>
+                        </div>
+                        
+                        {/* DSR and MIP Analysis */}
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            {(() => {
+                              const dsrAnalysis = calculateDSR(
+                                calc.monthlyMortgage, 
+                                buyerInfo.monthlyIncome, 
+                                calc.property.price, 
+                                false // Assuming no existing mortgage for now
+                              );
+                              
+                              const mipAnalysis = calculateMIP(
+                                calc.property.price, 
+                                buyerInfo.isFirstTimeBuyer, 
+                                true // Assuming salaried for now
+                              );
+                              
+                              return (
+                                <>
+                                  {/* DSR Analysis */}
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-medium text-gray-900">{t('results.dsr')}:</span>
+                                      <span className={`font-medium ${dsrAnalysis.isCompliant ? 'text-green-600' : 'text-red-600'}`}>
+                                        {(dsrAnalysis.dsr * 100).toFixed(1)}%
+                                      </span>
+                                    </div>
+                                    <div className="text-xs">
+                                      {dsrAnalysis.isCompliant ? (
+                                        <span className="text-green-600">{t('results.dsrCompliant')}</span>
+                                      ) : (
+                                        <span className="text-red-600">{t('results.dsrExceeded')}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  {/* MIP Analysis */}
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-medium text-gray-900">{t('results.maxLTV')}:</span>
+                                      <span className="font-medium text-blue-600">
+                                        {(mipAnalysis.maxLTV * 100).toFixed(0)}%
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-medium text-gray-900">{t('results.maxLoan')}:</span>
+                                      <span className="font-medium text-blue-600">
+                                        {formatCurrency(mipAnalysis.maxLoan)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-medium text-gray-900">{t('results.requiredDownpayment')}:</span>
+                                      <span className="font-medium text-blue-600">
+                                        {formatCurrency(mipAnalysis.downPayment)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </td>
