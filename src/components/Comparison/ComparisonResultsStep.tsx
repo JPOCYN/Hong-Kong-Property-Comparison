@@ -11,11 +11,6 @@ import { useState, useEffect } from 'react';
 export default function ComparisonResultsStep() {
   const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep, setEditingProperty, updateBuyerInfo } = useAppStore();
   const [showClearModal, setShowClearModal] = useState(false);
-  const [showQuickEdit, setShowQuickEdit] = useState(false);
-  const [quickEditData, setQuickEditData] = useState({
-    maxMonthlyPayment: buyerInfo.maxMonthlyPayment,
-    downpaymentBudget: buyerInfo.downpaymentBudget
-  });
   const t = (key: string) => getTranslation(key, language);
 
   // Auto-redirect to Step 2 when all properties are deleted
@@ -273,12 +268,6 @@ export default function ComparisonResultsStep() {
           <h2 className="text-xl font-semibold">{t('results.detailedComparison')}</h2>
           <div className="flex space-x-2">
             <button
-              onClick={() => setShowQuickEdit(!showQuickEdit)}
-              className="btn-secondary text-sm"
-            >
-              ⚙️ {t('actions.quickEdit')}
-            </button>
-            <button
               onClick={() => setCurrentStep(2)}
               className="btn-secondary text-sm"
             >
@@ -305,88 +294,69 @@ export default function ComparisonResultsStep() {
           </div>
         </div>
 
-        {/* Quick Edit Section */}
-        {showQuickEdit && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-blue-900">⚙️ {t('results.quickEditTitle')}</h3>
-              <button
-                onClick={() => setShowQuickEdit(false)}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-blue-800 mb-2">
-                  💰 {t('results.maxMonthlyPayment')}
-                </label>
+        {/* Budget Settings Section */}
+        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">💰 預算設定</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                💰 {t('results.maxMonthlyPayment')}
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  $
+                </span>
                 <input
                   type="number"
-                  value={quickEditData.maxMonthlyPayment}
-                  onChange={(e) => setQuickEditData({
-                    ...quickEditData,
-                    maxMonthlyPayment: Number(e.target.value)
-                  })}
-                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={buyerInfo.maxMonthlyPayment || ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : Number(e.target.value);
+                    updateBuyerInfo({
+                      ...buyerInfo,
+                      maxMonthlyPayment: value
+                    });
+                  }}
+                  className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder={t('placeholder.maxMonthlyPayment')}
                 />
-                <p className="text-xs text-blue-600 mt-1">
-                  {t('results.maxMonthlyPaymentHint')}
-                </p>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-blue-800 mb-2">
-                  💳 {t('results.downpaymentBudget')}
-                </label>
-                <input
-                  type="number"
-                  value={quickEditData.downpaymentBudget}
-                  onChange={(e) => setQuickEditData({
-                    ...quickEditData,
-                    downpaymentBudget: Number(e.target.value)
-                  })}
-                  className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder={t('placeholder.downpaymentBudget')}
-                />
-                <p className="text-xs text-blue-600 mt-1">
-                  {t('results.downpaymentBudgetHint')}
-                </p>
-              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {t('results.maxMonthlyPaymentHint')}
+              </p>
             </div>
             
-            <div className="flex justify-end space-x-3 mt-4">
-              <button
-                onClick={() => {
-                  setQuickEditData({
-                    maxMonthlyPayment: buyerInfo.maxMonthlyPayment,
-                    downpaymentBudget: buyerInfo.downpaymentBudget
-                  });
-                  setShowQuickEdit(false);
-                }}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                {t('actions.cancel')}
-              </button>
-              <button
-                onClick={() => {
-                  updateBuyerInfo({
-                    ...buyerInfo,
-                    maxMonthlyPayment: quickEditData.maxMonthlyPayment,
-                    downpaymentBudget: quickEditData.downpaymentBudget
-                  });
-                  setShowQuickEdit(false);
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-              >
-                {t('actions.apply')}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                💳 {t('buyerInfo.downpaymentBudget')}
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  $
+                </span>
+                <input
+                  type="number"
+                  value={buyerInfo.downpaymentBudget / 10000 || ''}
+                  onChange={(e) => {
+                    const value = e.target.value === '' ? 0 : Number(e.target.value) * 10000;
+                    updateBuyerInfo({
+                      ...buyerInfo,
+                      downpaymentBudget: value
+                    });
+                  }}
+                  className="w-full px-3 py-2 pl-8 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t('placeholder.downpaymentBudget')}
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                  {t('common.tenThousand')}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {t('results.downpaymentBudgetHint')}
+              </p>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Modern Card-Based Comparison */}
         <div className="space-y-4">
@@ -540,6 +510,10 @@ export default function ComparisonResultsStep() {
                               : t('results.noParking')
                             }
                           </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">管理費:</span>
+                          <span className="font-medium">{formatCurrency(calc.property.managementFee)}/月</span>
                         </div>
                       </div>
                     </div>

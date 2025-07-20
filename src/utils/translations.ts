@@ -584,8 +584,8 @@ export const translations: Translations = {
     zh: '50000',
   },
   'placeholder.downpaymentBudget': {
-    en: '2000000',
-    zh: '2000000',
+    en: '200',
+    zh: '200',
   },
   
   // Messages
@@ -744,6 +744,14 @@ export const translations: Translations = {
   'propertyInput.schoolNet': {
     en: 'School Net',
     zh: '校網',
+  },
+  'propertyInput.optional': {
+    en: 'Optional',
+    zh: '可選',
+  },
+  'propertyInput.schoolNetHelp': {
+    en: 'Enter the school net number (e.g., 11, 34, 91)',
+    zh: '輸入校網編號（例如：11, 34, 91）',
   },
   'propertyInput.hasCarPark': {
     en: 'Has Car Park',
