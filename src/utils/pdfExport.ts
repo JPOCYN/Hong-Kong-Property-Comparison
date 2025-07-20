@@ -4,10 +4,7 @@ import { PropertyCalculation } from './affordability';
 import { formatCurrency, formatNumber } from './calculations';
 import { getTranslation } from './translations';
 
-// Add Chinese font support
-import 'jspdf-font';
-
-// For Chinese text, we'll use a fallback approach
+// Enhanced sanitizeText function for better localization
 const sanitizeText = (text: string, language: 'en' | 'zh') => {
   if (language === 'zh') {
     // Replace Chinese characters with English equivalents or transliterations
@@ -30,21 +27,98 @@ const sanitizeText = (text: string, language: 'en' | 'zh') => {
       .replace(/呎/g, 'ft²')
       .replace(/第/g, 'Page ')
       .replace(/頁，共/g, ' of ')
-      .replace(/頁/g, ' pages');
+      .replace(/頁/g, ' pages')
+      .replace(/生成日期/g, 'Generated')
+      .replace(/詳細比較/g, 'Detailed Comparison')
+      .replace(/編輯物業/g, 'Edit Properties')
+      .replace(/返回首頁/g, 'Go Home')
+      .replace(/下載PDF/g, 'Download PDF')
+      .replace(/清除全部/g, 'Clear All')
+      .replace(/房間/g, 'Rooms')
+      .replace(/廁所/g, 'Toilets')
+      .replace(/樓齡/g, 'Building Age')
+      .replace(/地區/g, 'District')
+      .replace(/車位/g, 'Parking')
+      .replace(/管理費/g, 'Management Fee')
+      .replace(/校網/g, 'School Net');
   }
   return text;
 };
 
-// Function to add Chinese font to PDF
-const addChineseFont = (doc: jsPDF) => {
-  try {
-    // Add a Chinese font (using a web-safe approach)
-    doc.addFont('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap', 'NotoSansSC', 'normal');
-    return true;
-  } catch (error) {
-    console.warn('Chinese font not available, using fallback');
-    return false;
-  }
+// Function to get localized text based on language
+const getLocalizedText = (key: string, language: 'en' | 'zh') => {
+  const translations: Record<string, { en: string; zh: string }> = {
+    title: {
+      en: 'Hong Kong Property Comparison Report',
+      zh: 'Hong Kong Property Comparison Report'
+    },
+    summary: {
+      en: 'Summary',
+      zh: 'Summary'
+    },
+    mostAffordable: {
+      en: 'Most Affordable',
+      zh: 'Most Affordable'
+    },
+    bestValue: {
+      en: 'Best Value (per ft²)',
+      zh: 'Best Value (per ft²)'
+    },
+    averageMonthlyCost: {
+      en: 'Average Monthly Cost',
+      zh: 'Average Monthly Cost'
+    },
+    property: {
+      en: 'Property',
+      zh: 'Property'
+    },
+    size: {
+      en: 'Size',
+      zh: 'Size'
+    },
+    price: {
+      en: 'Price',
+      zh: 'Price'
+    },
+    costPerFt: {
+      en: 'Cost/ft²',
+      zh: 'Cost/ft²'
+    },
+    upfrontCosts: {
+      en: 'Upfront Costs',
+      zh: 'Upfront Costs'
+    },
+    monthlyMortgage: {
+      en: 'Monthly Mortgage',
+      zh: 'Monthly Mortgage'
+    },
+    monthlyExpenses: {
+      en: 'Monthly Expenses',
+      zh: 'Monthly Expenses'
+    },
+    affordability: {
+      en: 'Affordability %',
+      zh: 'Affordability %'
+    },
+    generated: {
+      en: 'Generated',
+      zh: 'Generated'
+    },
+    page: {
+      en: 'Page',
+      zh: 'Page'
+    },
+    of: {
+      en: 'of',
+      zh: 'of'
+    },
+    brand: {
+      en: 'Buy What House Ho?',
+      zh: 'Buy What House Ho?'
+    }
+  };
+  
+  return translations[key]?.[language] || key;
 };
 
 export const exportToPDF = (
@@ -62,30 +136,23 @@ export const exportToPDF = (
     floatPrecision: 16
   });
   
-  // For Chinese, use a different approach to avoid encoding issues
-  const useChineseFont = language === 'zh';
-  
-  if (useChineseFont) {
-    // Use a font that supports Chinese characters
-    doc.setFont('helvetica');
-  } else {
-    doc.setFont('helvetica');
-  }
+  // Set font
+  doc.setFont('helvetica');
   
   // Title
   doc.setFontSize(20);
-  const title = language === 'zh' ? 'Hong Kong Property Comparison Report' : 'Hong Kong Property Comparison Report';
+  const title = getLocalizedText('title', language);
   doc.text(title, 20, 20);
   
   // Date
   doc.setFontSize(10);
   const currentDate = new Date().toLocaleDateString(language === 'zh' ? 'zh-HK' : 'en-US');
-  const dateText = language === 'zh' ? `Generated: ${currentDate}` : `Generated: ${currentDate}`;
+  const dateText = `${getLocalizedText('generated', language)}: ${currentDate}`;
   doc.text(dateText, 20, 30);
   
   // Summary section
   doc.setFontSize(14);
-  const summaryTitle = language === 'zh' ? 'Summary' : 'Summary';
+  const summaryTitle = getLocalizedText('summary', language);
   doc.text(summaryTitle, 20, 45);
   
   const mostAffordable = calculations.reduce((min, calc) => 
@@ -101,9 +168,9 @@ export const exportToPDF = (
   ) / calculations.length;
   
   doc.setFontSize(10);
-  doc.text(`Most Affordable: ${mostAffordable.property.name}`, 20, 55);
-  doc.text(`Best Value (per ft²): ${bestValue.property.name}`, 20, 65);
-  doc.text(`Average Monthly Cost: ${formatCurrency(avgMonthlyCost)}`, 20, 75);
+  doc.text(`${getLocalizedText('mostAffordable', language)}: ${mostAffordable.property.name}`, 20, 55);
+  doc.text(`${getLocalizedText('bestValue', language)}: ${bestValue.property.name}`, 20, 65);
+  doc.text(`${getLocalizedText('averageMonthlyCost', language)}: ${formatCurrency(avgMonthlyCost)}`, 20, 75);
   
   // Property comparison table
   const tableData = calculations.map(calc => [
@@ -118,14 +185,14 @@ export const exportToPDF = (
   ]);
   
   const headers = [
-    'Property',
-    'Size',
-    'Price',
-    'Cost/ft²',
-    'Upfront Costs',
-    'Monthly Mortgage',
-    'Monthly Recurring',
-    'Affordability %'
+    getLocalizedText('property', language),
+    getLocalizedText('size', language),
+    getLocalizedText('price', language),
+    getLocalizedText('costPerFt', language),
+    getLocalizedText('upfrontCosts', language),
+    getLocalizedText('monthlyMortgage', language),
+    getLocalizedText('monthlyExpenses', language),
+    getLocalizedText('affordability', language)
   ];
   
   autoTable(doc, {
@@ -147,11 +214,12 @@ export const exportToPDF = (
     margin: { top: 10, right: 10, bottom: 10, left: 10 },
   });
   
-  // Add detailed property information
+  // Add detailed property information with proper page breaks
   let currentY = 150; // Start after the table
   
   calculations.forEach((calc, index) => {
-    if (currentY > doc.internal.pageSize.height - 60) {
+    // Check if we need a new page
+    if (currentY > doc.internal.pageSize.height - 80) {
       doc.addPage();
       currentY = 20;
     }
@@ -165,13 +233,13 @@ export const exportToPDF = (
     currentY += 8;
     
     const details = [
-      `Size: ${calc.property.size} ft²`,
-      `Price: ${formatCurrency(calc.property.price)}`,
-      `Cost/ft²: ${formatCurrency(calc.costPerSqFt)}`,
-      `Upfront Costs: ${formatCurrency(calc.upfrontCosts)}`,
-      `Monthly Mortgage: ${formatCurrency(calc.monthlyMortgage)}`,
-      `Monthly Expenses: ${formatCurrency(calc.monthlyRecurringCosts)}`,
-      `Affordability: ${formatNumber(calc.affordabilityPercentage)}%`,
+      `${getLocalizedText('size', language)}: ${calc.property.size} ft²`,
+      `${getLocalizedText('price', language)}: ${formatCurrency(calc.property.price)}`,
+      `${getLocalizedText('costPerFt', language)}: ${formatCurrency(calc.costPerSqFt)}`,
+      `${getLocalizedText('upfrontCosts', language)}: ${formatCurrency(calc.upfrontCosts)}`,
+      `${getLocalizedText('monthlyMortgage', language)}: ${formatCurrency(calc.monthlyMortgage)}`,
+      `${getLocalizedText('monthlyExpenses', language)}: ${formatCurrency(calc.monthlyRecurringCosts)}`,
+      `${getLocalizedText('affordability', language)}: ${formatNumber(calc.affordabilityPercentage)}%`,
     ];
     
     details.forEach(detail => {
@@ -188,7 +256,7 @@ export const exportToPDF = (
     doc.setPage(i);
     doc.setFontSize(8);
     doc.text(
-      `Page ${i} of ${pageCount}`,
+      `${getLocalizedText('page', language)} ${i} ${getLocalizedText('of', language)} ${pageCount}`,
       20, 
       doc.internal.pageSize.height - 10
     );
@@ -196,11 +264,12 @@ export const exportToPDF = (
     // Add watermark
     doc.setFontSize(6);
     doc.setTextColor(200, 200, 200);
-    doc.text('Buy What House Ho?', doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 5);
+    doc.text(getLocalizedText('brand', language), doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 5);
     doc.setTextColor(0, 0, 0);
   }
   
-  // Save the PDF with proper filename
-  const filename = 'Hong-Kong-Property-Comparison.pdf';
+  // Save the PDF with meaningful filename and timestamp
+  const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const filename = `Hong-Kong-Property-Comparison-${timestamp}.pdf`;
   doc.save(filename);
 }; 
