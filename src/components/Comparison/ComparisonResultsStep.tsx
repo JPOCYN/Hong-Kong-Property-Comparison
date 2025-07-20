@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 export default function ComparisonResultsStep() {
   const { properties, buyerInfo, removeProperty, clearProperties, language, setCurrentStep, setEditingProperty, updateBuyerInfo } = useAppStore();
   const [showClearModal, setShowClearModal] = useState(false);
+  const [showBudgetSettings, setShowBudgetSettings] = useState(false);
   const t = (key: string) => getTranslation(key, language);
 
   // Auto-redirect to Step 2 when all properties are deleted
@@ -294,73 +295,98 @@ export default function ComparisonResultsStep() {
           </div>
         </div>
 
-        {/* Budget Settings Section */}
-        <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">💰 預算設定</h3>
+        {/* Budget Settings Section - Collapsible */}
+        <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+          <button
+            onClick={() => setShowBudgetSettings(!showBudgetSettings)}
+            className="w-full p-4 flex items-center justify-between hover:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">💰</span>
+              <h3 className="text-lg font-medium text-gray-900">預算設定</h3>
+            </div>
+            <span className={`transform transition-transform duration-200 ${showBudgetSettings ? 'rotate-180' : ''}`}>
+              ▼
+            </span>
+          </button>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                💰 {t('results.maxMonthlyPayment')}
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  $
-                </span>
-                <input
-                  type="number"
-                  value={buyerInfo.maxMonthlyPayment || ''}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : Number(e.target.value);
-                    updateBuyerInfo({
-                      ...buyerInfo,
-                      maxMonthlyPayment: value
-                    });
-                  }}
-                  className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder={t('placeholder.maxMonthlyPayment')}
-                />
+          {showBudgetSettings && (
+            <div className="px-4 pb-4 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    💰 {t('results.maxMonthlyPayment')}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      value={buyerInfo.maxMonthlyPayment || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : Number(e.target.value);
+                        updateBuyerInfo({
+                          ...buyerInfo,
+                          maxMonthlyPayment: value
+                        });
+                      }}
+                      className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder={t('placeholder.maxMonthlyPayment')}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t('results.maxMonthlyPaymentHint')}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    💳 {t('buyerInfo.downpaymentBudget')}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      $
+                    </span>
+                    <input
+                      type="number"
+                      value={buyerInfo.downpaymentBudget / 10000 || ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : Number(e.target.value) * 10000;
+                        updateBuyerInfo({
+                          ...buyerInfo,
+                          downpaymentBudget: value
+                        });
+                      }}
+                      className="w-full px-3 py-2 pl-8 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder={t('placeholder.downpaymentBudget')}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                      {t('common.tenThousand')}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {t('results.downpaymentBudgetHint')}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {t('results.maxMonthlyPaymentHint')}
-              </p>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                💳 {t('buyerInfo.downpaymentBudget')}
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  $
-                </span>
-                <input
-                  type="number"
-                  value={buyerInfo.downpaymentBudget / 10000 || ''}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? 0 : Number(e.target.value) * 10000;
-                    updateBuyerInfo({
-                      ...buyerInfo,
-                      downpaymentBudget: value
-                    });
-                  }}
-                  className="w-full px-3 py-2 pl-8 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder={t('placeholder.downpaymentBudget')}
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                  {t('common.tenThousand')}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {t('results.downpaymentBudgetHint')}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Modern Card-Based Comparison */}
+        {/* Modern Card-Based Comparison - Auto-sorted by affordability */}
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <span className="text-blue-600">📊</span>
+            <span className="text-sm font-medium text-blue-800">
+              已按負擔能力排序（最佳到最差）
+            </span>
+          </div>
+        </div>
         <div className="space-y-4">
-          {calculations.map((calc, index) => {
+          {calculations
+            .sort((a, b) => a.affordabilityPercentage - b.affordabilityPercentage) // Sort by affordability (best to worst)
+            .map((calc, index) => {
             const isBestValue = calc.property.id === bestValue.property.id;
             const isMostAffordable = calc.property.id === mostAffordable.property.id;
             const dsrAnalysis = calculateDSR(
@@ -392,9 +418,20 @@ export default function ComparisonResultsStep() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {calc.property.name}
-                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                            index === 0 ? 'bg-green-500 text-white' :
+                            index === 1 ? 'bg-blue-500 text-white' :
+                            index === 2 ? 'bg-purple-500 text-white' :
+                            index === 3 ? 'bg-orange-500 text-white' :
+                            'bg-gray-500 text-white'
+                          }`}>
+                            {index + 1}
+                          </span>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {calc.property.name}
+                          </h3>
+                        </div>
                         {isBestValue && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success-100 text-success-800 border border-success-200">
                             🏆 {t('results.bestValue')}
