@@ -88,8 +88,11 @@ export default function BuyerInfoStep() {
               </span>
               <input
                 type="number"
-                value={buyerInfo.monthlyIncome}
-                onChange={(e) => handleInputChange('monthlyIncome', Number(e.target.value))}
+                value={buyerInfo.monthlyIncome || ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : Number(e.target.value);
+                  handleInputChange('monthlyIncome', value);
+                }}
                 className="input-field pl-8"
                 placeholder="50000"
                 required
@@ -111,8 +114,11 @@ export default function BuyerInfoStep() {
               </span>
               <input
                 type="number"
-                value={buyerInfo.downpaymentBudget / 10000}
-                onChange={(e) => handleInputChange('downpaymentBudget', Number(e.target.value) * 10000)}
+                value={buyerInfo.downpaymentBudget / 10000 || ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : Number(e.target.value) * 10000;
+                  handleInputChange('downpaymentBudget', value);
+                }}
                 className="input-field pl-8"
                 placeholder="200"
                 required
