@@ -25,8 +25,7 @@ export interface Property {
   toilets: number;
   buildingAge: number; // 樓齡
   district: string; // 地區
-  schoolNet?: string; // 小學校網 (optional) - for backward compatibility
-  schoolNets?: string[]; // 小學校網 (optional) - new multi-select format
+  schoolNet?: string; // 小學校網 (optional)
   carParkIncluded: boolean;
   carParkPrice: number;
   managementFee: number;

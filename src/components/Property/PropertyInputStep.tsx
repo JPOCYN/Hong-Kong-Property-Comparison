@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { getTranslation } from '@/utils/translations';
-import { loadEstateData, searchEstates, EstateData, getBuildingAgeNumber } from '@/utils/estateData';
-import { getSchoolNetByDistrict, getAllDistricts } from '@/utils/schoolNetMap';
+import { getSchoolNetByDistrict } from '@/utils/schoolNetMap';
+import { loadEstateData, searchEstates, getEstateByName, EstateData, formatPricePerFt, getBuildingAgeNumber } from '@/utils/estateData';
+import { useState, useEffect } from 'react';
 
 interface PropertyFormData {
   name: string;
@@ -14,67 +14,161 @@ interface PropertyFormData {
   toilets: number;
   buildingAge: number;
   district: string;
-  schoolNets: string[];
+  schoolNet: string;
   parkingType: 'none' | 'included' | 'additional';
   carParkIncluded: boolean;
   carParkPrice: number;
   managementFee: number;
 }
 
-interface PropertyPanel {
-  id: string;
-  form: PropertyFormData;
-  isExpanded: boolean;
-  isEditing: boolean;
-}
-
 export default function PropertyInputStep() {
-  const { 
-    language, 
-    properties, 
-    addProperty, 
-    updateProperty, 
-    removeProperty,
-    editingPropertyId,
-    setEditingProperty
-  } = useAppStore();
-  
+  const { properties, addProperty, updateProperty, removeProperty, language, editingPropertyId, setEditingProperty } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
-
-  // State for accordion panels
-  const [panels, setPanels] = useState<PropertyPanel[]>([
+  
+  // Property form data for both columns
+  const [propertyForms, setPropertyForms] = useState<PropertyFormData[]>([
     {
-      id: 'panel-1',
-      form: {
-        name: '',
-        size: 0,
-        price: 0,
-        rooms: 1,
-        toilets: 1,
-        buildingAge: 0,
-        district: '',
-        schoolNets: [],
-        parkingType: 'none',
-        carParkIncluded: false,
-        carParkPrice: 0,
-        managementFee: 0,
-      },
-      isExpanded: true,
-      isEditing: false,
+      name: '',
+      size: 0,
+      price: 0,
+      rooms: 1,
+      toilets: 1,
+      buildingAge: 0,
+      district: '',
+      schoolNet: '',
+      parkingType: 'none',
+      carParkIncluded: false,
+      carParkPrice: 0,
+      managementFee: 0,
+    },
+    {
+      name: '',
+      size: 0,
+      price: 0,
+      rooms: 1,
+      toilets: 1,
+      buildingAge: 0,
+      district: '',
+      schoolNet: '',
+      parkingType: 'none',
+      carParkIncluded: false,
+      carParkPrice: 0,
+      managementFee: 0,
     }
   ]);
 
-  // Estate data for autocomplete
+  // Estate autocomplete state
   const [estates, setEstates] = useState<EstateData[]>([]);
-  const [isLoadingEstates, setIsLoadingEstates] = useState(false);
   const [suggestions, setSuggestions] = useState<EstateData[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number>(-1);
+  const [isLoadingEstates, setIsLoadingEstates] = useState(true);
 
-  // District autocomplete
+  // District autocomplete state
   const [districtSuggestions, setDistrictSuggestions] = useState<string[]>([]);
   const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
-  const [activeDistrictSuggestionIndex, setActiveDistrictSuggestionIndex] = useState<number | null>(null);
+  const [activeDistrictSuggestionIndex, setActiveDistrictSuggestionIndex] = useState<number>(-1);
+
+  // Collapsible state for mobile UX
+  const [collapsedForms, setCollapsedForms] = useState<Set<number>>(new Set());
+
+  // Hong Kong districts
+  const hkDistricts = [
+    '中西區', '灣仔', '東區', '南區',
+    '油尖旺', '深水埗', '九龍城', '黃大仙', '觀塘',
+    '葵青', '荃灣', '屯門', '元朗', '北區', '大埔', '西貢', '沙田', '離島'
+  ];
+
+  const handleInputChange = (formIndex: number, field: string, value: any) => {
+    setPropertyForms(prev => prev.map((form, index) => {
+      if (index === formIndex) {
+        const updatedForm = { ...form, [field]: value };
+        
+        // Sync parkingType with carParkIncluded
+        if (field === 'parkingType') {
+          updatedForm.carParkIncluded = value === 'included';
+          if (value !== 'additional') {
+            updatedForm.carParkPrice = 0;
+          }
+        }
+        
+        return updatedForm;
+      }
+      return form;
+    }));
+  };
+
+  const handleDistrictChange = (formIndex: number, district: string) => {
+    const schoolNets = getSchoolNetByDistrict(district);
+    setPropertyForms(prev => prev.map((form, index) => 
+      index === formIndex ? {
+        ...form,
+        district,
+        schoolNet: schoolNets.length > 0 ? schoolNets[0].code : ''
+      } : form
+    ));
+  };
+
+  const calculateCostPerSqFt = (form: PropertyFormData): number => {
+    if (form.size > 0 && form.price > 0) {
+      return form.price / form.size;
+    }
+    return 0;
+  };
+
+  const getManagementFeeSuggestion = (form: PropertyFormData): number => {
+    if (form.size > 0) {
+      return Math.round(form.size * 2.5);
+    }
+    return 0;
+  };
+
+  const isPropertyValid = (form: PropertyFormData): boolean => {
+    return form.name.trim() !== '' && 
+           form.price > 0 && 
+           form.size > 0;
+  };
+
+  const handleAddProperty = (formIndex: number) => {
+    const form = propertyForms[formIndex];
+    if (isPropertyValid(form)) {
+      if (editingPropertyId) {
+        // Update existing property
+        updateProperty(editingPropertyId, {
+          ...form,
+          carParkIncluded: form.parkingType === 'included',
+        });
+        setEditingProperty(null); // Clear editing state
+      } else {
+        // Add new property
+        addProperty({
+          ...form,
+          id: Date.now().toString() + formIndex,
+          carParkIncluded: form.parkingType === 'included',
+        });
+      }
+      
+      // Reset the form and collapse it on mobile
+      setPropertyForms(prev => prev.map((f, index) => 
+        index === formIndex ? {
+          name: '',
+          size: 0,
+          price: 0,
+          rooms: 1,
+          toilets: 1,
+          buildingAge: 0,
+          district: '',
+          schoolNet: '',
+          parkingType: 'none',
+          carParkIncluded: false,
+          carParkPrice: 0,
+          managementFee: 0,
+        } : f
+      ));
+      // Collapse the form after adding property (mobile UX)
+      setCollapsedForms(prev => new Set(Array.from(prev).concat([formIndex])));
+    }
+  };
 
   // Load estate data on component mount
   useEffect(() => {
@@ -92,230 +186,43 @@ export default function PropertyInputStep() {
     if (editingPropertyId) {
       const editingProperty = properties.find(p => p.id === editingPropertyId);
       if (editingProperty) {
-        // Find the panel to edit or create a new one
-        const panelIndex = panels.findIndex(p => p.id === editingPropertyId);
-        if (panelIndex >= 0) {
-          // Update existing panel
-          setPanels(prev => prev.map((panel, index) => 
-            index === panelIndex ? {
-              ...panel,
-              form: {
-                name: editingProperty.name,
-                size: editingProperty.size,
-                price: editingProperty.price,
-                rooms: editingProperty.rooms,
-                toilets: editingProperty.toilets,
-                buildingAge: editingProperty.buildingAge,
-                district: editingProperty.district,
-                schoolNets: editingProperty.schoolNets ? editingProperty.schoolNets : (editingProperty.schoolNet ? editingProperty.schoolNet.split(', ').filter(Boolean) : []),
-                parkingType: editingProperty.carParkIncluded ? 'included' : (editingProperty.carParkPrice > 0 ? 'additional' : 'none'),
-                carParkIncluded: editingProperty.carParkIncluded,
-                carParkPrice: editingProperty.carParkPrice,
-                managementFee: editingProperty.managementFee,
-              },
-              isExpanded: true,
-              isEditing: true,
-            } : panel
-          ));
-        } else {
-          // Add new panel for editing
-          setPanels(prev => [...prev, {
-            id: editingPropertyId,
-            form: {
-              name: editingProperty.name,
-              size: editingProperty.size,
-              price: editingProperty.price,
-              rooms: editingProperty.rooms,
-              toilets: editingProperty.toilets,
-              buildingAge: editingProperty.buildingAge,
-              district: editingProperty.district,
-                              schoolNets: editingProperty.schoolNets ? editingProperty.schoolNets : (editingProperty.schoolNet ? editingProperty.schoolNet.split(', ').filter(Boolean) : []),
-              parkingType: editingProperty.carParkIncluded ? 'included' : (editingProperty.carParkPrice > 0 ? 'additional' : 'none'),
-              carParkIncluded: editingProperty.carParkIncluded,
-              carParkPrice: editingProperty.carParkPrice,
-              managementFee: editingProperty.managementFee,
-            },
-            isExpanded: true,
-            isEditing: true,
-          }]);
-        }
+        // Load the editing property data into the first form
+        setPropertyForms(prev => prev.map((form, index) => 
+          index === 0 ? {
+            name: editingProperty.name,
+            size: editingProperty.size,
+            price: editingProperty.price,
+            rooms: editingProperty.rooms,
+            toilets: editingProperty.toilets,
+            buildingAge: editingProperty.buildingAge,
+            district: editingProperty.district,
+            schoolNet: editingProperty.schoolNet || '',
+            parkingType: editingProperty.carParkIncluded ? 'included' : (editingProperty.carParkPrice > 0 ? 'additional' : 'none'),
+            carParkIncluded: editingProperty.carParkIncluded,
+            carParkPrice: editingProperty.carParkPrice,
+            managementFee: editingProperty.managementFee,
+          } : form
+        ));
+        
+        // Expand the first form when editing
+        setCollapsedForms(prev => {
+          const newSet = new Set(Array.from(prev));
+          newSet.delete(0); // Ensure first form is expanded
+          return newSet;
+        });
       }
     }
   }, [editingPropertyId, properties]);
 
-  const handleInputChange = (panelIndex: number, field: string, value: any) => {
-    setPanels(prev => prev.map((panel, index) => {
-      if (index === panelIndex) {
-        const updatedForm = { ...panel.form, [field]: value };
-        
-        // Sync parkingType with carParkIncluded
-        if (field === 'parkingType') {
-          updatedForm.carParkIncluded = value === 'included';
-          if (value !== 'additional') {
-            updatedForm.carParkPrice = 0;
-          }
-        }
-        
-        return { ...panel, form: updatedForm };
-      }
-      return panel;
-    }));
-  };
-
-  const handleDistrictChange = (panelIndex: number, district: string) => {
-    const schoolNetInfo = getSchoolNetByDistrict(district);
-    const schoolNets = schoolNetInfo.map(net => net.code);
-    setPanels(prev => prev.map((panel, index) => 
-      index === panelIndex ? {
-        ...panel,
-        form: {
-          ...panel.form,
-          district,
-          schoolNets: schoolNets || panel.form.schoolNets,
-        }
-      } : panel
-    ));
-  };
-
-  const calculateCostPerSqFt = (form: PropertyFormData): number => {
-    if (form.size <= 0) return 0;
-    return form.price / form.size;
-  };
-
-  const getManagementFeeSuggestion = (form: PropertyFormData): number => {
-    if (form.size <= 0) return 0;
-    return form.size * 2.5; // $2.5 per sq ft
-  };
-
-  const isPropertyValid = (form: PropertyFormData): boolean => {
-    return form.name.trim() !== '' && form.size > 0 && form.price > 0 && form.schoolNets.length > 0;
-  };
-
-  const handleAddProperty = (panelIndex: number) => {
-    const panel = panels[panelIndex];
-    const form = panel.form;
-    
-    if (!isPropertyValid(form)) return;
-
-          if (panel.isEditing) {
-        // Update existing property
-        updateProperty(panel.id, {
-          ...form,
-          carParkIncluded: form.parkingType === 'included',
-          schoolNet: form.schoolNets.join(', '), // For backward compatibility
-          schoolNets: form.schoolNets, // New format
-        });
-        setEditingProperty(null);
-        
-        // Remove the editing panel
-        setPanels(prev => prev.filter((_, index) => index !== panelIndex));
-      } else {
-        // Add new property
-        const newPropertyId = Date.now().toString() + panelIndex;
-        addProperty({
-          ...form,
-          id: newPropertyId,
-          carParkIncluded: form.parkingType === 'included',
-          schoolNet: form.schoolNets.join(', '), // For backward compatibility
-          schoolNets: form.schoolNets, // New format
-        });
-        
-        // Reset the panel for next use
-        setPanels(prev => prev.map((p, index) => 
-          index === panelIndex ? {
-            ...p,
-            id: `panel-${Date.now()}`,
-            form: {
-              name: '',
-              size: 0,
-              price: 0,
-              rooms: 1,
-              toilets: 1,
-              buildingAge: 0,
-              district: '',
-              schoolNets: [],
-              parkingType: 'none',
-              carParkIncluded: false,
-              carParkPrice: 0,
-              managementFee: 0,
-            },
-            isEditing: false,
-          } : p
-        ));
-      }
-  };
-
-  const handleCancelEdit = (panelIndex: number) => {
-    setEditingProperty(null);
-    setPanels(prev => prev.filter((_, index) => index !== panelIndex));
-  };
-
-  const handleRemoveProperty = (propertyId: string) => {
-    removeProperty(propertyId);
-  };
-
-  const togglePanel = (panelIndex: number) => {
-    setPanels(prev => prev.map((panel, index) => 
-      index === panelIndex ? { ...panel, isExpanded: !panel.isExpanded } : panel
-    ));
-  };
-
-  const addNewPanel = () => {
-    if (panels.length >= 3) return;
-    
-    const newPanel: PropertyPanel = {
-      id: `panel-${Date.now()}`,
-      form: {
-        name: '',
-        size: 0,
-        price: 0,
-        rooms: 1,
-        toilets: 1,
-        buildingAge: 0,
-        district: '',
-        schoolNets: [],
-        parkingType: 'none',
-        carParkIncluded: false,
-        carParkPrice: 0,
-        managementFee: 0,
-      },
-      isExpanded: true,
-      isEditing: false,
-    };
-    
-    setPanels(prev => [...prev, newPanel]);
-  };
-
-  const getPanelHeader = (panel: PropertyPanel, index: number) => {
-    const form = panel.form;
-    
-    if (panel.isEditing) {
-      return `${t('propertyInput.editProperty')} ${index + 1}`;
-    }
-    
-    if (!form.name && !form.size && !form.price) {
-      return `${t('propertyInput.newProperty')} ${index + 1}`;
-    }
-    
-    const summary = [
-      form.name,
-      `${form.rooms}R ${form.toilets}T`,
-      form.size > 0 ? `${form.size}${t('common.ft2')}` : '',
-      form.district
-    ].filter(Boolean).join(' · ');
-    
-    return summary || `${t('propertyInput.newProperty')} ${index + 1}`;
-  };
-
   // Handle estate name input with autocomplete
-  const handleEstateNameChange = (panelIndex: number, value: string) => {
-    handleInputChange(panelIndex, 'name', value);
+  const handleEstateNameChange = (formIndex: number, value: string) => {
+    handleInputChange(formIndex, 'name', value);
     
     if (value.trim().length > 0) {
       const results = searchEstates(value, estates);
       setSuggestions(results);
       setShowSuggestions(true);
-      setActiveSuggestionIndex(panelIndex);
+      setActiveSuggestionIndex(formIndex);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -323,34 +230,30 @@ export default function PropertyInputStep() {
   };
 
   // Handle estate selection
-  const handleEstateSelect = (panelIndex: number, estate: EstateData) => {
-    setPanels(prev => prev.map((panel, index) => 
-      index === panelIndex ? {
-        ...panel,
-        form: {
-          ...panel.form,
-          name: estate.name,
-          district: estate.district,
-          buildingAge: getBuildingAgeNumber(estate.buildingAge),
-          schoolNets: estate.schoolNet ? [estate.schoolNet] : [],
-        }
-      } : panel
+  const handleEstateSelect = (formIndex: number, estate: EstateData) => {
+    setPropertyForms(prev => prev.map((form, index) => 
+      index === formIndex ? {
+        ...form,
+        name: estate.name,
+        district: estate.district,
+        buildingAge: getBuildingAgeNumber(estate.buildingAge),
+        schoolNet: estate.schoolNet,
+      } : form
     ));
     setShowSuggestions(false);
   };
 
   // Handle district input with autocomplete
-  const handleDistrictInputChange = (panelIndex: number, value: string) => {
-    handleInputChange(panelIndex, 'district', value);
+  const handleDistrictInputChange = (formIndex: number, value: string) => {
+    handleInputChange(formIndex, 'district', value);
     
     if (value.trim().length > 0) {
-      const districts = getAllDistricts();
-      const filtered = districts.filter(district => 
+      const filtered = hkDistricts.filter(district => 
         district.toLowerCase().includes(value.toLowerCase())
       );
       setDistrictSuggestions(filtered);
       setShowDistrictSuggestions(true);
-      setActiveDistrictSuggestionIndex(panelIndex);
+      setActiveDistrictSuggestionIndex(formIndex);
     } else {
       setDistrictSuggestions([]);
       setShowDistrictSuggestions(false);
@@ -358,24 +261,80 @@ export default function PropertyInputStep() {
   };
 
   // Handle district selection
-  const handleDistrictSelect = (panelIndex: number, district: string) => {
-    handleDistrictChange(panelIndex, district);
+  const handleDistrictSelect = (formIndex: number, district: string) => {
+    handleDistrictChange(formIndex, district);
     setShowDistrictSuggestions(false);
   };
 
-  const getBuildingAgeNumber = (buildingAge: string): number => {
-    const match = buildingAge.match(/(\d+)/);
-    return match ? parseInt(match[1]) : 0;
+  // Toggle collapsed state
+  const toggleCollapsed = (formIndex: number) => {
+    setCollapsedForms(prev => {
+      const newSet = new Set(Array.from(prev));
+      if (newSet.has(formIndex)) {
+        newSet.delete(formIndex);
+      } else {
+        newSet.add(formIndex);
+      }
+      return newSet;
+    });
   };
 
-  const renderPropertyForm = (panel: PropertyPanel, panelIndex: number) => {
-    const form = panel.form;
+  const renderPropertyForm = (formIndex: number) => {
+    const form = propertyForms[formIndex];
     const costPerSqFt = calculateCostPerSqFt(form);
     const managementFeeSuggestion = getManagementFeeSuggestion(form);
     const isExpensive = costPerSqFt > 25000;
 
+    const isCollapsed = collapsedForms.has(formIndex);
+    const hasData = form.name || form.size > 0 || form.price > 0;
+
     return (
-      <div className="p-4 lg:p-6">
+      <div key={formIndex} data-form-index={formIndex} className="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
+        {/* Header - Always visible */}
+        <div className="p-4 lg:p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {editingPropertyId && formIndex === 0 ? (
+                <span className="flex items-center">
+                  <span className="text-blue-600 mr-2">✏️</span>
+                  {t('actions.edit')} {t('propertyInput.propertyName')}
+                </span>
+              ) : (
+                `${t('propertyInput.propertyName')} ${formIndex + 1}`
+              )}
+            </h3>
+            <div className="flex items-center space-x-2">
+              {/* Show summary if form has data */}
+              {hasData && (
+                <div className="text-sm text-gray-600 hidden sm:block">
+                  {form.name && <span className="mr-2">{form.name}</span>}
+                  {form.price > 0 && <span className="mr-2">${(form.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>}
+                  {form.size > 0 && <span>{form.size} {t('common.ft2')}</span>}
+                </div>
+              )}
+              {/* Collapse/Expand button */}
+              <button
+                onClick={() => toggleCollapsed(formIndex)}
+                className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label={isCollapsed ? 'Expand form' : 'Collapse form'}
+              >
+                <svg 
+                  className={`w-5 h-5 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Collapsible Content */}
+        <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'}`}>
+          <div className="p-4 lg:p-6">
+
         {/* Basic Info Section */}
         <div className="mb-4 lg:mb-6">
           <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
@@ -392,14 +351,14 @@ export default function PropertyInputStep() {
               <input
                 type="text"
                 value={form.name}
-                onChange={(e) => handleEstateNameChange(panelIndex, e.target.value)}
+                onChange={(e) => handleEstateNameChange(formIndex, e.target.value)}
                 className="input-field"
                 placeholder={t('propertyInput.propertyNamePlaceholder')}
                 required
                 onFocus={() => {
                   if (form.name.trim().length > 0) {
                     setShowSuggestions(true);
-                    setActiveSuggestionIndex(panelIndex);
+                    setActiveSuggestionIndex(formIndex);
                   }
                 }}
                 onBlur={() => {
@@ -407,22 +366,35 @@ export default function PropertyInputStep() {
                 }}
               />
               
-              {/* Estate Suggestions */}
-              {showSuggestions && activeSuggestionIndex === panelIndex && suggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+              {/* Autocomplete Suggestions */}
+              {showSuggestions && suggestions.length > 0 && activeSuggestionIndex === formIndex && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                   {suggestions.map((estate, index) => (
                     <button
                       key={index}
                       type="button"
-                      onClick={() => handleEstateSelect(panelIndex, estate)}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                      onClick={() => handleEstateSelect(formIndex, estate)}
+                      className="block w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                     >
-                      <div className="font-medium">{estate.name}</div>
-                      <div className="text-sm text-gray-600">
-                        {estate.district} • {estate.buildingAge} • {estate.schoolNet}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">{estate.name}</div>
+                          <div className="text-sm text-gray-500">{estate.address}</div>
+                        </div>
+                        <div className="text-right text-xs text-gray-400">
+                          <div>{estate.district}</div>
+                          <div>{estate.pricePerFt}</div>
+                        </div>
                       </div>
                     </button>
                   ))}
+                </div>
+              )}
+              
+              {/* Loading indicator */}
+              {isLoadingEstates && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
                 </div>
               )}
             </div>
@@ -436,26 +408,16 @@ export default function PropertyInputStep() {
                 <input
                   type="number"
                   value={form.size || ''}
-                  onChange={(e) => handleInputChange(panelIndex, 'size', Number(e.target.value))}
+                  onChange={(e) => handleInputChange(formIndex, 'size', Number(e.target.value))}
                   className="input-field"
                   placeholder="500"
                   required
                 />
-                {form.size > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    {t('propertyInput.costPerSqFt')}: ${costPerSqFt.toLocaleString()}
-                    {isExpensive && (
-                      <span className="text-red-600 ml-2">
-                        ⚠️ {t('propertyInput.expensiveWarning')}
-                      </span>
-                    )}
-                  </p>
-                )}
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.price')} ({t('common.tenThousand')}) *
+                  {t('propertyInput.price')} *
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
@@ -463,181 +425,161 @@ export default function PropertyInputStep() {
                   </span>
                   <input
                     type="number"
-                    value={form.price || ''}
-                    onChange={(e) => handleInputChange(panelIndex, 'price', Number(e.target.value))}
+                    value={form.price ? form.price / 10000 : ''}
+                    onChange={(e) => handleInputChange(formIndex, 'price', Number(e.target.value) * 10000)}
                     className="input-field pl-8"
                     placeholder="800"
                     required
                   />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+                    {t('common.tenThousand')}
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Rooms and Toilets - Paired Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.rooms')} *
-                </label>
+            {/* Cost per ft² Feedback */}
+            {costPerSqFt > 0 && (
+              <div className={`p-3 rounded-lg text-sm ${
+                isExpensive 
+                  ? 'bg-red-50 border border-red-200 text-red-700' 
+                  : 'bg-blue-50 border border-blue-200 text-blue-700'
+              }`}>
                 <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => handleInputChange(panelIndex, 'rooms', Math.max(1, form.rooms - 1))}
-                    className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50"
-                  >
-                    -
-                  </button>
-                  <span className="w-12 text-center font-medium">{form.rooms}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleInputChange(panelIndex, 'rooms', form.rooms + 1)}
-                    className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50"
-                  >
-                    +
-                  </button>
-                  <span className="text-sm text-gray-500">{t('propertyInput.roomsHint')}</span>
+                  <span>👉</span>
+                  <span>
+                    {t('propertyInput.costPerSqFt')}: <strong>${costPerSqFt.toLocaleString()}/{t('common.ft2')}</strong>
+                    {isExpensive && (
+                      <span className="ml-2 text-red-600">
+                        {t('propertyInput.expensiveWarning')}
+                      </span>
+                    )}
+                  </span>
                 </div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.toilets')} *
-                </label>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => handleInputChange(panelIndex, 'toilets', Math.max(1, form.toilets - 1))}
-                    className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50"
-                  >
-                    -
-                  </button>
-                  <span className="w-12 text-center font-medium">{form.toilets}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleInputChange(panelIndex, 'toilets', form.toilets + 1)}
-                    className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-50"
-                  >
-                    +
-                  </button>
-                  <span className="text-sm text-gray-500">{t('propertyInput.toiletsHint')}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Building Age */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('propertyInput.buildingAge')} ({t('propertyInput.years')})
-              </label>
-              <input
-                type="number"
-                value={form.buildingAge || ''}
-                onChange={(e) => handleInputChange(panelIndex, 'buildingAge', Number(e.target.value))}
-                className="input-field"
-                placeholder="20"
-              />
-            </div>
+            )}
           </div>
         </div>
 
         {/* Layout & Location Section */}
-        <div className="mb-4 lg:mb-6">
+        <div className="mb-4 lg:mb-6 border-t border-gray-200 pt-4 lg:pt-6">
           <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
             <span className="text-lg mr-2">📍</span>
             {t('propertyInput.layoutLocationSection')}
           </h4>
           
           <div className="space-y-3 lg:space-y-4">
-            {/* District with Autocomplete */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('propertyInput.district')} *
-              </label>
-              <input
-                type="text"
-                value={form.district}
-                onChange={(e) => handleDistrictInputChange(panelIndex, e.target.value)}
-                className="input-field"
-                placeholder={t('propertyInput.districtPlaceholder')}
-                required
-                onFocus={() => {
-                  if (form.district.trim().length > 0) {
-                    setShowDistrictSuggestions(true);
-                    setActiveDistrictSuggestionIndex(panelIndex);
-                  }
-                }}
-                onBlur={() => {
-                  setTimeout(() => setShowDistrictSuggestions(false), 200);
-                }}
-              />
-              
-              {/* District Suggestions */}
-              {showDistrictSuggestions && activeDistrictSuggestionIndex === panelIndex && districtSuggestions.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                  {districtSuggestions.map((district, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleDistrictSelect(panelIndex, district)}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                    >
-                      {district}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* School Net */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('propertyInput.schoolNet')}
-              </label>
-              <div className="flex flex-wrap items-center p-1 bg-gray-100 rounded-md border border-gray-300">
-                {form.schoolNets.map((schoolNet, index) => (
-                  <span
-                    key={index}
-                    className="flex items-center bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-1 mb-1"
-                  >
-                    {schoolNet}
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange(panelIndex, 'schoolNets', form.schoolNets.filter((_, i) => i !== index))}
-                      className="ml-1 text-primary-600 hover:text-primary-900 focus:outline-none"
-                      aria-label="Remove school net"
-                    >
-                      ✖️
-                    </button>
-                  </span>
-                ))}
+            {/* Rooms and Toilets - Paired Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.rooms')}
+                </label>
                 <input
-                  type="text"
-                  value=""
+                  type="number"
+                  value={form.rooms || ''}
                   onChange={(e) => {
-                    const newSchoolNet = e.target.value.trim();
-                    if (newSchoolNet && !form.schoolNets.includes(newSchoolNet)) {
-                      setPanels(prev => prev.map((panel, i) => 
-                        i === panelIndex ? {
-                          ...panel,
-                          form: {
-                            ...panel.form,
-                            schoolNets: [...panel.form.schoolNets, newSchoolNet],
-                          },
-                        } : panel
-                      ));
-                      e.target.value = ''; // Clear input after adding
+                    const inputValue = e.target.value;
+                    if (inputValue === '') {
+                      handleInputChange(formIndex, 'rooms', 1);
+                    } else {
+                      const numValue = parseInt(inputValue);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 10) {
+                        handleInputChange(formIndex, 'rooms', numValue);
+                      }
                     }
                   }}
-                  className="flex-1 input-field pl-1"
-                  placeholder={t('propertyInput.schoolNetPlaceholder')}
+                  className="input-field"
+                  placeholder="1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {t('propertyInput.roomsHint')}
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.toilets')}
+                </label>
+                <input
+                  type="number"
+                  value={form.toilets || ''}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === '') {
+                      handleInputChange(formIndex, 'toilets', 1);
+                    } else {
+                      const numValue = parseInt(inputValue);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 8) {
+                        handleInputChange(formIndex, 'toilets', numValue);
+                      }
+                    }
+                  }}
+                  className="input-field"
+                  placeholder="1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {t('propertyInput.toiletsHint')}
+                </p>
+              </div>
+            </div>
+
+            {/* Building Age and District - Paired Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.buildingAge')} ({t('propertyInput.years')})
+                </label>
+                <input
+                  type="number"
+                  value={form.buildingAge || ''}
+                  onChange={(e) => handleInputChange(formIndex, 'buildingAge', Number(e.target.value))}
+                  className="input-field"
+                  placeholder="10"
                 />
               </div>
-              {form.schoolNets.length > 0 && (
-                <p className="text-xs text-green-600 mt-1">
-                  ✅ {t('propertyInput.autoFilled')}
-                </p>
-              )}
+              
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('propertyInput.district')}
+                </label>
+                <input
+                  type="text"
+                  value={form.district}
+                  onChange={(e) => handleDistrictInputChange(formIndex, e.target.value)}
+                  className="input-field"
+                  placeholder={t('propertyInput.districtPlaceholder')}
+                />
+                
+                {/* District Suggestions */}
+                {showDistrictSuggestions && districtSuggestions.length > 0 && activeDistrictSuggestionIndex === formIndex && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                    {districtSuggestions.map((district, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleDistrictSelect(formIndex, district)}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
+                      >
+                        {district}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* School Net - Auto-filled */}
+            {form.schoolNet && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <span className="text-green-600">✅</span>
+                  <span className="text-sm text-green-700">
+                    <strong>{t('propertyInput.schoolNet')}:</strong> {form.schoolNet}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -660,9 +602,9 @@ export default function PropertyInputStep() {
                 <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                   <input
                     type="radio"
-                    name={`parking-${panelIndex}`}
+                    name={`parking-${formIndex}`}
                     checked={form.parkingType === 'none'}
-                    onChange={() => handleInputChange(panelIndex, 'parkingType', 'none')}
+                    onChange={() => handleInputChange(formIndex, 'parkingType', 'none')}
                     className="text-primary-600 focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-900">{t('propertyInput.parkingNone')}</span>
@@ -671,9 +613,9 @@ export default function PropertyInputStep() {
                 <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                   <input
                     type="radio"
-                    name={`parking-${panelIndex}`}
+                    name={`parking-${formIndex}`}
                     checked={form.parkingType === 'included'}
-                    onChange={() => handleInputChange(panelIndex, 'parkingType', 'included')}
+                    onChange={() => handleInputChange(formIndex, 'parkingType', 'included')}
                     className="text-primary-600 focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-900">{t('propertyInput.parkingIncluded')} 🆗</span>
@@ -682,9 +624,9 @@ export default function PropertyInputStep() {
                 <label className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
                   <input
                     type="radio"
-                    name={`parking-${panelIndex}`}
+                    name={`parking-${formIndex}`}
                     checked={form.parkingType === 'additional'}
-                    onChange={() => handleInputChange(panelIndex, 'parkingType', 'additional')}
+                    onChange={() => handleInputChange(formIndex, 'parkingType', 'additional')}
                     className="text-primary-600 focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-900">{t('propertyInput.parkingAdditional')}</span>
@@ -704,7 +646,7 @@ export default function PropertyInputStep() {
                     <input
                       type="number"
                       value={form.carParkPrice || ''}
-                      onChange={(e) => handleInputChange(panelIndex, 'carParkPrice', Number(e.target.value))}
+                      onChange={(e) => handleInputChange(formIndex, 'carParkPrice', Number(e.target.value))}
                       className="input-field pl-8"
                       placeholder="e.g. 500,000"
                     />
@@ -731,7 +673,7 @@ export default function PropertyInputStep() {
                   <input
                     type="number"
                     value={form.managementFee || ''}
-                    onChange={(e) => handleInputChange(panelIndex, 'managementFee', Number(e.target.value))}
+                    onChange={(e) => handleInputChange(formIndex, 'managementFee', Number(e.target.value))}
                     className="input-field pl-8"
                     placeholder="1250"
                   />
@@ -752,53 +694,17 @@ export default function PropertyInputStep() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('propertyInput.schoolNet')}
                 </label>
-                <div className="flex flex-wrap items-center p-1 bg-gray-100 rounded-md border border-gray-300">
-                  {form.schoolNets.map((schoolNet, index) => (
-                    <span
-                      key={index}
-                      className="flex items-center bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-1 mb-1"
-                    >
-                      {schoolNet}
-                      <button
-                        type="button"
-                        onClick={() => handleInputChange(panelIndex, 'schoolNets', form.schoolNets.filter((_, i) => i !== index))}
-                        className="ml-1 text-primary-600 hover:text-primary-900 focus:outline-none"
-                        aria-label="Remove school net"
-                      >
-                        ✖️
-                      </button>
-                    </span>
-                  ))}
-                  <input
-                    type="text"
-                    value=""
-                    onChange={(e) => {
-                      const newSchoolNet = e.target.value.trim();
-                      if (newSchoolNet && !form.schoolNets.includes(newSchoolNet)) {
-                        setPanels(prev => prev.map((panel, i) => 
-                          i === panelIndex ? {
-                            ...panel,
-                            form: {
-                              ...panel.form,
-                              schoolNets: [...panel.form.schoolNets, newSchoolNet],
-                            },
-                          } : panel
-                        ));
-                        e.target.value = ''; // Clear input after adding
-                      }
-                    }}
-                    className="flex-1 input-field pl-1"
-                    placeholder={t('propertyInput.schoolNetPlaceholder')}
-                  />
-                </div>
-                {form.schoolNets.length > 0 && (
+                <input
+                  type="text"
+                  value={form.schoolNet}
+                  onChange={(e) => handleInputChange(formIndex, 'schoolNet', e.target.value)}
+                  className="input-field"
+                  placeholder="e.g., 11, 34, 91"
+                  disabled={!!getSchoolNetByDistrict(form.district)}
+                />
+                {getSchoolNetByDistrict(form.district) && (
                   <p className="text-xs text-green-600 mt-1">
                     ✅ {t('propertyInput.autoFilled')}
-                  </p>
-                )}
-                {form.schoolNets.length === 0 && (
-                  <p className="text-xs text-red-600 mt-1">
-                    ⚠️ {t('propertyInput.schoolNetRequired')}
                   </p>
                 )}
               </div>
@@ -806,33 +712,44 @@ export default function PropertyInputStep() {
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Add Property Button */}
         <div className="mt-6 lg:mt-8 flex justify-end space-x-3">
-          {panel.isEditing ? (
-            <>
-              <button
-                onClick={() => handleCancelEdit(panelIndex)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
-              >
-                {t('actions.cancel')}
-              </button>
-              <button
-                onClick={() => handleAddProperty(panelIndex)}
-                disabled={!isPropertyValid(form)}
-                className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('actions.updateProperty')}
-              </button>
-            </>
-          ) : (
+          {editingPropertyId && formIndex === 0 && (
             <button
-              onClick={() => handleAddProperty(panelIndex)}
-              disabled={!isPropertyValid(form)}
-              className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => {
+                setEditingProperty(null);
+                // Reset the first form
+                setPropertyForms(prev => prev.map((form, index) => 
+                  index === 0 ? {
+                    name: '',
+                    size: 0,
+                    price: 0,
+                    rooms: 1,
+                    toilets: 1,
+                    buildingAge: 0,
+                    district: '',
+                    schoolNet: '',
+                    parkingType: 'none',
+                    carParkIncluded: false,
+                    carParkPrice: 0,
+                    managementFee: 0,
+                  } : form
+                ));
+              }}
+              className="btn-secondary"
             >
-              {t('propertyInput.addProperty')}
+              {t('actions.cancel')}
             </button>
           )}
+          <button
+            onClick={() => handleAddProperty(formIndex)}
+            disabled={!isPropertyValid(form)}
+            className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {editingPropertyId && formIndex === 0 ? t('actions.updateProperty') : t('propertyInput.addProperty')}
+          </button>
+        </div>
+          </div>
         </div>
       </div>
     );
@@ -850,68 +767,87 @@ export default function PropertyInputStep() {
         </p>
       </div>
 
-      {/* Properties Counter */}
-      <div className="text-center mb-4">
-        <span className="text-sm text-gray-600">
-          {t('propertyInput.addedProperties')} ({properties.length}/3)
-        </span>
+      {/* 2-Column Property Forms */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {propertyForms.map((_, index) => renderPropertyForm(index))}
       </div>
 
-      {/* Accordion Panels */}
-      <div className="space-y-4">
-        {panels.map((panel, index) => (
-          <div key={panel.id} className="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
-            {/* Panel Header */}
-            <div className="p-4 lg:p-6 border-b border-gray-100">
+      {/* Add 3rd Property Button */}
+      {properties.length < 3 && (
+        <div className="text-center">
+          <button
+            onClick={() => {
+              setPropertyForms(prev => [...prev, {
+                name: '',
+                size: 0,
+                price: 0,
+                rooms: 1,
+                toilets: 1,
+                buildingAge: 0,
+                district: '',
+                schoolNet: '',
+                parkingType: 'none',
+                carParkIncluded: false,
+                carParkPrice: 0,
+                managementFee: 0,
+              }]);
+            }}
+            className="btn-secondary"
+          >
+            + {t('propertyInput.addProperty')} 3
+          </button>
+        </div>
+      )}
+
+      {/* Properties List */}
+      {properties.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t('propertyInput.addedProperties')} ({properties.length}/3)
+          </h3>
+          
+          {properties.map((property, index) => (
+            <div key={property.id} className="card">
               <div className="flex items-center justify-between">
-                <button
-                  onClick={() => togglePanel(index)}
-                  className="flex-1 text-left"
-                >
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {getPanelHeader(panel, index)}
-                  </h3>
-                </button>
-                
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">{property.name}</h4>
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                    <span>${(property.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>
+                                          <span>{property.size} {t('common.ft2')}</span>
+                      <span>{property.rooms}R {property.toilets}T</span>
+                    {property.district && <span>{property.district}</span>}
+                  </div>
+                </div>
                 <div className="flex items-center space-x-2">
-                  {/* Edit/Expand Button */}
                   <button
-                    onClick={() => togglePanel(index)}
-                    className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
-                    aria-label="Edit property"
+                    onClick={() => {
+                      setEditingProperty(property.id);
+                      // Scroll to the first form
+                      const firstForm = document.querySelector('[data-form-index="0"]');
+                      if (firstForm) {
+                        firstForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm font-medium hover:bg-blue-50 px-3 py-2 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300"
                   >
-                    ✏️ {t('actions.edit')}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>{t('actions.edit')}</span>
                   </button>
-                  
-                  {/* Remove Button - only show for existing properties */}
-                  {panel.isEditing && (
-                    <button
-                      onClick={() => handleRemoveProperty(panel.id)}
-                      className="p-2 text-red-500 hover:text-red-700 transition-colors"
-                      aria-label="Remove property"
-                    >
-                      🗑️ {t('actions.remove')}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => removeProperty(property.id)}
+                    className="flex items-center space-x-1 text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-3 py-2 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-300"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>{t('propertyInput.remove')}</span>
+                  </button>
                 </div>
               </div>
             </div>
-
-            {/* Panel Content */}
-            {panel.isExpanded && renderPropertyForm(panel, index)}
-          </div>
-        ))}
-      </div>
-
-      {/* Add New Panel Button */}
-      {panels.length < 3 && (
-        <div className="text-center">
-          <button
-            onClick={addNewPanel}
-            className="btn-secondary"
-          >
-            + {t('propertyInput.addProperty')}
-          </button>
+          ))}
         </div>
       )}
     </div>

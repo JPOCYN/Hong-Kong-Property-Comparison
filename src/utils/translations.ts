@@ -460,6 +460,14 @@ export const translations: Translations = {
     en: 'Update Property',
     zh: '更新物業',
   },
+  'actions.edit': {
+    en: 'Edit',
+    zh: '編輯',
+  },
+  'actions.cancel': {
+    en: 'Cancel',
+    zh: '取消',
+  },
   'actions.clearAll': {
     en: 'Clear All',
     zh: '清除全部',
@@ -751,22 +759,6 @@ export const translations: Translations = {
   'propertyInput.remove': {
     en: 'Remove',
     zh: '移除',
-  },
-  'propertyInput.newProperty': {
-    en: 'New Property',
-    zh: '新增物業',
-  },
-  'propertyInput.editProperty': {
-    en: 'Edit Property',
-    zh: '編輯物業',
-  },
-  'propertyInput.schoolNetPlaceholder': {
-    en: 'Enter school net code...',
-    zh: '請輸入校網',
-  },
-  'propertyInput.schoolNetRequired': {
-    en: 'Please select at least one school net',
-    zh: '請選擇至少一個校網',
   },
   
   // Additional Results
