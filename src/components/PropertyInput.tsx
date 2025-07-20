@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePropertyStore } from '@/store/propertyStore';
 import { getTranslation } from '@/utils/translations';
-import { Property } from '@/utils/calculations';
+import { Property } from '@/store/useAppStore';
 
 export default function PropertyInput() {
   const { properties, addProperty, language } = usePropertyStore();
@@ -44,6 +44,8 @@ export default function PropertyInput() {
       price: formData.price!,
       rooms: formData.rooms || 1,
       toilets: formData.toilets || 1,
+      buildingAge: 0, // Default value
+      district: '', // Default value
       carParkIncluded: formData.carParkIncluded || false,
       carParkPrice: formData.carParkPrice || 0,
       managementFee: formData.managementFee || 0,
