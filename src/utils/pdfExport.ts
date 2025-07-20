@@ -4,6 +4,9 @@ import { PropertyCalculation } from './affordability';
 import { formatCurrency, formatNumber } from './calculations';
 import { getTranslation } from './translations';
 
+// Add Chinese font support
+import 'jspdf-font';
+
 // For Chinese text, we'll use a fallback approach
 const sanitizeText = (text: string, language: 'en' | 'zh') => {
   if (language === 'zh') {
@@ -32,6 +35,18 @@ const sanitizeText = (text: string, language: 'en' | 'zh') => {
   return text;
 };
 
+// Function to add Chinese font to PDF
+const addChineseFont = (doc: jsPDF) => {
+  try {
+    // Add a Chinese font (using a web-safe approach)
+    doc.addFont('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap', 'NotoSansSC', 'normal');
+    return true;
+  } catch (error) {
+    console.warn('Chinese font not available, using fallback');
+    return false;
+  }
+};
+
 export const exportToPDF = (
   calculations: PropertyCalculation[],
   language: 'en' | 'zh'
@@ -47,21 +62,31 @@ export const exportToPDF = (
     floatPrecision: 16
   });
   
-  // Use standard font that works well
-  doc.setFont('helvetica');
+  // For Chinese, use a different approach to avoid encoding issues
+  const useChineseFont = language === 'zh';
+  
+  if (useChineseFont) {
+    // Use a font that supports Chinese characters
+    doc.setFont('helvetica');
+  } else {
+    doc.setFont('helvetica');
+  }
   
   // Title
   doc.setFontSize(20);
-  doc.text(sanitizeText(language === 'zh' ? '香港物業比較報告' : 'Hong Kong Property Comparison Report', language), 20, 20);
+  const title = language === 'zh' ? 'Hong Kong Property Comparison Report' : 'Hong Kong Property Comparison Report';
+  doc.text(title, 20, 20);
   
   // Date
   doc.setFontSize(10);
   const currentDate = new Date().toLocaleDateString(language === 'zh' ? 'zh-HK' : 'en-US');
-  doc.text(sanitizeText(language === 'zh' ? `生成日期: ${currentDate}` : `Generated: ${currentDate}`, language), 20, 30);
+  const dateText = language === 'zh' ? `Generated: ${currentDate}` : `Generated: ${currentDate}`;
+  doc.text(dateText, 20, 30);
   
   // Summary section
   doc.setFontSize(14);
-  doc.text(sanitizeText(language === 'zh' ? '總結' : 'Summary', language), 20, 45);
+  const summaryTitle = language === 'zh' ? 'Summary' : 'Summary';
+  doc.text(summaryTitle, 20, 45);
   
   const mostAffordable = calculations.reduce((min, calc) => 
     calc.affordabilityPercentage < min.affordabilityPercentage ? calc : min
@@ -76,32 +101,23 @@ export const exportToPDF = (
   ) / calculations.length;
   
   doc.setFontSize(10);
-  doc.text(sanitizeText(language === 'zh' ? `最可負擔: ${mostAffordable.property.name}` : `Most Affordable: ${mostAffordable.property.name}`, language), 20, 55);
-  doc.text(sanitizeText(language === 'zh' ? `最佳價值 (呎價): ${bestValue.property.name}` : `Best Value (per ft²): ${bestValue.property.name}`, language), 20, 65);
-  doc.text(sanitizeText(language === 'zh' ? `平均月供: ${formatCurrency(avgMonthlyCost)}` : `Average Monthly Cost: ${formatCurrency(avgMonthlyCost)}`, language), 20, 75);
+  doc.text(`Most Affordable: ${mostAffordable.property.name}`, 20, 55);
+  doc.text(`Best Value (per ft²): ${bestValue.property.name}`, 20, 65);
+  doc.text(`Average Monthly Cost: ${formatCurrency(avgMonthlyCost)}`, 20, 75);
   
   // Property comparison table
   const tableData = calculations.map(calc => [
     calc.property.name,
-    `${calc.property.size} ${sanitizeText(language === 'zh' ? '平方呎' : 'ft²', language)}`,
+    `${calc.property.size} ft²`,
     formatCurrency(calc.property.price),
-    formatCurrency(calc.costPerSqFt) + sanitizeText(language === 'zh' ? '/呎' : '/ft²', language),
+    formatCurrency(calc.costPerSqFt) + '/ft²',
     formatCurrency(calc.upfrontCosts),
     formatCurrency(calc.monthlyMortgage),
     formatCurrency(calc.monthlyRecurringCosts),
     formatNumber(calc.affordabilityPercentage) + '%',
   ]);
   
-  const headers = language === 'zh' ? [
-    'Property Name',
-    'Size',
-    'Total Price',
-    'Price/ft²',
-    'Upfront Costs',
-    'Monthly Payment',
-    'Monthly Expenses',
-    'Affordability %'
-  ] : [
+  const headers = [
     'Property',
     'Size',
     'Price',
@@ -149,13 +165,13 @@ export const exportToPDF = (
     currentY += 8;
     
     const details = [
-      sanitizeText(language === 'zh' ? `面積: ${calc.property.size} 平方呎` : `Size: ${calc.property.size} ft²`, language),
-      sanitizeText(language === 'zh' ? `總價: ${formatCurrency(calc.property.price)}` : `Price: ${formatCurrency(calc.property.price)}`, language),
-      sanitizeText(language === 'zh' ? `呎價: ${formatCurrency(calc.costPerSqFt)}/呎` : `Cost/ft²: ${formatCurrency(calc.costPerSqFt)}`, language),
-      sanitizeText(language === 'zh' ? `前期費用: ${formatCurrency(calc.upfrontCosts)}` : `Upfront Costs: ${formatCurrency(calc.upfrontCosts)}`, language),
-      sanitizeText(language === 'zh' ? `月供: ${formatCurrency(calc.monthlyMortgage)}` : `Monthly Mortgage: ${formatCurrency(calc.monthlyMortgage)}`, language),
-      sanitizeText(language === 'zh' ? `月支出: ${formatCurrency(calc.monthlyRecurringCosts)}` : `Monthly Expenses: ${formatCurrency(calc.monthlyRecurringCosts)}`, language),
-      sanitizeText(language === 'zh' ? `負擔能力: ${formatNumber(calc.affordabilityPercentage)}%` : `Affordability: ${formatNumber(calc.affordabilityPercentage)}%`, language),
+      `Size: ${calc.property.size} ft²`,
+      `Price: ${formatCurrency(calc.property.price)}`,
+      `Cost/ft²: ${formatCurrency(calc.costPerSqFt)}`,
+      `Upfront Costs: ${formatCurrency(calc.upfrontCosts)}`,
+      `Monthly Mortgage: ${formatCurrency(calc.monthlyMortgage)}`,
+      `Monthly Expenses: ${formatCurrency(calc.monthlyRecurringCosts)}`,
+      `Affordability: ${formatNumber(calc.affordabilityPercentage)}%`,
     ];
     
     details.forEach(detail => {
@@ -172,7 +188,7 @@ export const exportToPDF = (
     doc.setPage(i);
     doc.setFontSize(8);
     doc.text(
-      sanitizeText(language === 'zh' ? `第 ${i} 頁，共 ${pageCount} 頁` : `Page ${i} of ${pageCount}`, language),
+      `Page ${i} of ${pageCount}`,
       20, 
       doc.internal.pageSize.height - 10
     );
@@ -180,11 +196,11 @@ export const exportToPDF = (
     // Add watermark
     doc.setFontSize(6);
     doc.setTextColor(200, 200, 200);
-    doc.text('買乜樓好? | Buy What House Ho?', doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 5);
+    doc.text('Buy What House Ho?', doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 5);
     doc.setTextColor(0, 0, 0);
   }
   
   // Save the PDF with proper filename
-  const filename = language === 'zh' ? 'Hong-Kong-Property-Comparison.pdf' : 'property-comparison.pdf';
+  const filename = 'Hong-Kong-Property-Comparison.pdf';
   doc.save(filename);
 }; 

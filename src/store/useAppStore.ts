@@ -164,6 +164,7 @@ export const useAppStore = create<AppState>()(
         buyerInfo: state.buyerInfo,
         properties: state.properties,
         language: state.language,
+        currentStep: state.currentStep,
       }),
     }
   )
