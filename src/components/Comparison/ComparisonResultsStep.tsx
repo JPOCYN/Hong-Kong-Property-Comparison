@@ -219,9 +219,65 @@ export default function ComparisonResultsStep() {
           </div>
         </>
       )}
+      
+      {/* Budget Gap Analysis */}
+      <div className="card bg-blue-50 border-blue-200 p-4 lg:p-6">
+        <div className="flex items-center mb-4">
+          <span className="text-lg lg:text-xl mr-2 lg:mr-3">📉</span>
+          <h3 className="font-medium text-blue-800 text-base lg:text-lg">{t('results.budgetGap')}</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {calculations.map((calc) => {
+            // Calculate monthly payment gap (target: 50% of income)
+            const targetMonthlyPayment = buyerInfo.monthlyIncome * 0.5;
+            const monthlyPaymentGap = calc.monthlyRecurringCosts - targetMonthlyPayment;
+            
+            // Calculate downpayment gap (target: user's budget)
+            const downpaymentGap = calc.upfrontCosts - buyerInfo.downpaymentBudget;
+            
+            return (
+              <div key={calc.property.id} className="bg-white rounded-lg p-4 border border-blue-200">
+                <h4 className="font-semibold text-gray-900 mb-3 text-sm lg:text-base">
+                  【{calc.property.name}】
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">{t('results.monthlyPaymentGap')}:</span>
+                    <span className={`font-medium ${monthlyPaymentGap > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {monthlyPaymentGap > 0 ? '+' : ''}{formatCurrency(monthlyPaymentGap)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">{t('results.downpaymentGap')}:</span>
+                    <span className={`font-medium ${downpaymentGap > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {downpaymentGap > 0 ? '+' : ''}{formatCurrency(downpaymentGap)}
+                    </span>
+                  </div>
+                  {monthlyPaymentGap > 0 && (
+                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                      {t('results.monthlyPaymentExcess')}: {formatCurrency(monthlyPaymentGap)}
+                    </div>
+                  )}
+                  {downpaymentGap > 0 && (
+                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                      {t('results.downpaymentShortfall')}: {formatCurrency(downpaymentGap)}
+                    </div>
+                  )}
+                  {(monthlyPaymentGap <= 0 && downpaymentGap <= 0) && (
+                    <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
+                      ✅ {t('results.withinBudget')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Enhanced Comparison Table */}
-      <div className="card p-4 lg:p-6">
+      <div className="card p-4 lg:p-6 mt-6 lg:mt-8">
         {/* Summary Tip */}
         <div className="mb-4 lg:mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800 font-medium">
@@ -447,7 +503,7 @@ export default function ComparisonResultsStep() {
       </div>
 
       {/* Enhanced Monthly Burden Breakdown */}
-      <div className="card p-4 lg:p-6">
+      <div className="card p-4 lg:p-6 mt-6 lg:mt-8">
         <h3 className="text-base lg:text-lg font-semibold mb-3 lg:mb-4">{t('results.monthlyBurdenBreakdown')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {calculations.map((calc) => (

@@ -297,6 +297,30 @@ export const translations: Translations = {
     en: 'Suggested Downpayment',
     zh: '建議首期',
   },
+  'results.budgetGap': {
+    en: 'Budget Gap Analysis',
+    zh: '與您預算的差距',
+  },
+  'results.monthlyPaymentGap': {
+    en: 'Monthly Payment Gap',
+    zh: '每月供款差距',
+  },
+  'results.downpaymentGap': {
+    en: 'Downpayment Gap',
+    zh: '首期預算差距',
+  },
+  'results.monthlyPaymentExcess': {
+    en: 'Monthly Payment Excess',
+    zh: '每月供款超出',
+  },
+  'results.downpaymentShortfall': {
+    en: 'Downpayment Shortfall',
+    zh: '首期預算不足',
+  },
+  'results.withinBudget': {
+    en: 'Within Budget',
+    zh: '在預算範圍內',
+  },
   'results.detailedComparison': {
     en: 'Detailed Comparison',
     zh: '詳細比較',
