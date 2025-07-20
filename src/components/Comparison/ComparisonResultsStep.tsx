@@ -290,12 +290,6 @@ export default function ComparisonResultsStep() {
                       {formatCurrency(dsrAnalysis.requiredMonthlyIncome)}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">{t('results.requiredAnnualIncome')}:</span>
-                    <span className={`font-medium ${dsrAnalysis.needsHigherIncome ? 'text-orange-600' : 'text-green-600'}`}>
-                      {formatCurrency(dsrAnalysis.requiredAnnualIncome)}
-                    </span>
-                  </div>
                   {dsrAnalysis.needsHigherIncome && (
                     <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
                       ⚠️ {t('results.incomeGap')}: {formatCurrency(dsrAnalysis.incomeGap)}
@@ -308,67 +302,7 @@ export default function ComparisonResultsStep() {
         </div>
       </div>
 
-      {/* Budget Gap Analysis */}
-      <div className="card bg-blue-50 border-blue-200 p-4 lg:p-6">
-        <div className="flex items-center mb-4">
-          <span className="text-lg lg:text-xl mr-2 lg:mr-3">📉</span>
-          <h3 className="font-medium text-blue-800 text-base lg:text-lg">{t('results.budgetGap')}</h3>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {calculations.map((calc) => {
-            // Calculate payment ratio: monthlyMortgage / maxMonthlyPayment * 100%
-            const paymentRatio = (calc.monthlyMortgage / buyerInfo.maxMonthlyPayment) * 100;
-            
-            // Calculate downpayment shortfall: downpaymentBudget - upfrontCosts
-            const downpaymentShortfall = calc.upfrontCosts - buyerInfo.downpaymentBudget;
-            
-            return (
-              <div key={calc.property.id} className="bg-white rounded-lg p-4 border border-blue-200">
-                <h4 className="font-semibold text-gray-900 mb-3 text-sm lg:text-base">
-                  【{calc.property.name}】
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">{t('results.monthlyPaymentRatio')}:</span>
-                      <span className={`font-medium ${paymentRatio <= 100 ? 'text-green-600' : 'text-red-600'}`}>
-                        {paymentRatio.toFixed(1)}%
-                        {paymentRatio > 100 && <span className="ml-1">🔴</span>}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">
-                        {downpaymentShortfall <= 0 ? t('results.downpaymentSurplus') : t('results.downpaymentShortfall')}
-                      </span>
-                      <span className={`font-medium ${downpaymentShortfall <= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(Math.abs(downpaymentShortfall))}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Status indicators */}
-                  {paymentRatio <= 100 && downpaymentShortfall <= 0 && (
-                    <div className="text-xs text-green-600 bg-green-50 p-2 rounded mt-2">
-                      ✅ {t('results.withinBudget')}
-                    </div>
-                  )}
-                  {paymentRatio > 100 && (
-                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
-                      🛑 {t('results.monthlyPaymentExceeded')}
-                    </div>
-                  )}
-                  {downpaymentShortfall > 0 && (
-                    <div className="text-xs text-red-600 bg-red-50 p-2 rounded mt-2">
-                      🛑 {t('results.downpaymentInsufficient')}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+
 
       {/* Enhanced Comparison Table */}
       <div className="card p-4 lg:p-6 mt-6 lg:mt-8">
