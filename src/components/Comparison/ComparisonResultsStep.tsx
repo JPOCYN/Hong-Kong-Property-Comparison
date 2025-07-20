@@ -274,7 +274,7 @@ export default function ComparisonResultsStep() {
               onClick={async () => {
                 setIsGeneratingPDF(true);
                 try {
-                  await exportToPDF(calculations, language);
+                  await exportToPDF(calculations, language, buyerInfo);
                 } catch (error) {
                   console.error('PDF generation failed:', error);
                 } finally {
