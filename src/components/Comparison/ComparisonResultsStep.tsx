@@ -422,30 +422,30 @@ export default function ComparisonResultsStep() {
                       </div>
                       
                       {/* Key Metrics Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
-                          <div className="text-2xl font-bold text-gray-900">
+                      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+                        <div className="text-center p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 truncate">
                             {formatCurrency(calc.property.price)}
                           </div>
                           <div className="text-xs text-gray-500">總價</div>
                         </div>
                         
-                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
-                          <div className="text-xl font-bold text-blue-600">
+                        <div className="text-center p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="text-lg sm:text-xl font-bold text-blue-600 truncate">
                             {formatCurrency(calc.monthlyMortgage)}
                           </div>
                           <div className="text-xs text-gray-500">月供</div>
                         </div>
                         
-                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
-                          <div className="text-xl font-bold text-purple-600">
+                        <div className="text-center p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="text-lg sm:text-xl font-bold text-purple-600 truncate">
                             {formatCurrency(calc.costPerSqFt)}/ft²
                           </div>
                           <div className="text-xs text-gray-500">呎價</div>
                         </div>
                         
-                        <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
-                          <div className={`text-xl font-bold ${getAffordabilityColor(calc.affordabilityStatus)}`}>
+                        <div className="text-center p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
+                          <div className={`text-lg sm:text-xl font-bold ${getAffordabilityColor(calc.affordabilityStatus)} truncate`}>
                             {formatNumber(calc.affordabilityPercentage)}%
                           </div>
                           <div className="text-xs text-gray-500">負擔能力</div>

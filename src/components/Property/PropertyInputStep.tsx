@@ -21,7 +21,7 @@ interface PropertyFormData {
 }
 
 export default function PropertyInputStep() {
-  const { properties, addProperty, updateProperty, removeProperty, language, editingPropertyId, setEditingProperty } = useAppStore();
+  const { properties, addProperty, updateProperty, removeProperty, language, editingPropertyId, setEditingProperty, setCurrentStep } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
   
   // Property form data for both columns
@@ -731,89 +731,133 @@ export default function PropertyInputStep() {
         </p>
       </div>
 
-      {/* 2-Column Property Forms */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {propertyForms.map((_, index) => renderPropertyForm(index))}
-      </div>
-
-      {/* Add 3rd Property Button */}
-      {properties.length < 3 && (
-        <div className="text-center">
-          <button
-            onClick={() => {
-              setPropertyForms(prev => [...prev, {
-                name: '',
-                size: 0,
-                price: 0,
-                rooms: 1,
-                toilets: 1,
-                buildingAge: 0,
-                district: '',
-                schoolNet: '',
-                parkingType: 'none',
-                carParkIncluded: false,
-                carParkPrice: 0,
-                managementFee: 0,
-              }]);
-            }}
-            className="btn-secondary"
-          >
-            + {t('propertyInput.addProperty')} 3
-          </button>
-        </div>
-      )}
-
-      {/* Properties List */}
+      {/* Added Properties Section - Moved to Top */}
       {properties.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            {t('propertyInput.addedProperties')} ({properties.length}/3)
-          </h3>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
+                {properties.length}
+              </span>
+              {t('propertyInput.addedProperties')} ({properties.length}/3)
+            </h3>
+            {properties.length >= 2 && (
+              <button
+                onClick={() => setCurrentStep(3)}
+                className="btn-primary text-sm px-4 py-2"
+              >
+                🚀 {t('actions.compareNow')}
+              </button>
+            )}
+          </div>
           
-          {properties.map((property, index) => (
-            <div key={property.id} className="card">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">{property.name}</h4>
-                  <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                    <span>${(property.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>
-                                          <span>{property.size} {t('common.ft2')}</span>
-                      <span>{property.rooms}R {property.toilets}T</span>
-                    {property.district && <span>{property.district}</span>}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {properties.map((property, index) => (
+              <div key={property.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900 text-sm mb-1">{property.name}</h4>
+                    <div className="space-y-1 text-xs text-gray-600">
+                      <div className="flex justify-between">
+                        <span>總價:</span>
+                        <span className="font-medium">${(property.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>面積:</span>
+                        <span className="font-medium">{property.size} {t('common.ft2')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>房間:</span>
+                        <span className="font-medium">{property.rooms}R {property.toilets}T</span>
+                      </div>
+                      {property.district && (
+                        <div className="flex justify-between">
+                          <span>地區:</span>
+                          <span className="font-medium">{property.district}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1 ml-2">
+                    <button
+                      onClick={() => {
+                        setEditingProperty(property.id);
+                        // Scroll to the first form
+                        const firstForm = document.querySelector('[data-form-index="0"]');
+                        if (firstForm) {
+                          firstForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                      className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
+                      title={t('actions.edit')}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => removeProperty(property.id)}
+                      className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                      title={t('propertyInput.remove')}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => {
-                      setEditingProperty(property.id);
-                      // Scroll to the first form
-                      const firstForm = document.querySelector('[data-form-index="0"]');
-                      if (firstForm) {
-                        firstForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
-                    }}
-                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 text-sm font-medium hover:bg-blue-50 px-3 py-2 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-300"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    <span>{t('actions.edit')}</span>
-                  </button>
-                  <button
-                    onClick={() => removeProperty(property.id)}
-                    className="flex items-center space-x-1 text-red-600 hover:text-red-800 text-sm font-medium hover:bg-red-50 px-3 py-2 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-300"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span>{t('propertyInput.remove')}</span>
-                  </button>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-500">#{index + 1}</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    index === 0 ? 'bg-green-100 text-green-800' :
+                    index === 1 ? 'bg-blue-100 text-blue-800' :
+                    'bg-purple-100 text-purple-800'
+                  }`}>
+                    {index === 0 ? '🏆 最佳' : index === 1 ? '🥈 次選' : '🥉 第三'}
+                  </span>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Property Input Forms */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {t('propertyInput.addNewProperty')}
+          </h3>
+          {properties.length < 3 && (
+            <button
+              onClick={() => {
+                setPropertyForms(prev => [...prev, {
+                  name: '',
+                  size: 0,
+                  price: 0,
+                  rooms: 1,
+                  toilets: 1,
+                  buildingAge: 0,
+                  district: '',
+                  schoolNet: '',
+                  parkingType: 'none',
+                  carParkIncluded: false,
+                  carParkPrice: 0,
+                  managementFee: 0,
+                }]);
+              }}
+              className="btn-secondary text-sm"
+            >
+              + {t('propertyInput.addProperty')}
+            </button>
+          )}
+        </div>
+
+        {/* 2-Column Property Forms */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {propertyForms.map((_, index) => renderPropertyForm(index))}
+        </div>
+      </div>
     </div>
   );
 } 

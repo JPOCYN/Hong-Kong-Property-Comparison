@@ -533,6 +533,10 @@ export const translations: Translations = {
     en: 'Quick Edit',
     zh: '快速編輯',
   },
+  'actions.compareNow': {
+    en: 'Compare Now',
+    zh: '立即比較',
+  },
   'actions.apply': {
     en: 'Apply',
     zh: '應用',
@@ -832,6 +836,10 @@ export const translations: Translations = {
   'propertyInput.addProperty': {
     en: 'Add Property',
     zh: '添加物業',
+  },
+  'propertyInput.addNewProperty': {
+    en: 'Add New Property',
+    zh: '添加新物業',
   },
   'propertyInput.addedProperties': {
     en: 'Added Properties',
