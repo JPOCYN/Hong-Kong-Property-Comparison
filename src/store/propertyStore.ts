@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Property, UserFinancials, MortgageConfig } from '@/utils/calculations';
+import { Property } from '@/store/useAppStore';
+import { MortgageConfig } from '@/utils/mortgage';
+
+interface UserFinancials {
+  monthlySalary: number;
+  downpaymentBudget: number;
+  isFirstTimeBuyer: boolean;
+  mortgageConfig: MortgageConfig;
+  mortgageYears: number;
+}
 
 interface PropertyStore {
   // User financial information
