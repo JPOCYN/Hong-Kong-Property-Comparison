@@ -6,32 +6,65 @@ import { getSchoolNetByDistrict } from '@/utils/schoolNetMap';
 import { loadEstateData, searchEstates, getEstateByName, EstateData, formatPricePerFt, getBuildingAgeNumber } from '@/utils/estateData';
 import { useState, useEffect } from 'react';
 
+interface PropertyFormData {
+  name: string;
+  size: number;
+  price: number;
+  rooms: number;
+  toilets: number;
+  buildingAge: number;
+  district: string;
+  schoolNet: string;
+  carParkIncluded: boolean;
+  carParkPrice: number;
+  managementFee: number;
+}
+
 export default function PropertyInputStep() {
   const { properties, addProperty, updateProperty, removeProperty, language } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
-  const [currentProperty, setCurrentProperty] = useState({
-    name: '',
-    size: 0,
-    price: 0,
-    rooms: 1,
-    toilets: 1,
-    buildingAge: 0,
-    district: '',
-    schoolNet: '',
-    carParkIncluded: false,
-    carParkPrice: 0,
-    managementFee: 0,
-  });
+  
+  // Property form data for both columns
+  const [propertyForms, setPropertyForms] = useState<PropertyFormData[]>([
+    {
+      name: '',
+      size: 0,
+      price: 0,
+      rooms: 1,
+      toilets: 1,
+      buildingAge: 0,
+      district: '',
+      schoolNet: '',
+      carParkIncluded: false,
+      carParkPrice: 0,
+      managementFee: 0,
+    },
+    {
+      name: '',
+      size: 0,
+      price: 0,
+      rooms: 1,
+      toilets: 1,
+      buildingAge: 0,
+      district: '',
+      schoolNet: '',
+      carParkIncluded: false,
+      carParkPrice: 0,
+      managementFee: 0,
+    }
+  ]);
 
   // Estate autocomplete state
   const [estates, setEstates] = useState<EstateData[]>([]);
   const [suggestions, setSuggestions] = useState<EstateData[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number>(-1);
   const [isLoadingEstates, setIsLoadingEstates] = useState(true);
 
   // District autocomplete state
   const [districtSuggestions, setDistrictSuggestions] = useState<string[]>([]);
   const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
+  const [activeDistrictSuggestionIndex, setActiveDistrictSuggestionIndex] = useState<number>(-1);
 
   // Hong Kong districts
   const hkDistricts = [
@@ -40,64 +73,68 @@ export default function PropertyInputStep() {
     '葵青', '荃灣', '屯門', '元朗', '北區', '大埔', '西貢', '沙田', '離島'
   ];
 
-  const handleInputChange = (field: string, value: any) => {
-    setCurrentProperty(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (formIndex: number, field: string, value: any) => {
+    setPropertyForms(prev => prev.map((form, index) => 
+      index === formIndex ? { ...form, [field]: value } : form
+    ));
   };
 
-  const handleDistrictChange = (district: string) => {
+  const handleDistrictChange = (formIndex: number, district: string) => {
     const schoolNets = getSchoolNetByDistrict(district);
-    setCurrentProperty(prev => ({ 
-      ...prev, 
-      district,
-      schoolNet: schoolNets.length > 0 ? schoolNets[0].code : ''
-    }));
+    setPropertyForms(prev => prev.map((form, index) => 
+      index === formIndex ? {
+        ...form,
+        district,
+        schoolNet: schoolNets.length > 0 ? schoolNets[0].code : ''
+      } : form
+    ));
   };
 
-  const calculateCostPerSqFt = (): number => {
-    if (currentProperty.size > 0 && currentProperty.price > 0) {
-      return currentProperty.price / currentProperty.size;
+  const calculateCostPerSqFt = (form: PropertyFormData): number => {
+    if (form.size > 0 && form.price > 0) {
+      return form.price / form.size;
     }
     return 0;
   };
 
-  const getManagementFeeSuggestion = (): number => {
-    if (currentProperty.size > 0) {
-      return Math.round(currentProperty.size * 2.5);
+  const getManagementFeeSuggestion = (form: PropertyFormData): number => {
+    if (form.size > 0) {
+      return Math.round(form.size * 2.5);
     }
     return 0;
   };
 
-  const isPropertyValid = (): boolean => {
-    return currentProperty.name.trim() !== '' && 
-           currentProperty.price > 0 && 
-           currentProperty.size > 0;
+  const isPropertyValid = (form: PropertyFormData): boolean => {
+    return form.name.trim() !== '' && 
+           form.price > 0 && 
+           form.size > 0;
   };
 
-  const handleAddProperty = () => {
-    if (isPropertyValid()) {
+  const handleAddProperty = (formIndex: number) => {
+    const form = propertyForms[formIndex];
+    if (isPropertyValid(form)) {
       addProperty({
-        ...currentProperty,
-        id: Date.now().toString(),
+        ...form,
+        id: Date.now().toString() + formIndex,
       });
-      setCurrentProperty({
-        name: '',
-        size: 0,
-        price: 0,
-        rooms: 1,
-        toilets: 1,
-        buildingAge: 0,
-        district: '',
-        schoolNet: '',
-        carParkIncluded: false,
-        carParkPrice: 0,
-        managementFee: 0,
-      });
+      // Reset the form
+      setPropertyForms(prev => prev.map((f, index) => 
+        index === formIndex ? {
+          name: '',
+          size: 0,
+          price: 0,
+          rooms: 1,
+          toilets: 1,
+          buildingAge: 0,
+          district: '',
+          schoolNet: '',
+          carParkIncluded: false,
+          carParkPrice: 0,
+          managementFee: 0,
+        } : f
+      ));
     }
   };
-
-  const costPerSqFt = calculateCostPerSqFt();
-  const managementFeeSuggestion = getManagementFeeSuggestion();
-  const isExpensive = costPerSqFt > 25000;
 
   // Load estate data on component mount
   useEffect(() => {
@@ -111,13 +148,14 @@ export default function PropertyInputStep() {
   }, []);
 
   // Handle estate name input with autocomplete
-  const handleEstateNameChange = (value: string) => {
-    setCurrentProperty(prev => ({ ...prev, name: value }));
+  const handleEstateNameChange = (formIndex: number, value: string) => {
+    handleInputChange(formIndex, 'name', value);
     
     if (value.trim().length > 0) {
       const results = searchEstates(value, estates);
       setSuggestions(results);
       setShowSuggestions(true);
+      setActiveSuggestionIndex(formIndex);
     } else {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -125,20 +163,22 @@ export default function PropertyInputStep() {
   };
 
   // Handle estate selection
-  const handleEstateSelect = (estate: EstateData) => {
-    setCurrentProperty(prev => ({
-      ...prev,
-      name: estate.name,
-      district: estate.district,
-      buildingAge: getBuildingAgeNumber(estate.buildingAge),
-      schoolNet: estate.schoolNet,
-    }));
+  const handleEstateSelect = (formIndex: number, estate: EstateData) => {
+    setPropertyForms(prev => prev.map((form, index) => 
+      index === formIndex ? {
+        ...form,
+        name: estate.name,
+        district: estate.district,
+        buildingAge: getBuildingAgeNumber(estate.buildingAge),
+        schoolNet: estate.schoolNet,
+      } : form
+    ));
     setShowSuggestions(false);
   };
 
   // Handle district input with autocomplete
-  const handleDistrictInputChange = (value: string) => {
-    setCurrentProperty(prev => ({ ...prev, district: value }));
+  const handleDistrictInputChange = (formIndex: number, value: string) => {
+    handleInputChange(formIndex, 'district', value);
     
     if (value.trim().length > 0) {
       const filtered = hkDistricts.filter(district => 
@@ -146,6 +186,7 @@ export default function PropertyInputStep() {
       );
       setDistrictSuggestions(filtered);
       setShowDistrictSuggestions(true);
+      setActiveDistrictSuggestionIndex(formIndex);
     } else {
       setDistrictSuggestions([]);
       setShowDistrictSuggestions(false);
@@ -153,31 +194,31 @@ export default function PropertyInputStep() {
   };
 
   // Handle district selection
-  const handleDistrictSelect = (district: string) => {
-    setCurrentProperty(prev => ({ ...prev, district }));
+  const handleDistrictSelect = (formIndex: number, district: string) => {
+    handleDistrictChange(formIndex, district);
     setShowDistrictSuggestions(false);
   };
 
-  return (
-    <div className="space-y-4 lg:space-y-6">
-      {/* Header */}
-      <div className="text-center mb-4 lg:mb-6">
-        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-          {t('propertyInput.stepTitle')}
-        </h2>
-        <p className="text-gray-600 text-sm lg:text-base">
-          {t('propertyInput.stepDescription')}
-        </p>
-      </div>
+  const renderPropertyForm = (formIndex: number) => {
+    const form = propertyForms[formIndex];
+    const costPerSqFt = calculateCostPerSqFt(form);
+    const managementFeeSuggestion = getManagementFeeSuggestion(form);
+    const isExpensive = costPerSqFt > 25000;
 
-      {/* Property Form Card */}
-      <div className="bg-white shadow-lg rounded-xl p-4 lg:p-6 border border-gray-200">
+    return (
+      <div key={formIndex} className="bg-white shadow-lg rounded-xl p-4 lg:p-6 border border-gray-200">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {t('propertyInput.propertyName')} {formIndex + 1}
+          </h3>
+        </div>
+
         {/* Basic Info Section */}
         <div className="mb-4 lg:mb-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
-            <span className="text-lg lg:text-xl mr-2">🏠</span>
+          <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+            <span className="text-lg mr-2">🏠</span>
             {t('propertyInput.basicInfoSection')}
-          </h3>
+          </h4>
           
           <div className="space-y-3 lg:space-y-4">
             {/* Property Name with Autocomplete */}
@@ -187,30 +228,30 @@ export default function PropertyInputStep() {
               </label>
               <input
                 type="text"
-                value={currentProperty.name}
-                onChange={(e) => handleEstateNameChange(e.target.value)}
+                value={form.name}
+                onChange={(e) => handleEstateNameChange(formIndex, e.target.value)}
                 className="input-field"
                 placeholder={t('propertyInput.propertyNamePlaceholder')}
                 required
                 onFocus={() => {
-                  if (currentProperty.name.trim().length > 0) {
+                  if (form.name.trim().length > 0) {
                     setShowSuggestions(true);
+                    setActiveSuggestionIndex(formIndex);
                   }
                 }}
                 onBlur={() => {
-                  // Delay hiding suggestions to allow for clicks
                   setTimeout(() => setShowSuggestions(false), 200);
                 }}
               />
               
               {/* Autocomplete Suggestions */}
-              {showSuggestions && suggestions.length > 0 && (
+              {showSuggestions && suggestions.length > 0 && activeSuggestionIndex === formIndex && (
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                   {suggestions.map((estate, index) => (
                     <button
                       key={index}
                       type="button"
-                      onClick={() => handleEstateSelect(estate)}
+                      onClick={() => handleEstateSelect(formIndex, estate)}
                       className="block w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                     >
                       <div className="flex items-center justify-between">
@@ -244,8 +285,8 @@ export default function PropertyInputStep() {
                 </label>
                 <input
                   type="number"
-                  value={currentProperty.size || ''}
-                  onChange={(e) => handleInputChange('size', Number(e.target.value))}
+                  value={form.size || ''}
+                  onChange={(e) => handleInputChange(formIndex, 'size', Number(e.target.value))}
                   className="input-field"
                   placeholder="500"
                   required
@@ -262,8 +303,8 @@ export default function PropertyInputStep() {
                   </span>
                   <input
                     type="number"
-                    value={currentProperty.price ? currentProperty.price / 10000 : ''}
-                    onChange={(e) => handleInputChange('price', Number(e.target.value) * 10000)}
+                    value={form.price ? form.price / 10000 : ''}
+                    onChange={(e) => handleInputChange(formIndex, 'price', Number(e.target.value) * 10000)}
                     className="input-field pl-8"
                     placeholder="800"
                     required
@@ -300,10 +341,10 @@ export default function PropertyInputStep() {
 
         {/* Layout & Location Section */}
         <div className="mb-4 lg:mb-6 border-t border-gray-200 pt-4 lg:pt-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
-            <span className="text-lg lg:text-xl mr-2">📍</span>
+          <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+            <span className="text-lg mr-2">📍</span>
             {t('propertyInput.layoutLocationSection')}
-          </h3>
+          </h4>
           
           <div className="space-y-3 lg:space-y-4">
             {/* Rooms and Toilets - Paired Fields */}
@@ -316,8 +357,8 @@ export default function PropertyInputStep() {
                   type="number"
                   min="1"
                   max="10"
-                  value={currentProperty.rooms}
-                  onChange={(e) => handleInputChange('rooms', parseInt(e.target.value) || 1)}
+                  value={form.rooms}
+                  onChange={(e) => handleInputChange(formIndex, 'rooms', parseInt(e.target.value) || 1)}
                   className="input-field"
                   placeholder="1"
                 />
@@ -334,8 +375,8 @@ export default function PropertyInputStep() {
                   type="number"
                   min="1"
                   max="8"
-                  value={currentProperty.toilets}
-                  onChange={(e) => handleInputChange('toilets', parseInt(e.target.value) || 1)}
+                  value={form.toilets}
+                  onChange={(e) => handleInputChange(formIndex, 'toilets', parseInt(e.target.value) || 1)}
                   className="input-field"
                   placeholder="1"
                 />
@@ -353,8 +394,8 @@ export default function PropertyInputStep() {
                 </label>
                 <input
                   type="number"
-                  value={currentProperty.buildingAge || ''}
-                  onChange={(e) => handleInputChange('buildingAge', Number(e.target.value))}
+                  value={form.buildingAge || ''}
+                  onChange={(e) => handleInputChange(formIndex, 'buildingAge', Number(e.target.value))}
                   className="input-field"
                   placeholder="10"
                 />
@@ -366,20 +407,20 @@ export default function PropertyInputStep() {
                 </label>
                 <input
                   type="text"
-                  value={currentProperty.district}
-                  onChange={(e) => handleDistrictInputChange(e.target.value)}
+                  value={form.district}
+                  onChange={(e) => handleDistrictInputChange(formIndex, e.target.value)}
                   className="input-field"
                   placeholder={t('propertyInput.districtPlaceholder')}
                 />
                 
                 {/* District Suggestions */}
-                {showDistrictSuggestions && districtSuggestions.length > 0 && (
+                {showDistrictSuggestions && districtSuggestions.length > 0 && activeDistrictSuggestionIndex === formIndex && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
                     {districtSuggestions.map((district, index) => (
                       <button
                         key={index}
                         type="button"
-                        onClick={() => handleDistrictSelect(district)}
+                        onClick={() => handleDistrictSelect(formIndex, district)}
                         className="block w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
                       >
                         {district}
@@ -391,12 +432,12 @@ export default function PropertyInputStep() {
             </div>
 
             {/* School Net - Auto-filled */}
-            {currentProperty.schoolNet && (
+            {form.schoolNet && (
               <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center space-x-2">
                   <span className="text-green-600">✅</span>
                   <span className="text-sm text-green-700">
-                    <strong>{t('propertyInput.schoolNet')}:</strong> {currentProperty.schoolNet}
+                    <strong>{t('propertyInput.schoolNet')}:</strong> {form.schoolNet}
                   </span>
                 </div>
               </div>
@@ -406,18 +447,18 @@ export default function PropertyInputStep() {
 
         {/* Extras & Fees Section */}
         <div className="border-t border-gray-200 pt-4 lg:pt-6">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3 lg:mb-4 flex items-center">
-            <span className="text-lg lg:text-xl mr-2">💰</span>
+          <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+            <span className="text-lg mr-2">💰</span>
             {t('propertyInput.extrasFeesSection')}
-          </h3>
+          </h4>
           
           <div className="space-y-3 lg:space-y-4">
             {/* Car Park Toggle */}
             <label className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
               <input
                 type="checkbox"
-                checked={currentProperty.carParkIncluded}
-                onChange={(e) => handleInputChange('carParkIncluded', e.target.checked)}
+                checked={form.carParkIncluded}
+                onChange={(e) => handleInputChange(formIndex, 'carParkIncluded', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-1"
               />
               <div className="flex-1">
@@ -436,7 +477,7 @@ export default function PropertyInputStep() {
             </label>
 
             {/* Car Park Price - Conditional */}
-            {currentProperty.carParkIncluded && (
+            {form.carParkIncluded && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('propertyInput.carParkPrice')}
@@ -447,8 +488,8 @@ export default function PropertyInputStep() {
                   </span>
                   <input
                     type="number"
-                    value={currentProperty.carParkPrice || ''}
-                    onChange={(e) => handleInputChange('carParkPrice', Number(e.target.value))}
+                    value={form.carParkPrice || ''}
+                    onChange={(e) => handleInputChange(formIndex, 'carParkPrice', Number(e.target.value))}
                     className="input-field pl-8"
                     placeholder="500000"
                   />
@@ -468,8 +509,8 @@ export default function PropertyInputStep() {
                   </span>
                   <input
                     type="number"
-                    value={currentProperty.managementFee || ''}
-                    onChange={(e) => handleInputChange('managementFee', Number(e.target.value))}
+                    value={form.managementFee || ''}
+                    onChange={(e) => handleInputChange(formIndex, 'managementFee', Number(e.target.value))}
                     className="input-field pl-8"
                     placeholder="1250"
                   />
@@ -479,7 +520,7 @@ export default function PropertyInputStep() {
                     {t('propertyInput.managementFeeSuggestion')}: ${managementFeeSuggestion.toLocaleString()}/month
                   </p>
                 )}
-                {currentProperty.managementFee === 0 && (
+                {form.managementFee === 0 && (
                   <p className="text-xs text-yellow-600 mt-1">
                     ⚠️ {t('propertyInput.managementFeeWarning')}
                   </p>
@@ -492,13 +533,13 @@ export default function PropertyInputStep() {
                 </label>
                 <input
                   type="text"
-                  value={currentProperty.schoolNet}
-                  onChange={(e) => handleInputChange('schoolNet', e.target.value)}
+                  value={form.schoolNet}
+                  onChange={(e) => handleInputChange(formIndex, 'schoolNet', e.target.value)}
                   className="input-field"
                   placeholder="e.g., 11, 34, 91"
-                  disabled={!!getSchoolNetByDistrict(currentProperty.district)}
+                  disabled={!!getSchoolNetByDistrict(form.district)}
                 />
-                {getSchoolNetByDistrict(currentProperty.district) && (
+                {getSchoolNetByDistrict(form.district) && (
                   <p className="text-xs text-green-600 mt-1">
                     ✅ {t('propertyInput.autoFilled')}
                   </p>
@@ -511,14 +552,59 @@ export default function PropertyInputStep() {
         {/* Add Property Button */}
         <div className="mt-6 lg:mt-8 flex justify-end">
           <button
-            onClick={handleAddProperty}
-            disabled={!isPropertyValid()}
+            onClick={() => handleAddProperty(formIndex)}
+            disabled={!isPropertyValid(form)}
             className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t('propertyInput.addProperty')}
           </button>
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4 lg:space-y-6">
+      {/* Header */}
+      <div className="text-center mb-4 lg:mb-6">
+        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+          {t('propertyInput.stepTitle')}
+        </h2>
+        <p className="text-gray-600 text-sm lg:text-base">
+          {t('propertyInput.stepDescription')}
+        </p>
+      </div>
+
+      {/* 2-Column Property Forms */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {propertyForms.map((_, index) => renderPropertyForm(index))}
+      </div>
+
+      {/* Add 3rd Property Button */}
+      {properties.length < 3 && (
+        <div className="text-center">
+          <button
+            onClick={() => {
+              setPropertyForms(prev => [...prev, {
+                name: '',
+                size: 0,
+                price: 0,
+                rooms: 1,
+                toilets: 1,
+                buildingAge: 0,
+                district: '',
+                schoolNet: '',
+                carParkIncluded: false,
+                carParkPrice: 0,
+                managementFee: 0,
+              }]);
+            }}
+            className="btn-secondary"
+          >
+            + {t('propertyInput.addProperty')} 3
+          </button>
+        </div>
+      )}
 
       {/* Properties List */}
       {properties.length > 0 && (
@@ -546,7 +632,7 @@ export default function PropertyInputStep() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
-                  <span>{t('common.remove')}</span>
+                  <span>{t('propertyInput.remove')}</span>
                 </button>
               </div>
             </div>

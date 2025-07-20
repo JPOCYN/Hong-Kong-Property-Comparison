@@ -575,6 +575,10 @@ export const translations: Translations = {
     en: 'Added Properties',
     zh: '已添加的物業',
   },
+  'propertyInput.remove': {
+    en: 'Remove',
+    zh: '移除',
+  },
 };
 
 export const getTranslation = (key: string, language: 'en' | 'zh'): string => {
