@@ -366,14 +366,20 @@ export function calculatePropertyDetails(property: any, userFinancials: any) {
   const loanAmount = property.price - downpayment;
   const monthlyMortgage = calculateMortgage(loanAmount, property.price, 30);
   const stampDuty = calculateStampDuty(property.price);
+  const monthlyRecurringCosts = monthlyMortgage.monthlyPayment + property.managementFee;
+  const affordabilityPercentage = (monthlyRecurringCosts / userFinancials.monthlySalary) * 100;
+  const ratesPerMonth = (property.price * 0.03) / 12; // 3% annually
   
   return {
     property,
     monthlyMortgage: monthlyMortgage.monthlyPayment,
-    monthlyRecurringCosts: monthlyMortgage.monthlyPayment + property.managementFee,
-    affordabilityPercentage: ((monthlyMortgage.monthlyPayment + property.managementFee) / userFinancials.monthlySalary) * 100,
+    monthlyRecurringCosts,
+    affordabilityPercentage,
+    affordabilityStatus: affordabilityPercentage <= 40 ? 'affordable' : affordabilityPercentage <= 60 ? 'moderate' : 'expensive',
     upfrontCosts: downpayment + stampDuty.totalDuty,
     costPerSqFt: calculateCostPerSqFt(property.price, property.size),
     stampDuty: stampDuty.totalDuty,
+    ratesPerMonth,
+    totalMonthlyBurden: monthlyRecurringCosts,
   };
 } 
