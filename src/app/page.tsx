@@ -7,10 +7,18 @@ import BuyerInfoStep from '@/components/Input/BuyerInfoStep';
 import PropertyInputStep from '@/components/Property/PropertyInputStep';
 import ComparisonResultsStep from '@/components/Comparison/ComparisonResultsStep';
 import LanguageToggle from '@/components/LanguageToggle';
+import { useEffect } from 'react';
 
 export default function Home() {
   const { currentStep, nextStep, prevStep, canProceedToNextStep, language } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep]);
 
   const renderCurrentStep = () => {
     switch (currentStep) {

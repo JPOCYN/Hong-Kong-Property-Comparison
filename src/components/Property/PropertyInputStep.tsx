@@ -66,6 +66,9 @@ export default function PropertyInputStep() {
   const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
   const [activeDistrictSuggestionIndex, setActiveDistrictSuggestionIndex] = useState<number>(-1);
 
+  // Collapsible state for mobile UX
+  const [collapsedForms, setCollapsedForms] = useState<Set<number>>(new Set());
+
   // Hong Kong districts
   const hkDistricts = [
     '中西區', '灣仔', '東區', '南區',
@@ -117,7 +120,7 @@ export default function PropertyInputStep() {
         ...form,
         id: Date.now().toString() + formIndex,
       });
-      // Reset the form
+      // Reset the form and collapse it on mobile
       setPropertyForms(prev => prev.map((f, index) => 
         index === formIndex ? {
           name: '',
@@ -133,6 +136,8 @@ export default function PropertyInputStep() {
           managementFee: 0,
         } : f
       ));
+      // Collapse the form after adding property (mobile UX)
+      setCollapsedForms(prev => new Set(Array.from(prev).concat([formIndex])));
     }
   };
 
@@ -199,19 +204,67 @@ export default function PropertyInputStep() {
     setShowDistrictSuggestions(false);
   };
 
+  // Toggle collapsed state
+  const toggleCollapsed = (formIndex: number) => {
+    setCollapsedForms(prev => {
+      const newSet = new Set(Array.from(prev));
+      if (newSet.has(formIndex)) {
+        newSet.delete(formIndex);
+      } else {
+        newSet.add(formIndex);
+      }
+      return newSet;
+    });
+  };
+
   const renderPropertyForm = (formIndex: number) => {
     const form = propertyForms[formIndex];
     const costPerSqFt = calculateCostPerSqFt(form);
     const managementFeeSuggestion = getManagementFeeSuggestion(form);
     const isExpensive = costPerSqFt > 25000;
 
+    const isCollapsed = collapsedForms.has(formIndex);
+    const hasData = form.name || form.size > 0 || form.price > 0;
+
     return (
-      <div key={formIndex} className="bg-white shadow-lg rounded-xl p-4 lg:p-6 border border-gray-200">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {t('propertyInput.propertyName')} {formIndex + 1}
-          </h3>
+      <div key={formIndex} className="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
+        {/* Header - Always visible */}
+        <div className="p-4 lg:p-6 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {t('propertyInput.propertyName')} {formIndex + 1}
+            </h3>
+            <div className="flex items-center space-x-2">
+              {/* Show summary if form has data */}
+              {hasData && (
+                <div className="text-sm text-gray-600 hidden sm:block">
+                  {form.name && <span className="mr-2">{form.name}</span>}
+                  {form.price > 0 && <span className="mr-2">${(form.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>}
+                  {form.size > 0 && <span>{form.size} {t('common.ft2')}</span>}
+                </div>
+              )}
+              {/* Collapse/Expand button */}
+              <button
+                onClick={() => toggleCollapsed(formIndex)}
+                className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label={isCollapsed ? 'Expand form' : 'Collapse form'}
+              >
+                <svg 
+                  className={`w-5 h-5 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
+
+        {/* Collapsible Content */}
+        <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'}`}>
+          <div className="p-4 lg:p-6">
 
         {/* Basic Info Section */}
         <div className="mb-4 lg:mb-6">
@@ -355,10 +408,18 @@ export default function PropertyInputStep() {
                 </label>
                 <input
                   type="number"
-                  min="1"
-                  max="10"
-                  value={form.rooms}
-                  onChange={(e) => handleInputChange(formIndex, 'rooms', parseInt(e.target.value) || 1)}
+                  value={form.rooms || ''}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === '') {
+                      handleInputChange(formIndex, 'rooms', 1);
+                    } else {
+                      const numValue = parseInt(inputValue);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 10) {
+                        handleInputChange(formIndex, 'rooms', numValue);
+                      }
+                    }
+                  }}
                   className="input-field"
                   placeholder="1"
                 />
@@ -373,10 +434,18 @@ export default function PropertyInputStep() {
                 </label>
                 <input
                   type="number"
-                  min="1"
-                  max="8"
-                  value={form.toilets}
-                  onChange={(e) => handleInputChange(formIndex, 'toilets', parseInt(e.target.value) || 1)}
+                  value={form.toilets || ''}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === '') {
+                      handleInputChange(formIndex, 'toilets', 1);
+                    } else {
+                      const numValue = parseInt(inputValue);
+                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 8) {
+                        handleInputChange(formIndex, 'toilets', numValue);
+                      }
+                    }
+                  }}
                   className="input-field"
                   placeholder="1"
                 />
@@ -558,6 +627,8 @@ export default function PropertyInputStep() {
           >
             {t('propertyInput.addProperty')}
           </button>
+        </div>
+          </div>
         </div>
       </div>
     );

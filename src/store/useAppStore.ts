@@ -90,6 +90,10 @@ export const useAppStore = create<AppState>()(
         const { currentStep, maxSteps, canProceedToNextStep } = get();
         if (currentStep < maxSteps && canProceedToNextStep()) {
           set({ currentStep: currentStep + 1 });
+          // Scroll to top on mobile
+          if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         }
       },
       
@@ -97,6 +101,10 @@ export const useAppStore = create<AppState>()(
         const { currentStep } = get();
         if (currentStep > 1) {
           set({ currentStep: currentStep - 1 });
+          // Scroll to top on mobile
+          if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         }
       },
       
