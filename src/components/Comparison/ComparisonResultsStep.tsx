@@ -515,6 +515,12 @@ export default function ComparisonResultsStep() {
                           <span className="text-gray-600">管理費:</span>
                           <span className="font-medium">{formatCurrency(calc.property.managementFee)}/月</span>
                         </div>
+                        {calc.property.schoolNet && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">{t('results.schoolNet')}:</span>
+                            <span className="font-medium text-green-600">{calc.property.schoolNet}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -522,28 +528,42 @@ export default function ComparisonResultsStep() {
                     <div className="space-y-3">
                       <h4 className="font-medium text-gray-900 text-sm">💰 財務分析</h4>
                       <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                           <span className="text-gray-600">{t('results.upfrontCosts')}:</span>
-                          <span className="font-medium">{formatCurrency(calc.upfrontCosts)}</span>
-                        </div>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>{t('results.stampDuty')}:</span>
-                          <span>{formatCurrency(calc.stampDuty)}</span>
-                        </div>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>律師費:</span>
-                          <span>{formatCurrency(5000)}</span>
-                        </div>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>代理佣金 (1%):</span>
-                          <span>{formatCurrency(calc.property.price * 0.01)}</span>
-                        </div>
-                        {!calc.property.carParkIncluded && calc.property.carParkPrice > 0 && (
-                          <div className="flex justify-between text-xs text-gray-500">
-                            <span>車位費用:</span>
-                            <span>{formatCurrency(calc.property.carParkPrice)}</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium">{formatCurrency(calc.upfrontCosts)}</span>
+                            <div className="relative group">
+                              <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </button>
+                              <div className="absolute bottom-full right-0 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                                <div className="space-y-1">
+                                  <div className="flex justify-between">
+                                    <span>印花稅:</span>
+                                    <span>{formatCurrency(calc.stampDuty)}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>律師費:</span>
+                                    <span>{formatCurrency(5000)}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>代理佣金 (1%):</span>
+                                    <span>{formatCurrency(calc.property.price * 0.01)}</span>
+                                  </div>
+                                  {!calc.property.carParkIncluded && calc.property.carParkPrice > 0 && (
+                                    <div className="flex justify-between">
+                                      <span>車位費用:</span>
+                                      <span>{formatCurrency(calc.property.carParkPrice)}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="absolute top-full right-2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                            </div>
                           </div>
-                        )}
+                        </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">{t('results.actualLTV')}:</span>
                           <span className="font-medium text-blue-600">{(mipAnalysis.actualLTV * 100).toFixed(0)}%</span>
@@ -621,6 +641,9 @@ export default function ComparisonResultsStep() {
                     <span>80%</span>
                     <span>100%</span>
                     <span>120%</span>
+                    {calc.affordabilityPercentage > 120 && (
+                      <span className="text-red-500 font-medium">{formatNumber(calc.affordabilityPercentage)}%</span>
+                    )}
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3 relative">
                     <div 
@@ -640,9 +663,20 @@ export default function ComparisonResultsStep() {
                       className="absolute top-0 w-1 h-3 bg-black rounded-full"
                       style={{ left: `${Math.min(calc.affordabilityPercentage, 120)}%`, transform: 'translateX(-50%)' }}
                     />
+                    {/* Exceeded indicator */}
+                    {calc.affordabilityPercentage > 120 && (
+                      <div className="absolute top-0 w-1 h-3 bg-red-600 rounded-full" style={{ left: '100%', transform: 'translateX(-50%)' }}>
+                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-red-600 font-medium">
+                          ⚠️
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    {t('results.healthyMortgageHint')}
+                    {calc.affordabilityPercentage > 120 ? 
+                      `⚠️ 超出預算 ${formatNumber(calc.affordabilityPercentage - 100)}%` : 
+                      t('results.healthyMortgageHint')
+                    }
                   </p>
                 </div>
               </div>

@@ -10,19 +10,31 @@ A comprehensive web application for comparing Hong Kong properties with intellig
 - **Financial Calculations**: Mortgage, stamp duty, affordability analysis
 - **Multi-language Support**: English and Traditional Chinese
 - **Responsive Design**: Optimized for desktop and mobile
-- **PDF Export**: Download comparison results
+- **PDF Export**: Download comparison results with Chinese text support
 
 ### 🏢 Property Data
 - **40+ Hong Kong Estates**: Real property data with addresses, districts, building ages
 - **Price per ft²**: Current market prices
-- **School Nets**: Primary school district information
+- **School Nets**: Primary school district information (optional manual input)
 - **Building Ages**: Property age data for mortgage considerations
+- **Management Fees**: Monthly property management costs
+- **Parking Options**: Included, additional, or no parking
 
 ### 💰 Financial Calculations
 - **Mortgage Calculator**: Monthly payments, interest, loan amounts
-- **Stamp Duty**: Hong Kong property tax calculations
-- **Affordability Analysis**: Debt-to-income ratios
+- **Stamp Duty**: Hong Kong property tax calculations (Basic, Ad Valorem, Special)
+- **Affordability Analysis**: Based on maximum monthly payment input
+- **Upfront Costs**: Stamp duty, legal fees, agent commission, parking
+- **Management Fees**: Monthly property management costs
 - **Cost per ft²**: Property value analysis
+
+### 🎨 Enhanced UI/UX
+- **Card-based Comparison**: Clean, modern comparison layout
+- **Quick Edit**: Inline budget adjustments on results page
+- **Simplified Forms**: Streamlined property input with better flow
+- **Color-coded Warnings**: Visual indicators for affordability status
+- **Progressive Disclosure**: Information shown when needed
+- **Mobile-optimized**: Responsive design for all devices
 
 ## 🚀 Quick Start
 
@@ -112,8 +124,8 @@ Hong-Kong-Property-Comparison/
 ## 💡 Usage Guide
 
 ### Step 1: Buyer Information
-- Enter monthly salary (月薪)
-- Set downpayment budget (首期預算)
+- Enter maximum monthly payment (最大月供款)
+- Set downpayment budget in 萬 HKD (首期預算)
 - Choose first-time buyer status
 - View current mortgage rates
 
@@ -122,12 +134,18 @@ Hong-Kong-Property-Comparison/
 - **Auto-fill**: Select estate to populate district, age, school net
 - **Smart Validation**: Real-time cost per ft² feedback
 - **Multiple Properties**: Compare up to 3 properties
+- **Simplified Parking**: Dropdown selection with conditional price input
+- **Management Fees**: Monthly property management costs
+- **School Net**: Optional manual input (no auto-fill)
 
 ### Step 3: Comparison Results
-- **Side-by-side Comparison**: All properties in one view
+- **Card-based Layout**: Clean, modern comparison design
+- **Quick Edit Section**: Adjust budget settings directly on results page
 - **Financial Breakdown**: Mortgage, stamp duty, monthly costs
-- **Affordability Analysis**: Debt-to-income ratios
-- **PDF Export**: Download detailed comparison
+- **Upfront Costs**: Detailed breakdown of stamp duty, legal fees, agent fees
+- **Management Fees**: Monthly property management costs
+- **Affordability Analysis**: Based on maximum monthly payment
+- **PDF Export**: Download detailed comparison with proper Chinese text
 
 ## 🛠️ Technical Stack
 
@@ -135,12 +153,13 @@ Hong-Kong-Property-Comparison/
 - **Next.js 14**: React framework with app directory
 - **TypeScript**: Type safety and better DX
 - **TailwindCSS**: Utility-first CSS framework
-- **Zustand**: Lightweight state management
+- **Zustand**: Lightweight state management with persistence
 
 ### Data & Calculations
 - **Puppeteer**: Web scraping for property data
 - **Custom Calculations**: Hong Kong-specific financial formulas
 - **Local Storage**: Persistent user data
+- **jsPDF**: PDF generation with Chinese text support
 
 ### Deployment
 - **Vercel**: Recommended hosting platform
@@ -158,6 +177,31 @@ Hong-Kong-Property-Comparison/
 - **Basic Rate**: 1.5% (first $2M)
 - **Ad Valorem**: 7.5% (over $2M)
 - **Special Rate**: 15% (over $3M)
+
+### Upfront Costs Formula
+```
+Upfront Costs = Stamp Duty + Legal Fees ($5,000) + Agent Commission (1%) + Parking Cost
+```
+
+### Management Fees
+- **Average Rate**: HK$2.7 per square foot
+- **Industry Standard**: Common rate for Hong Kong properties
+
+## 🎨 UI/UX Improvements
+
+### Recent Enhancements
+- **Simplified Property Input**: Streamlined forms with better flow
+- **Card-based Results**: Modern comparison layout with clear sections
+- **Quick Edit Feature**: Inline budget adjustments on results page
+- **Color-coded Warnings**: Visual indicators for affordability status
+- **Progressive Disclosure**: Information shown when needed
+- **Mobile-optimized**: Responsive design for all devices
+
+### Form Improvements
+- **Parking UI**: Compact dropdown with conditional price input
+- **School Net**: Plain text input without auto-fill
+- **Management Fees**: Monthly costs with per sq ft rate suggestion
+- **Budget Inputs**: 萬 HKD units for better understanding
 
 ## 🔒 Privacy & Data
 

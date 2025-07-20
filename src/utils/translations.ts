@@ -483,6 +483,10 @@ export const translations: Translations = {
     en: 'Stamp Duty',
     zh: '印花稅',
   },
+  'results.schoolNet': {
+    en: 'School Net',
+    zh: '校網',
+  },
   
   // Actions
   'actions.addProperty': {
