@@ -9,8 +9,8 @@ interface PropertyFormData {
   name: string;
   size: number;
   price: number;
-  rooms: number;
-  toilets: number;
+  rooms: number | '';
+  toilets: number | '';
   buildingAge: number;
   district: string;
   schoolNet: string;
@@ -21,27 +21,20 @@ interface PropertyFormData {
   propertyLink: string;
 }
 
+type InputMode = 'guided' | 'quick';
+type FormStep = 'basic' | 'details' | 'extras';
+
 export default function PropertyInputStep() {
   const { properties, addProperty, updateProperty, removeProperty, language, editingPropertyId, setEditingProperty, setCurrentStep, nextStep, canProceedToNextStep } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
   
-  // Property form data for both columns
+  // UI State
+  const [inputMode, setInputMode] = useState<InputMode>('guided');
+  const [activeFormStep, setActiveFormStep] = useState<FormStep>('basic');
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState<string | null>(null);
+  
+  // Property form data - Start with just one form
   const [propertyForms, setPropertyForms] = useState<PropertyFormData[]>([
-    {
-      name: '',
-      size: 0,
-      price: 0,
-      rooms: 1,
-      toilets: 1,
-      buildingAge: 0,
-      district: '',
-      schoolNet: '',
-      parkingType: 'none',
-      carParkIncluded: false,
-      carParkPrice: 0,
-      managementFee: 0,
-      propertyLink: '',
-    },
     {
       name: '',
       size: 0,
@@ -71,9 +64,6 @@ export default function PropertyInputStep() {
   const [showDistrictSuggestions, setShowDistrictSuggestions] = useState(false);
   const [activeDistrictSuggestionIndex, setActiveDistrictSuggestionIndex] = useState<number>(-1);
 
-  // Collapsible state for mobile UX
-  const [collapsedForms, setCollapsedForms] = useState<Set<number>>(new Set());
-
   // Hong Kong districts
   const hkDistricts = [
     '中西區', '灣仔', '東區', '南區',
@@ -86,7 +76,7 @@ export default function PropertyInputStep() {
       if (index === formIndex) {
         const updatedForm = { ...form, [field]: value };
         
-        // Sync parkingType with carParkIncluded
+        // Smart defaults and auto-calculations
         if (field === 'parkingType') {
           updatedForm.carParkIncluded = value === 'included';
           if (value !== 'additional') {
@@ -99,19 +89,17 @@ export default function PropertyInputStep() {
           updatedForm.managementFee = Math.round(value * 2.7);
         }
         
+        // Auto-advance to next step in guided mode
+        if (inputMode === 'guided' && activeFormStep === 'basic') {
+          if (field === 'price' && value > 0 && updatedForm.name && updatedForm.size > 0) {
+            setTimeout(() => setActiveFormStep('details'), 500);
+          }
+        }
+        
         return updatedForm;
       }
       return form;
     }));
-  };
-
-  const handleDistrictChange = (formIndex: number, district: string) => {
-    setPropertyForms(prev => prev.map((form, index) => 
-      index === formIndex ? {
-        ...form,
-        district
-      } : form
-    ));
   };
 
   const calculateCostPerSqFt = (form: PropertyFormData): number => {
@@ -121,39 +109,56 @@ export default function PropertyInputStep() {
     return 0;
   };
 
-  const getManagementFeeSuggestion = (form: PropertyFormData): number => {
-    if (form.size > 0) {
-      return Math.round(form.size * 2.7);
-    }
-    return 0;
+  const getFormCompletionPercentage = (form: PropertyFormData): number => {
+    const fields = [
+      form.name,
+      form.size > 0,
+      form.price > 0,
+      form.rooms,
+      form.toilets,
+      form.district,
+      form.managementFee > 0
+    ];
+    const completed = fields.filter(Boolean).length;
+    return Math.round((completed / fields.length) * 100);
+  };
+
+  const isBasicFormValid = (form: PropertyFormData): boolean => {
+    return form.name.trim() !== '' && form.price > 0 && form.size > 0;
   };
 
   const isPropertyValid = (form: PropertyFormData): boolean => {
-    return form.name.trim() !== '' && 
-           form.price > 0 && 
-           form.size > 0;
+    return isBasicFormValid(form);
   };
 
   const handleAddProperty = (formIndex: number) => {
     const form = propertyForms[formIndex];
     if (isPropertyValid(form)) {
+      // Ensure rooms and toilets are numbers
+      const propertyData = {
+        ...form,
+        rooms: typeof form.rooms === 'string' ? 1 : form.rooms,
+        toilets: typeof form.toilets === 'string' ? 1 : form.toilets,
+        carParkIncluded: form.parkingType === 'included',
+      };
+      
       if (editingPropertyId) {
         // Update existing property
-        updateProperty(editingPropertyId, {
-          ...form,
-          carParkIncluded: form.parkingType === 'included',
-        });
-        setEditingProperty(null); // Clear editing state
+        updateProperty(editingPropertyId, propertyData);
+        setEditingProperty(null);
       } else {
         // Add new property
         addProperty({
-          ...form,
+          ...propertyData,
           id: Date.now().toString() + formIndex,
-          carParkIncluded: form.parkingType === 'included',
         });
       }
       
-      // Reset the form and collapse it on mobile
+      // Show success animation
+      setShowSuccessAnimation(propertyData.name);
+      setTimeout(() => setShowSuccessAnimation(null), 2000);
+      
+      // Reset the form
       setPropertyForms(prev => prev.map((f, index) => 
         index === formIndex ? {
           name: '',
@@ -171,8 +176,9 @@ export default function PropertyInputStep() {
           propertyLink: '',
         } : f
       ));
-      // Collapse the form after adding property (mobile UX)
-      setCollapsedForms(prev => new Set(Array.from(prev).concat([formIndex])));
+      
+      // Reset to basic step
+      setActiveFormStep('basic');
     }
   };
 
@@ -192,31 +198,22 @@ export default function PropertyInputStep() {
     if (editingPropertyId) {
       const editingProperty = properties.find(p => p.id === editingPropertyId);
       if (editingProperty) {
-        // Load the editing property data into the first form
-        setPropertyForms(prev => prev.map((form, index) => 
-          index === 0 ? {
-            name: editingProperty.name,
-            size: editingProperty.size,
-            price: editingProperty.price,
-            rooms: editingProperty.rooms,
-            toilets: editingProperty.toilets,
-            buildingAge: editingProperty.buildingAge,
-            district: editingProperty.district,
-            schoolNet: editingProperty.schoolNet || '',
-            parkingType: editingProperty.carParkIncluded ? 'included' : (editingProperty.carParkPrice > 0 ? 'additional' : 'none'),
-            carParkIncluded: editingProperty.carParkIncluded,
-            carParkPrice: editingProperty.carParkPrice,
-            managementFee: editingProperty.managementFee,
-            propertyLink: editingProperty.propertyLink || '',
-          } : form
-        ));
-        
-        // Expand the first form when editing
-        setCollapsedForms(prev => {
-          const newSet = new Set(Array.from(prev));
-          newSet.delete(0); // Ensure first form is expanded
-          return newSet;
-        });
+        setPropertyForms([{
+          name: editingProperty.name,
+          size: editingProperty.size,
+          price: editingProperty.price,
+          rooms: editingProperty.rooms,
+          toilets: editingProperty.toilets,
+          buildingAge: editingProperty.buildingAge,
+          district: editingProperty.district,
+          schoolNet: editingProperty.schoolNet || '',
+          parkingType: editingProperty.carParkIncluded ? 'included' : (editingProperty.carParkPrice > 0 ? 'additional' : 'none'),
+          carParkIncluded: editingProperty.carParkIncluded,
+          carParkPrice: editingProperty.carParkPrice,
+          managementFee: editingProperty.managementFee,
+          propertyLink: editingProperty.propertyLink || '',
+        }]);
+        setActiveFormStep('basic');
       }
     }
   }, [editingPropertyId, properties]);
@@ -245,11 +242,18 @@ export default function PropertyInputStep() {
         district: estate.district,
         buildingAge: getBuildingAgeNumber(estate.buildingAge),
         schoolNet: estate.schoolNet,
-        // Keep existing management fee - user will need to enter size manually
         managementFee: form.managementFee,
       } : form
     ));
     setShowSuggestions(false);
+    
+    // Auto-advance to next field in guided mode
+    if (inputMode === 'guided') {
+      setTimeout(() => {
+        const sizeInput = document.querySelector(`input[placeholder="500"]`) as HTMLInputElement;
+        if (sizeInput) sizeInput.focus();
+      }, 100);
+    }
   };
 
   // Handle district input with autocomplete
@@ -271,478 +275,686 @@ export default function PropertyInputStep() {
 
   // Handle district selection
   const handleDistrictSelect = (formIndex: number, district: string) => {
-    handleDistrictChange(formIndex, district);
+    handleInputChange(formIndex, 'district', district);
     setShowDistrictSuggestions(false);
   };
 
-  // Toggle collapsed state
-  const toggleCollapsed = (formIndex: number) => {
-    setCollapsedForms(prev => {
-      const newSet = new Set(Array.from(prev));
-      if (newSet.has(formIndex)) {
-        newSet.delete(formIndex);
-      } else {
-        newSet.add(formIndex);
-      }
-      return newSet;
-    });
+  const renderModeToggle = () => (
+    <div className="flex items-center justify-center mb-6">
+      <div className="bg-gray-100 p-1 rounded-lg flex">
+        <button
+          onClick={() => setInputMode('guided')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            inputMode === 'guided'
+              ? 'bg-white text-blue-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          🎯 Guided Mode
+        </button>
+        <button
+          onClick={() => setInputMode('quick')}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            inputMode === 'quick'
+              ? 'bg-white text-blue-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          ⚡ Quick Mode
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderProgressSteps = (formIndex: number) => {
+    if (inputMode === 'quick') return null;
+    
+    const form = propertyForms[formIndex];
+    const steps = [
+      { key: 'basic', label: 'Basic Info', completed: isBasicFormValid(form) },
+      { key: 'details', label: 'Details', completed: form.district && form.rooms && form.toilets },
+      { key: 'extras', label: 'Extras', completed: form.managementFee > 0 }
+    ];
+
+    return (
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="text-sm font-medium text-gray-700">Progress</h4>
+          <span className="text-sm text-gray-500">{getFormCompletionPercentage(form)}% complete</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          {steps.map((step, index) => (
+            <div key={step.key} className="flex items-center">
+              <button
+                onClick={() => setActiveFormStep(step.key as FormStep)}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  activeFormStep === step.key
+                    ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                    : step.completed
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {step.completed ? '✓' : index + 1}
+              </button>
+              {index < steps.length - 1 && (
+                <div className={`w-8 h-0.5 mx-1 ${step.completed ? 'bg-green-500' : 'bg-gray-200'}`} />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-500">
+          {steps.map(step => (
+            <span key={step.key}>{step.label}</span>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderBasicForm = (formIndex: number) => {
+    const form = propertyForms[formIndex];
+    const costPerSqFt = calculateCostPerSqFt(form);
+    const isExpensive = costPerSqFt > 25000;
+
+    return (
+      <div className="space-y-4">
+        {/* Property Name with Autocomplete */}
+        <div className="relative">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            🏠 Property Name *
+          </label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={(e) => handleEstateNameChange(formIndex, e.target.value)}
+            className="input-field text-lg"
+            placeholder="Start typing estate name..."
+            required
+            onFocus={() => {
+              if (form.name.trim().length > 0) {
+                setShowSuggestions(true);
+                setActiveSuggestionIndex(formIndex);
+              }
+            }}
+            onBlur={() => {
+              setTimeout(() => setShowSuggestions(false), 200);
+            }}
+          />
+          
+          {/* Autocomplete Suggestions */}
+          {showSuggestions && suggestions.length > 0 && activeSuggestionIndex === formIndex && (
+            <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+              {suggestions.map((estate, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleEstateSelect(formIndex, estate)}
+                  className="block w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900">{estate.name}</div>
+                      <div className="text-sm text-gray-500">{estate.address}</div>
+                    </div>
+                    <div className="text-right text-xs text-gray-400">
+                      <div>{estate.district}</div>
+                      <div className="font-medium text-blue-600">{estate.pricePerFt}</div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+          
+          {isLoadingEstates && (
+            <div className="absolute right-3 top-12 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            </div>
+          )}
+        </div>
+
+        {/* Size and Price - Enhanced Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📏 Size (ft²) *
+            </label>
+            <input
+              type="number"
+              value={form.size || ''}
+              onChange={(e) => handleInputChange(formIndex, 'size', Number(e.target.value))}
+              className="input-field text-lg"
+              placeholder="500"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              💰 Price (萬 HKD) *
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">
+                $
+              </span>
+              <input
+                type="number"
+                value={form.price ? form.price / 10000 : ''}
+                onChange={(e) => handleInputChange(formIndex, 'price', Number(e.target.value) * 10000)}
+                className="input-field pl-8 text-lg"
+                placeholder="800"
+                required
+              />
+              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                萬
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Cost per ft² Feedback - Enhanced */}
+        {costPerSqFt > 0 && (
+          <div className={`p-4 rounded-lg border-2 ${
+            isExpensive 
+              ? 'bg-red-50 border-red-200' 
+              : 'bg-green-50 border-green-200'
+          }`}>
+            <div className="flex items-center space-x-3">
+              <span className="text-2xl">{isExpensive ? '🔥' : '💚'}</span>
+              <div>
+                <div className={`font-semibold ${isExpensive ? 'text-red-800' : 'text-green-800'}`}>
+                  ${costPerSqFt.toLocaleString()}/ft²
+                </div>
+                <div className={`text-sm ${isExpensive ? 'text-red-600' : 'text-green-600'}`}>
+                  {isExpensive ? 'Premium pricing' : 'Good value'}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderDetailsForm = (formIndex: number) => {
+    const form = propertyForms[formIndex];
+
+    return (
+      <div className="space-y-4">
+        {/* Rooms and Toilets */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🛏️ Rooms
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={form.rooms || ''}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                if (inputValue === '') {
+                  handleInputChange(formIndex, 'rooms', '');
+                  return;
+                }
+                const numValue = parseInt(inputValue);
+                if (!isNaN(numValue)) {
+                  handleInputChange(formIndex, 'rooms', numValue);
+                }
+              }}
+              onBlur={(e) => {
+                const inputValue = e.target.value;
+                if (inputValue === '' || parseInt(inputValue) < 1) {
+                  handleInputChange(formIndex, 'rooms', 1);
+                } else if (parseInt(inputValue) > 10) {
+                  handleInputChange(formIndex, 'rooms', 10);
+                }
+              }}
+              className="input-field text-center text-lg font-semibold"
+              placeholder="1"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🚽 Toilets
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="8"
+              value={form.toilets || ''}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                if (inputValue === '') {
+                  handleInputChange(formIndex, 'toilets', '');
+                  return;
+                }
+                const numValue = parseInt(inputValue);
+                if (!isNaN(numValue)) {
+                  handleInputChange(formIndex, 'toilets', numValue);
+                }
+              }}
+              onBlur={(e) => {
+                const inputValue = e.target.value;
+                if (inputValue === '' || parseInt(inputValue) < 1) {
+                  handleInputChange(formIndex, 'toilets', 1);
+                } else if (parseInt(inputValue) > 8) {
+                  handleInputChange(formIndex, 'toilets', 8);
+                }
+              }}
+              className="input-field text-center text-lg font-semibold"
+              placeholder="1"
+            />
+          </div>
+        </div>
+
+        {/* District and Building Age */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📍 District
+            </label>
+            <input
+              type="text"
+              value={form.district}
+              onChange={(e) => handleDistrictInputChange(formIndex, e.target.value)}
+              className="input-field"
+              placeholder="e.g., 中西區, 九龍城"
+            />
+            
+            {showDistrictSuggestions && districtSuggestions.length > 0 && activeDistrictSuggestionIndex === formIndex && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                {districtSuggestions.map((district, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleDistrictSelect(formIndex, district)}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
+                  >
+                    {district}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              🏗️ Building Age (years)
+            </label>
+            <input
+              type="number"
+              value={form.buildingAge || ''}
+              onChange={(e) => handleInputChange(formIndex, 'buildingAge', Number(e.target.value))}
+              className="input-field"
+              placeholder="10"
+            />
+          </div>
+        </div>
+
+        {/* School Net - Auto-filled */}
+        {form.schoolNet && (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <span className="text-green-600">🎓</span>
+              <span className="text-sm text-green-700">
+                <strong>School Net:</strong> {form.schoolNet}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderExtrasForm = (formIndex: number) => {
+    const form = propertyForms[formIndex];
+    const managementFeeSuggestion = Math.round(form.size * 2.7);
+
+    return (
+      <div className="space-y-4">
+        {/* Parking */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            🚗 Parking
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {[
+              { value: 'none', label: '❌ None', desc: 'No parking' },
+              { value: 'included', label: '✅ Included', desc: 'Free with unit' },
+              { value: 'additional', label: '💰 Additional', desc: 'Extra cost' }
+            ].map(option => (
+              <button
+                key={option.value}
+                onClick={() => handleInputChange(formIndex, 'parkingType', option.value)}
+                className={`p-3 rounded-lg border-2 text-left transition-all ${
+                  form.parkingType === option.value
+                    ? 'border-blue-500 bg-blue-50 text-blue-900'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="font-medium">{option.label}</div>
+                <div className="text-xs text-gray-500">{option.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Additional Parking Price */}
+        {form.parkingType === 'additional' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Parking Price
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                $
+              </span>
+              <input
+                type="number"
+                value={form.carParkPrice || ''}
+                onChange={(e) => handleInputChange(formIndex, 'carParkPrice', Number(e.target.value))}
+                className="input-field pl-8"
+                placeholder="500000"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Management Fee */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            🏢 Management Fee (per month)
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+              $
+            </span>
+            <input
+              type="number"
+              value={form.managementFee || ''}
+              onChange={(e) => handleInputChange(formIndex, 'managementFee', Number(e.target.value))}
+              className="input-field pl-8"
+              placeholder={managementFeeSuggestion.toString()}
+            />
+          </div>
+          {form.size > 0 && (
+            <p className="text-xs text-gray-500 mt-1">
+              💡 Suggested: ${managementFeeSuggestion} (based on $2.7/ft²)
+            </p>
+          )}
+        </div>
+
+        {/* Property Link */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            🔗 Property Link (optional)
+          </label>
+          <input
+            type="url"
+            value={form.propertyLink}
+            onChange={(e) => handleInputChange(formIndex, 'propertyLink', e.target.value)}
+            className="input-field"
+            placeholder="https://example.com/property-listing"
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderQuickForm = (formIndex: number) => {
+    const form = propertyForms[formIndex];
+    const costPerSqFt = calculateCostPerSqFt(form);
+    const isExpensive = costPerSqFt > 25000;
+
+    return (
+      <div className="space-y-4">
+        {/* All fields in compact layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Property Name */}
+          <div className="md:col-span-2 lg:col-span-3 relative">
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => handleEstateNameChange(formIndex, e.target.value)}
+              className="input-field text-lg"
+              placeholder="🏠 Property name..."
+              required
+            />
+            
+            {showSuggestions && suggestions.length > 0 && activeSuggestionIndex === formIndex && (
+              <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                {suggestions.map((estate, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleEstateSelect(formIndex, estate)}
+                    className="block w-full text-left px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="font-medium text-gray-900">{estate.name}</div>
+                    <div className="text-sm text-gray-500">{estate.address} • {estate.district}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Size */}
+          <div>
+            <input
+              type="number"
+              value={form.size || ''}
+              onChange={(e) => handleInputChange(formIndex, 'size', Number(e.target.value))}
+              className="input-field"
+              placeholder="📏 Size (ft²)"
+              required
+            />
+          </div>
+
+          {/* Price */}
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+            <input
+              type="number"
+              value={form.price ? form.price / 10000 : ''}
+              onChange={(e) => handleInputChange(formIndex, 'price', Number(e.target.value) * 10000)}
+              className="input-field pl-8"
+              placeholder="💰 Price (萬)"
+              required
+            />
+          </div>
+
+          {/* Rooms */}
+          <div>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={form.rooms || ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleInputChange(formIndex, 'rooms', value === '' ? '' : parseInt(value));
+              }}
+              className="input-field text-center"
+              placeholder="🛏️ Rooms"
+            />
+          </div>
+
+          {/* District */}
+          <div className="relative">
+            <input
+              type="text"
+              value={form.district}
+              onChange={(e) => handleDistrictInputChange(formIndex, e.target.value)}
+              className="input-field"
+              placeholder="📍 District"
+            />
+            
+            {showDistrictSuggestions && districtSuggestions.length > 0 && activeDistrictSuggestionIndex === formIndex && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                {districtSuggestions.map((district, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleDistrictSelect(formIndex, district)}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-50 text-sm"
+                  >
+                    {district}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Management Fee */}
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+            <input
+              type="number"
+              value={form.managementFee || ''}
+              onChange={(e) => handleInputChange(formIndex, 'managementFee', Number(e.target.value))}
+              className="input-field pl-8"
+              placeholder="🏢 Mgmt Fee"
+            />
+          </div>
+        </div>
+
+        {/* Cost feedback */}
+        {costPerSqFt > 0 && (
+          <div className={`p-3 rounded-lg text-sm ${
+            isExpensive ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
+          }`}>
+            <strong>${costPerSqFt.toLocaleString()}/ft²</strong> • {isExpensive ? 'Premium pricing' : 'Good value'}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderPropertyForm = (formIndex: number) => {
     const form = propertyForms[formIndex];
-    const costPerSqFt = calculateCostPerSqFt(form);
-    const managementFeeSuggestion = getManagementFeeSuggestion(form);
-    const isExpensive = costPerSqFt > 25000;
-
-    const isCollapsed = collapsedForms.has(formIndex);
-    const hasData = form.name || form.size > 0 || form.price > 0;
+    const completionPercentage = getFormCompletionPercentage(form);
 
     return (
-      <div key={formIndex} data-form-index={formIndex} className="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden">
-        {/* Header - Always visible */}
-        <div className="p-4 lg:p-6 border-b border-gray-100">
+      <div key={formIndex} className="bg-white shadow-xl rounded-2xl border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-100">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {editingPropertyId && formIndex === 0 ? (
-                <span className="flex items-center">
-                  <span className="text-blue-600 mr-2">✏️</span>
-                  {t('actions.edit')} {t('propertyInput.propertyName')}
-                </span>
-              ) : (
-                `${t('propertyInput.propertyName')} ${formIndex + 1}`
-              )}
-            </h3>
-            <div className="flex items-center space-x-2">
-              {/* Show summary if form has data */}
-              {hasData && (
-                <div className="text-sm text-gray-600 hidden sm:block">
-                  {form.name && <span className="mr-2">{form.name}</span>}
-                  {form.price > 0 && <span className="mr-2">${(form.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>}
-                  {form.size > 0 && <span>{form.size} {t('common.ft2')}</span>}
+            <div>
+              <h3 className="text-xl font-bold text-gray-900">
+                {editingPropertyId ? (
+                  <span className="flex items-center">
+                    <span className="text-blue-600 mr-2">✏️</span>
+                    Edit Property
+                  </span>
+                ) : (
+                  `Add Property ${properties.length + 1}`
+                )}
+              </h3>
+              {inputMode === 'guided' && (
+                <div className="mt-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${completionPercentage}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-600">{completionPercentage}%</span>
+                  </div>
                 </div>
               )}
-              {/* Collapse/Expand button */}
-              <button
-                onClick={() => toggleCollapsed(formIndex)}
-                className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
-                aria-label={isCollapsed ? 'Expand form' : 'Collapse form'}
-              >
-                <svg 
-                  className={`w-5 h-5 transform transition-transform ${isCollapsed ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Collapsible Content */}
-        <div className={`transition-all duration-300 ease-in-out ${isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'}`}>
-          <div className="p-4 lg:p-6">
-
-        {/* Basic Info Section */}
-        <div className="mb-4 lg:mb-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="text-lg mr-2">🏠</span>
-            {t('propertyInput.basicInfoSection')}
-          </h4>
+        {/* Form Content */}
+        <div className="p-6">
+          {inputMode === 'guided' && renderProgressSteps(formIndex)}
           
-          <div className="space-y-3 lg:space-y-4">
-            {/* Property Name with Autocomplete */}
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('propertyInput.propertyName')} *
-              </label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => handleEstateNameChange(formIndex, e.target.value)}
-                className="input-field"
-                placeholder={t('propertyInput.propertyNamePlaceholder')}
-                required
-                onFocus={() => {
-                  if (form.name.trim().length > 0) {
-                    setShowSuggestions(true);
-                    setActiveSuggestionIndex(formIndex);
+          {inputMode === 'guided' ? (
+            <>
+              {activeFormStep === 'basic' && renderBasicForm(formIndex)}
+              {activeFormStep === 'details' && renderDetailsForm(formIndex)}
+              {activeFormStep === 'extras' && renderExtrasForm(formIndex)}
+            </>
+          ) : (
+            renderQuickForm(formIndex)
+          )}
+
+          {/* Action Buttons */}
+          <div className="mt-8 flex justify-between items-center">
+            {inputMode === 'guided' && activeFormStep !== 'basic' && (
+              <button
+                onClick={() => {
+                  const steps: FormStep[] = ['basic', 'details', 'extras'];
+                  const currentIndex = steps.indexOf(activeFormStep);
+                  if (currentIndex > 0) {
+                    setActiveFormStep(steps[currentIndex - 1]);
                   }
                 }}
-                onBlur={() => {
-                  setTimeout(() => setShowSuggestions(false), 200);
-                }}
-              />
-              
-              {/* Autocomplete Suggestions */}
-              {showSuggestions && suggestions.length > 0 && activeSuggestionIndex === formIndex && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                  {suggestions.map((estate, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => handleEstateSelect(formIndex, estate)}
-                      className="block w-full text-left px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium text-gray-900">{estate.name}</div>
-                          <div className="text-sm text-gray-500">{estate.address}</div>
-                        </div>
-                        <div className="text-right text-xs text-gray-400">
-                          <div>{estate.district}</div>
-                          <div>{estate.pricePerFt}</div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-              
-              {/* Loading indicator */}
-              {isLoadingEstates && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
-                </div>
-              )}
-            </div>
-
-            {/* Size and Price - Paired Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.size')} ({t('common.ft2')}) *
-                </label>
-                <input
-                  type="number"
-                  value={form.size || ''}
-                  onChange={(e) => handleInputChange(formIndex, 'size', Number(e.target.value))}
-                  className="input-field"
-                  placeholder="500"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.price')} *
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    value={form.price ? form.price / 10000 : ''}
-                    onChange={(e) => handleInputChange(formIndex, 'price', Number(e.target.value) * 10000)}
-                    className="input-field pl-8"
-                    placeholder="800"
-                    required
-                  />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                    {t('common.tenThousand')}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Cost per ft² Feedback */}
-            {costPerSqFt > 0 && (
-              <div className={`p-3 rounded-lg text-sm ${
-                isExpensive 
-                  ? 'bg-red-50 border border-red-200 text-red-700' 
-                  : 'bg-blue-50 border border-blue-200 text-blue-700'
-              }`}>
-                <div className="flex items-center space-x-2">
-                  <span>👉</span>
-                  <span>
-                    {t('propertyInput.costPerSqFt')}: <strong>${costPerSqFt.toLocaleString()}/{t('common.ft2')}</strong>
-                    {isExpensive && (
-                      <span className="ml-2 text-red-600">
-                        {t('propertyInput.expensiveWarning')}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              </div>
+                className="btn-secondary"
+              >
+                ← Previous
+              </button>
             )}
-          </div>
-        </div>
-
-        {/* Layout & Location Section */}
-        <div className="mb-4 lg:mb-6 border-t border-gray-200 pt-4 lg:pt-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="text-lg mr-2">📍</span>
-            {t('propertyInput.layoutLocationSection')}
-          </h4>
-          
-          <div className="space-y-3 lg:space-y-4">
-            {/* Rooms and Toilets - Paired Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.rooms')}
-                </label>
-                <input
-                  type="number"
-                  value={form.rooms || ''}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (inputValue === '') {
-                      handleInputChange(formIndex, 'rooms', 1);
-                    } else {
-                      const numValue = parseInt(inputValue);
-                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 10) {
-                        handleInputChange(formIndex, 'rooms', numValue);
-                      }
-                    }
+            
+            <div className="flex space-x-3 ml-auto">
+              {editingPropertyId && (
+                <button
+                  onClick={() => {
+                    setEditingProperty(null);
+                    setPropertyForms([{
+                      name: '',
+                      size: 0,
+                      price: 0,
+                      rooms: 1,
+                      toilets: 1,
+                      buildingAge: 0,
+                      district: '',
+                      schoolNet: '',
+                      parkingType: 'none',
+                      carParkIncluded: false,
+                      carParkPrice: 0,
+                      managementFee: 0,
+                      propertyLink: '',
+                    }]);
+                    setActiveFormStep('basic');
                   }}
-                  className="input-field"
-                  placeholder="1"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {t('propertyInput.roomsHint')}
-                </p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.toilets')}
-                </label>
-                <input
-                  type="number"
-                  value={form.toilets || ''}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    if (inputValue === '') {
-                      handleInputChange(formIndex, 'toilets', 1);
-                    } else {
-                      const numValue = parseInt(inputValue);
-                      if (!isNaN(numValue) && numValue >= 1 && numValue <= 8) {
-                        handleInputChange(formIndex, 'toilets', numValue);
-                      }
-                    }
-                  }}
-                  className="input-field"
-                  placeholder="1"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {t('propertyInput.toiletsHint')}
-                </p>
-              </div>
-            </div>
-
-            {/* Building Age and District - Paired Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.buildingAge')} ({t('propertyInput.years')})
-                </label>
-                <input
-                  type="number"
-                  value={form.buildingAge || ''}
-                  onChange={(e) => handleInputChange(formIndex, 'buildingAge', Number(e.target.value))}
-                  className="input-field"
-                  placeholder="10"
-                />
-              </div>
-              
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.district')}
-                </label>
-                <input
-                  type="text"
-                  value={form.district}
-                  onChange={(e) => handleDistrictInputChange(formIndex, e.target.value)}
-                  className="input-field"
-                  placeholder={t('propertyInput.districtPlaceholder')}
-                />
-                
-                {/* District Suggestions */}
-                {showDistrictSuggestions && districtSuggestions.length > 0 && activeDistrictSuggestionIndex === formIndex && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto">
-                    {districtSuggestions.map((district, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => handleDistrictSelect(formIndex, district)}
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 text-sm"
-                      >
-                        {district}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* School Net - Auto-filled */}
-            {form.schoolNet && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <span className="text-green-600">✅</span>
-                  <span className="text-sm text-green-700">
-                    <strong>{t('propertyInput.schoolNet')}:</strong> {form.schoolNet}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Extras & Fees Section */}
-        <div className="border-t border-gray-200 pt-4 lg:pt-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-            <span className="text-lg mr-2">💰</span>
-            {t('propertyInput.extrasFeesSection')}
-          </h4>
-          
-          <div className="space-y-3 lg:space-y-4">
-            {/* Parking Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  🚗 {t('propertyInput.parkingSection')}
-                </label>
-                <select
-                  value={form.parkingType}
-                  onChange={(e) => handleInputChange(formIndex, 'parkingType', e.target.value as 'none' | 'included' | 'additional')}
-                  className="input-field"
+                  className="btn-secondary"
                 >
-                  <option value="none">❌ {t('propertyInput.parkingNone')}</option>
-                  <option value="included">✅ {t('propertyInput.parkingIncluded')}</option>
-                  <option value="additional">💰 {t('propertyInput.parkingAdditional')}</option>
-                </select>
-              </div>
+                  Cancel
+                </button>
+              )}
               
-              {/* Additional Parking Price - Conditional */}
-              {form.parkingType === 'additional' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('propertyInput.additionalParkingPrice')}
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                      $
-                    </span>
-                    <input
-                      type="number"
-                      value={form.carParkPrice || ''}
-                      onChange={(e) => handleInputChange(formIndex, 'carParkPrice', Number(e.target.value))}
-                      className="input-field pl-8"
-                      placeholder="e.g. 500,000"
-                    />
-                  </div>
-                </div>
+              {inputMode === 'guided' && activeFormStep !== 'extras' && isBasicFormValid(form) && (
+                <button
+                  onClick={() => {
+                    const steps: FormStep[] = ['basic', 'details', 'extras'];
+                    const currentIndex = steps.indexOf(activeFormStep);
+                    if (currentIndex < steps.length - 1) {
+                      setActiveFormStep(steps[currentIndex + 1]);
+                    }
+                  }}
+                  className="btn-primary"
+                >
+                  Next →
+                </button>
+              )}
+              
+              {(inputMode === 'quick' || activeFormStep === 'extras') && (
+                <button
+                  onClick={() => handleAddProperty(formIndex)}
+                  disabled={!isPropertyValid(form)}
+                  className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed px-8"
+                >
+                  {editingPropertyId ? 'Update Property' : 'Add Property'} ✨
+                </button>
               )}
             </div>
-
-            {/* Management Fee and School Net - Paired Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.managementFee')} ({t('propertyInput.perMonth')})
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    value={form.managementFee || ''}
-                    onChange={(e) => handleInputChange(formIndex, 'managementFee', Number(e.target.value))}
-                    className="input-field pl-8"
-                    placeholder="1250"
-                  />
-                </div>
-                {managementFeeSuggestion > 0 && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    每呎管理費（平均）：HK$2.7 • 已自動計算
-                  </p>
-                )}
-                {form.managementFee === 0 && form.size > 0 && (
-                  <p className="text-xs text-yellow-600 mt-1">
-                    ⚠️ 大多數單位都有每月管理費
-                  </p>
-                )}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('propertyInput.schoolNet')} ({t('propertyInput.optional')})
-                </label>
-                <input
-                  type="text"
-                  value={form.schoolNet}
-                  onChange={(e) => handleInputChange(formIndex, 'schoolNet', e.target.value)}
-                  className="input-field"
-                  placeholder="e.g., 11, 34, 91"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  💡 {t('propertyInput.schoolNetHelp')}
-                </p>
-              </div>
-            </div>
-
-            {/* Property Link - Optional */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('propertyInput.propertyLink')} ({t('propertyInput.optional')})
-              </label>
-              <input
-                type="url"
-                value={form.propertyLink}
-                onChange={(e) => handleInputChange(formIndex, 'propertyLink', e.target.value)}
-                className="input-field"
-                placeholder="https://example.com/property-listing"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                🔗 {t('propertyInput.propertyLinkHelp')}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Add Property Button */}
-        <div className="mt-6 lg:mt-8 flex justify-end space-x-3">
-          {editingPropertyId && formIndex === 0 && (
-            <button
-              onClick={() => {
-                setEditingProperty(null);
-                // Reset the first form
-                setPropertyForms(prev => prev.map((form, index) => 
-                  index === 0 ? {
-                    name: '',
-                    size: 0,
-                    price: 0,
-                    rooms: 1,
-                    toilets: 1,
-                    buildingAge: 0,
-                    district: '',
-                    schoolNet: '',
-                    parkingType: 'none',
-                    carParkIncluded: false,
-                    carParkPrice: 0,
-                    managementFee: 0,
-                    propertyLink: '',
-                  } : form
-                ));
-              }}
-              className="btn-secondary"
-            >
-              {t('actions.cancel')}
-            </button>
-          )}
-          <button
-            onClick={() => handleAddProperty(formIndex)}
-            disabled={!isPropertyValid(form)}
-            className="btn-primary font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {editingPropertyId && formIndex === 0 ? t('actions.updateProperty') : t('propertyInput.addProperty')}
-          </button>
-        </div>
           </div>
         </div>
       </div>
@@ -750,113 +962,112 @@ export default function PropertyInputStep() {
   };
 
   return (
-    <div className="space-y-4 lg:space-y-6">
+    <div className="space-y-6">
+      {/* Success Animation */}
+      {showSuccessAnimation && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce">
+          ✅ {showSuccessAnimation} added successfully!
+        </div>
+      )}
+
       {/* Header */}
-      <div className="text-center mb-4 lg:mb-6">
-        <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
-          {t('propertyInput.stepTitle')}
+      <div className="text-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Add Properties to Compare
         </h2>
-        <p className="text-gray-600 text-sm lg:text-base">
-          {t('propertyInput.stepDescription')}
+        <p className="text-gray-600">
+          Add up to 5 properties to find your perfect home
         </p>
       </div>
 
-      {/* Added Properties Section - Moved to Top */}
+      {/* Mode Toggle */}
+      {renderModeToggle()}
+
+      {/* Added Properties Section */}
       {properties.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 lg:p-6">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-              <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
+            <h3 className="text-xl font-bold text-gray-900 flex items-center">
+              <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                 {properties.length}
               </span>
-              {t('propertyInput.addedProperties')} ({properties.length}/5)
+              Added Properties ({properties.length}/5)
             </h3>
             {properties.length >= 2 && (
               <button
                 onClick={() => {
-                  // Use the store's nextStep function to respect validation
                   if (canProceedToNextStep()) {
                     nextStep();
                   }
                 }}
-                className="btn-primary text-sm px-4 py-2"
+                className="btn-primary px-6 py-3 text-lg font-bold"
               >
-                🚀 {t('actions.compareNow')}
+                🚀 Compare Now
               </button>
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {properties.map((property, index) => (
-              <div key={property.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+              <div key={property.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-lg transition-all">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900 text-sm mb-1">{property.name}</h4>
-                    <div className="space-y-1 text-xs text-gray-600">
+                    <h4 className="font-bold text-gray-900 mb-2">{property.name}</h4>
+                    <div className="space-y-1 text-sm text-gray-600">
                       <div className="flex justify-between">
-                        <span>總價:</span>
-                        <span className="font-medium">${(property.price / 10000).toFixed(0)}{t('common.tenThousand')}</span>
+                        <span>Price:</span>
+                        <span className="font-semibold">${(property.price / 10000).toFixed(0)}萬</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>面積:</span>
-                        <span className="font-medium">{property.size} {t('common.ft2')}</span>
+                        <span>Size:</span>
+                        <span className="font-semibold">{property.size} ft²</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>房間:</span>
-                        <span className="font-medium">{property.rooms}R {property.toilets}T</span>
+                        <span>Layout:</span>
+                        <span className="font-semibold">{property.rooms}R {property.toilets}T</span>
                       </div>
                       {property.district && (
                         <div className="flex justify-between">
-                          <span>地區:</span>
-                          <span className="font-medium">{property.district}</span>
+                          <span>District:</span>
+                          <span className="font-semibold">{property.district}</span>
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1 ml-2">
+                  <div className="flex flex-col space-y-1 ml-2">
                     <button
                       onClick={() => {
                         setEditingProperty(property.id);
-                        // Scroll to the first form
-                        const firstForm = document.querySelector('[data-form-index="0"]');
-                        if (firstForm) {
-                          firstForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors"
-                      title={t('actions.edit')}
+                      className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Edit"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                      </svg>
+                      ✏️
                     </button>
                     <button
                       onClick={() => removeProperty(property.id)}
-                      className="p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-                      title={t('propertyInput.remove')}
+                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Remove"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+                      🗑️
                     </button>
                   </div>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">#{index + 1}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">#{index + 1}</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                     index === 0 ? 'bg-green-100 text-green-800' :
                     index === 1 ? 'bg-blue-100 text-blue-800' :
                     index === 2 ? 'bg-purple-100 text-purple-800' :
                     index === 3 ? 'bg-orange-100 text-orange-800' :
-                    index === 4 ? 'bg-pink-100 text-pink-800' :
-                    'bg-gray-100 text-gray-800'
+                    'bg-pink-100 text-pink-800'
                   }`}>
-                    {index === 0 ? '🏆 最佳' : 
-                     index === 1 ? '🥈 次選' : 
-                     index === 2 ? '🥉 第三' : 
-                     index === 3 ? '4️⃣ 第四' :
-                     index === 4 ? '5️⃣ 第五' :
-                     `#${index + 1}`}
+                    {index === 0 ? '🏆 #1' : 
+                     index === 1 ? '🥈 #2' : 
+                     index === 2 ? '🥉 #3' : 
+                     index === 3 ? '4️⃣ #4' :
+                     '5️⃣ #5'}
                   </span>
                 </div>
               </div>
@@ -865,47 +1076,35 @@ export default function PropertyInputStep() {
         </div>
       )}
 
-      {/* Property Input Forms */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">
-            {t('propertyInput.addNewProperty')}
-          </h3>
-          {properties.length < 5 ? (
-            <button
-              onClick={() => {
-                setPropertyForms(prev => [...prev, {
-                  name: '',
-                  size: 0,
-                  price: 0,
-                  rooms: 1,
-                  toilets: 1,
-                  buildingAge: 0,
-                  district: '',
-                  schoolNet: '',
-                  parkingType: 'none',
-                  carParkIncluded: false,
-                  carParkPrice: 0,
-                  managementFee: 0,
-                  propertyLink: '',
-                }]);
-              }}
-              className="btn-secondary text-sm"
-            >
-              + {t('propertyInput.addProperty')}
-            </button>
-          ) : (
-            <span className="text-sm text-gray-500">
-              ✅ 已達上限 (5個物業)
-            </span>
-          )}
+      {/* Property Input Form */}
+      {properties.length < 5 && (
+        <div>
+          {renderPropertyForm(0)}
         </div>
+      )}
 
-        {/* 2-Column Property Forms */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {propertyForms.map((_, index) => renderPropertyForm(index))}
+      {/* Max Properties Message */}
+      {properties.length >= 5 && (
+        <div className="text-center p-8 bg-gray-50 rounded-xl">
+          <div className="text-4xl mb-4">🎉</div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            Maximum Properties Reached!
+          </h3>
+          <p className="text-gray-600 mb-4">
+            You've added 5 properties. Ready to compare them?
+          </p>
+          <button
+            onClick={() => {
+              if (canProceedToNextStep()) {
+                nextStep();
+              }
+            }}
+            className="btn-primary px-8 py-3 text-lg font-bold"
+          >
+            🚀 Compare All Properties
+          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 } 
