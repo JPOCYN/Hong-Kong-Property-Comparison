@@ -14,17 +14,20 @@ export default function ComparePage() {
   const { currentStep, nextStep, prevStep, canProceedToNextStep, language, setCurrentStep, properties, buyerInfo } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
 
-  // Restore step on page load
+  // Restore step on page load (only on initial mount)
   useEffect(() => {
-    // If we have properties but are on step 1, go to step 2
-    if (properties.length > 0 && currentStep === 1) {
-      setCurrentStep(2);
-    }
-    // If we have properties and buyer info but are on step 1 or 2, go to step 3
-    if (properties.length > 0 && buyerInfo.maxMonthlyPayment > 0 && buyerInfo.downpaymentBudget > 0 && currentStep <= 2) {
+    // Only auto-redirect on initial page load, not when user manually navigates
+    const hasInitialData = properties.length > 0 && buyerInfo.maxMonthlyPayment > 0 && buyerInfo.downpaymentBudget > 0;
+    
+    // If we have complete data and are on step 1, go to step 3
+    if (hasInitialData && currentStep === 1) {
       setCurrentStep(3);
     }
-  }, [properties.length, buyerInfo, currentStep, setCurrentStep]);
+    // If we have properties but no buyer info and are on step 1, go to step 2
+    else if (properties.length > 0 && currentStep === 1 && !hasInitialData) {
+      setCurrentStep(2);
+    }
+  }, []); // Only run on mount
 
   // Scroll to top when step changes
   useEffect(() => {

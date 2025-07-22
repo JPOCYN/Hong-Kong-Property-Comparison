@@ -22,7 +22,7 @@ interface PropertyFormData {
 }
 
 export default function PropertyInputStep() {
-  const { properties, addProperty, updateProperty, removeProperty, language, editingPropertyId, setEditingProperty, setCurrentStep } = useAppStore();
+  const { properties, addProperty, updateProperty, removeProperty, language, editingPropertyId, setEditingProperty, setCurrentStep, nextStep, canProceedToNextStep } = useAppStore();
   const t = (key: string) => getTranslation(key, language);
   
   // Property form data for both columns
@@ -773,7 +773,12 @@ export default function PropertyInputStep() {
             </h3>
             {properties.length >= 2 && (
               <button
-                onClick={() => setCurrentStep(3)}
+                onClick={() => {
+                  // Use the store's nextStep function to respect validation
+                  if (canProceedToNextStep()) {
+                    nextStep();
+                  }
+                }}
                 className="btn-primary text-sm px-4 py-2"
               >
                 🚀 {t('actions.compareNow')}

@@ -145,21 +145,9 @@ const getAffordabilityStatus = (percentage: number): { status: string; color: nu
 
 // Function to add Chinese font support
 const addChineseFont = (doc: jsPDF, language: 'en' | 'zh'): boolean => {
-  if (language === 'zh') {
-    try {
-      // Try to add Noto Sans SC font
-      doc.addFont('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap', 'NotoSansSC', 'normal');
-      doc.setFont('NotoSansSC');
-      return true;
-    } catch (error) {
-      console.warn('Chinese font not available, using fallback');
-      doc.setFont('helvetica');
-      return false;
-    }
-  } else {
-    doc.setFont('helvetica');
-    return false;
-  }
+  // Always use Helvetica for now to avoid font loading issues
+  doc.setFont('helvetica');
+  return false;
 };
 
 export const exportToPDF = (
@@ -207,7 +195,7 @@ export const exportToPDF = (
   
   // Enhanced Summary Cards Section (matching the result page layout)
   doc.setFontSize(14);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text('Summary Cards', 20, 45);
   
   // Most Affordable Card
@@ -217,16 +205,16 @@ export const exportToPDF = (
   doc.rect(20, 50, 55, 25, 'S');
   
   doc.setFontSize(10);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(22, 101, 52); // Dark green text
   doc.text('💰 Most Affordable', 25, 57);
   
   doc.setFontSize(12);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text(mostAffordable.property.name, 25, 65);
   
   doc.setFontSize(9);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.text(`${formatNumber(mostAffordable.affordabilityPercentage)}% of max payment`, 25, 72);
   
   // Best Value Card
@@ -236,16 +224,16 @@ export const exportToPDF = (
   doc.rect(80, 50, 55, 25, 'S');
   
   doc.setFontSize(10);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 64, 175); // Dark blue text
   doc.text('🏆 Best Value', 85, 57);
   
   doc.setFontSize(12);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text(bestValue.property.name, 85, 65);
   
   doc.setFontSize(9);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.text(`${formatCurrency(bestValue.costPerSqFt)}/ft²`, 85, 72);
   
   // Average Monthly Cost Card
@@ -255,16 +243,16 @@ export const exportToPDF = (
   doc.rect(140, 50, 55, 25, 'S');
   
   doc.setFontSize(10);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(88, 28, 135); // Dark purple text
   doc.text('📊 Average Monthly', 145, 57);
   
   doc.setFontSize(12);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text(formatCurrency(avgMonthlyCost), 145, 65);
   
   doc.setFontSize(9);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.text('Total recurring costs', 145, 72);
   
   // Reset colors
@@ -273,7 +261,7 @@ export const exportToPDF = (
   
   // Detailed Comparison Section
   doc.setFontSize(16);
-  doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+  doc.setFont('helvetica', 'bold');
   doc.text(getLocalizedText('detailedComparison', language), 20, 90);
   
   // Property comparison table with improved formatting
@@ -306,7 +294,7 @@ export const exportToPDF = (
     startY: 100,
     styles: {
       fontSize: 8,
-      font: language === 'zh' ? 'NotoSansSC' : 'helvetica',
+      font: 'helvetica',
       cellPadding: 3,
       lineWidth: 0.2,
       lineColor: [200, 200, 200],
@@ -346,7 +334,7 @@ export const exportToPDF = (
     }
     
     doc.setFontSize(16);
-    doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text(getLocalizedText('monthlyBurdenBreakdown', language), 20, currentY);
     
     currentY += 15;
@@ -362,11 +350,11 @@ export const exportToPDF = (
       
       // Property header
       doc.setFontSize(12);
-      doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text(`${index + 1}. ${calc.property.name}`, 20, currentY);
       
       doc.setFontSize(9);
-      doc.setFont(language === 'zh' ? 'NotoSansSC' : 'helvetica', 'normal');
+      doc.setFont('helvetica', 'normal');
       currentY += 8;
       
               // Monthly details
